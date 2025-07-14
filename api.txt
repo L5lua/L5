@@ -1,0 +1,198 @@
+# L5 Reference
+
+> Processing is not a single programming language, but an arts-centric system for learning, teaching, and making visual form with code. --[Processing.py reference](https://py.processing.org/reference/)
+
+## STRUCTURE
+
+* [X] {} (curly braces - defines a table for arrays, classes, objects, dictionaries, data and more)
+* [X] [] (access items from an ordered table aka "array")
+* [X] -- (comment)
+* [X] --[[ (multi-line comment) ]]--
+* [X] = (assign global variable)
+* [X] local (assign local variable)
+* [X] ==
+* [X] nil
+* [X] true
+* [X] false
+* [X] setup()
+* [X] draw()
+* [X] for i=1,5 do end
+* [X] loop
+* [X] noLoop()
+* [X] isLooping() -- equals true or false
+* [X] exit() (quits/stops/exits the program)
+* [X] redraw() (executes draw one time)
+* [X] setTitle() (sets window title)
+* [X] function (used to define a new user-defined function)
+
+## Control
+
+### Conditionals
+
+* [X] break (finish a loop that contains it)
+* [X] if
+* [X] then
+* [X] end
+* [X] elseif
+
+### Relational Operators
+
+* [X] == (equality)
+* [X] ~= (inequality)
+
+### Iteration
+
+* [X] for (runs a set number of times)
+* [X] while do (runs while true, checks before executing)
+* [X] repeat until (loops but checks condition at end. executes at least once)
+
+### Logical Operators
+
+* [X] and 
+* [X] or 
+* [X] not 
+
+## Environment
+* [X] print
+* [X] deltaTime
+* [ ] describe()
+* [ ] displayDensity()
+* [ ] displayHeight() (or windowHeight)
+* [ ] displayWidth() (or windowHeight)
+* [ ] focused
+* [X] frameCount
+* [X] frameRate()
+* [ ] fullscreen()
+* [X] width (width of canvas in pixels)
+* [X] height (height of canvas in pixels)
+* [X] resizeWindow() (function that runs when window is resized)
+
+## I/O
+
+### Input
+* [ ] loadJSON()
+* [ ] loadStrings()
+* [ ] loadTable()
+* [ ] loadXML()
+
+### Output
+* [ ] saveJSON()
+* [ ] saveStrings()
+* [ ] saveTable()
+
+### Time and Date
+* [X] millis()
+* [X] day()
+* [X] month()
+* [X] year()
+
+## SHAPE
+
+### 2D Primitives
+
+* [X] arc()
+* [X] circle()
+* [X] ellipse()
+* [X] line()
+* [X] point()
+* [X] rect()
+* [X] square()
+* [X] triangle()
+
+### Attributes
+
+* [X] ellipseMode()
+* [X] rectMode()
+* [ ] strokeCap()
+* [X] strokeWeight()
+* [ ] noSmooth()
+* [ ] smooth()
+* [ ] strokeJoin()
+
+### Curves
+* [X] curve()
+
+### Vertex
+* [ ] beginContour()
+* [ ] beginShape()
+* [X] bezier()
+* [ ] curveVertex()
+* [ ] endContour()
+* [ ] endShape()
+* [ ] quadraticVertex()
+* [ ] texture()
+* [ ] textureMode()
+* [ ] vertex()
+
+### Creating & Reading
+* [ ] alpha() (gets alpha aka 4th value of a color)
+* [ ] blue() (gets blue aka 3rd value of a color)
+* [ ] red() (gets red value of a color)
+* [ ] brightness() (extracts HSB brightness value of a color)
+* [ ] color() (creates a color object)
+* [ ] green() (gets the green value of a color)
+* [ ] hue() (gets the hue value of a color)
+* [ ] lerpColor()
+* [ ] lightness()
+* [ ] paletteLerp()
+* [ ] saturation()
+
+### Setting
+* [X] background()
+* [X] clear()
+* [ ] HSB (see https://www.love2d.org/wiki/HSV_color hsv=hsb)
+* [ ] colormode
+* [X] fill()
+* [ ] noFill()
+* [ ] noStroke()
+* [X] stroke()
+
+### Transform
+* [X] push() (saves previous drawing style settings)
+* [X] pop() (restores previous drawing style settings)
+* [X] translate()
+* [X] rotate()
+* [X] scale()
+
+## Constants
+* [X] HALF_PI (1.57079...)
+* [X] PI (3.14159...)
+* [X] QUARTER_PI (0.78539...)
+* [X] TAU (6.28318...)
+* [X] TWO_PI (6.28318...)
+
+### Math
+* [X] random()
+* [X] randomSeed()
+* [ ] noise() (see https://www.love2d.org/wiki/love.math.noise )
+* [ ] lerp()
+* [X] abs()
+* [X] ceil()
+* [X] floor()
+* [X] round()
+* [X] constrain()
+* [X] map()
+* [X] dist()
+* [X] max()
+* [X] min()
+* [X] sin()
+* [X] cos()
+* [X] tan()
+
+## Typography
+* [ ] loadFont()
+* [X] text()
+* [ ] textFont()
+* [ ] textMode()
+* [ ] textAlign()
+* [ ] textSize()
+
+### Loading and Displaying
+* [X] image()
+* [X] imageMode()
+* [X] loadImage()
+* [X] noTint()
+* [X] tint()
+* [ ] save()
+* [X] cursor() (see https://www.love2d.org/wiki/love.mouse.setCursor )
+* [X] noCursor()
