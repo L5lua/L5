@@ -1,16 +1,58 @@
+-- Custom love.run() function that doesn't clear screen between frames but does clear matrix transformation
+function love.run()
+  if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
+  
+  -- We don't want to clear the screen automatically
+  if love.timer then love.timer.step() end
+  
+  local dt = 0
+  
+  -- Main loop
+  return function()
+    -- Process events
+    if love.event then
+      love.event.pump()
+      for name, a,b,c,d,e,f in love.event.poll() do
+        if name == "quit" then
+          if not love.quit or not love.quit() then
+            return a or 0
+          end
+        end
+        love.handlers[name](a,b,c,d,e,f)
+      end
+    end
+    
+    -- Update dt
+    if love.timer then dt = love.timer.step() end
+    
+    -- Update
+    if love.update then love.update(dt) end
+    
+    -- Draw (without clearing!)
+    if love.graphics and love.graphics.isActive() then
+      -- Reset transformation matrix at the beginning of each frame
+      love.graphics.origin()
+
+      -- DON'T call love.graphics.clear() here!
+      if love.draw then love.draw() end
+      love.graphics.present()
+    end
+    
+    if love.timer then love.timer.sleep(0.001) end
+  end
+end
+
 function love.load()
   love.math.setRandomSeed(os.time())
   defaults()
   if setup ~= nil then setup() end
-  love.graphics.setCanvas()
-  displayCanvas()
 end
 function love.update()
   mouseX, mouseY = love.mouse.getPosition()
   deltaTime=love.timer.getDelta()
 end
+
 function love.draw()
-  love.graphics.setCanvas(canvas)
   frameCount=frameCount+1
   local isPressed = love.mouse.isDown(1)
     
@@ -22,28 +64,18 @@ function love.draw()
     wasPressed = isPressed
 
   if draw ~= nil then draw() end
-  love.graphics.setCanvas()
-  displayCanvas()
-end
-
-function displayCanvas()
-  love.graphics.clear()
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.draw(canvas,0,0)
 end
 
 function love.mousepressed(_x,_y, button, istouch, presses )
   --if mousePressed ~= nil then mousePressed() end
 end
 
-function createWindow(_w,_h)
+function size(_w,_h)
   love.window.setMode(_w,_h) --leaving out optional flags for now
 
   --dependent on window size
   width, height = love.graphics.getDimensions()
-  canvas = love.graphics.newCanvas(width, height)
-  love.graphics.setCanvas(canvas)
-  background(120,120,120)
+  --background(120,120,120)
 end
 
 function environment() 
@@ -59,6 +91,9 @@ function defaults()
   RADIUS = "RADIUS"
   CORNERS = "CORNERS"
   CENTER = "CENTER"
+  RADIANS = "RADIANS"
+  DEGREES = "DEGREES"
+  global_degree_mode = RADIANS --also: DEGREES
   global_rect_mode = CORNER --also: CORNERS, CENTER
   global_ellipse_mode = CENTER
   global_image_mode = CORNER
@@ -92,7 +127,11 @@ function translate(_x,_y)
 end
 
 function rotate(_angle)
-  love.graphics.rotate(_angle)
+  if global_degree_mode == RADIANS then
+    love.graphics.rotate(_angle)
+  else
+    love.graphics.rotate(radians(_angle))
+  end
 end
 
 function scale(_sx,_sy)
@@ -128,28 +167,28 @@ end
 function rect(_a,_b,_c,_d)
   if global_rect_mode=="CORNERS" then --x1,y1,x2,y2
     love.graphics.rectangle(fillMode,_a,_b,_c-_a,_d-_b)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
+    love.graphics.setColor(r, g, b, a)
   elseif global_rect_mode=="CENTER" then --x-w/2,y-h/2,w,h 
     love.graphics.rectangle(fillMode, _a-_c/2,_b-_d/2,_c,_d)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
+    love.graphics.setColor(r, g, b, a)
   elseif global_rect_mode=="RADIUS" then --x-w/2,y-h/2,r1*2,r2*2
     love.graphics.rectangle(fillMode, _a-_c/2,_b-_d/2,_c*2,_d*2)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
+    love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
     love.graphics.rectangle(fillMode,_a,_b,_c,_d)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line",_a,_b,_c,_d)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line",_a,_b,_c,_d)
+    love.graphics.setColor(r, g, b, a)
   end
 end
 
@@ -157,79 +196,78 @@ function square(_a,_b,_c)
   --CORNERS mode doesn't exist for squares
   if global_rect_mode=="CENTER" then --x-w/2,y-h/2,w,h 
     love.graphics.rectangle(fillMode, _a-_c/2,_b-_c/2,_c,_c)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
+    love.graphics.setColor(r, g, b, a)
   elseif global_rect_mode=="RADIUS" then --x-w/2,y-h/2,r*2,r*2
     love.graphics.rectangle(fillMode, _a-_c/2,_b-_c/2,_c*2,_c*2)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
+    love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
     love.graphics.rectangle(fillMode,_a,_b,_c,_c)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.rectangle("line",_a,_b,_c,_c)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.rectangle("line",_a,_b,_c,_c)
+    love.graphics.setColor(r, g, b, a)
   end
-
 end
 
 function ellipse(_a,_b,_c,_d)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
   if global_ellipse_mode=="RADIUS" then
     love.graphics.ellipse(fillMode,_a,_b,_c,_d)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.ellipse("line",_a,_b,_c,_d)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.ellipse("line",_a,_b,_c,_d)
+    love.graphics.setColor(r, g, b, a)
   elseif global_ellipse_mode=="CORNER" then
     love.graphics.ellipse(fillMode,_a+_c/2,_b+_d/2,_c/2,_d/2)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
+    love.graphics.setColor(r, g, b, a)
   elseif global_ellipse_mode=="CORNERS" then
     love.graphics.ellipse(fillMode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
+    love.graphics.setColor(r, g, b, a)
   else --default CENTER x,y,w/2,h/2
     love.graphics.ellipse(fillMode,_a,_b,_c/2,_d/2)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.ellipse("line",_a,_b,_c/2,_d/2)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.ellipse("line",_a,_b,_c/2,_d/2)
+    love.graphics.setColor(r, g, b, a)
   end
 end
 
 function circle(_a,_b,_c)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
   love.graphics.ellipse(fillMode,_a,_b,_c/2,_c/2)
-  love.graphics.push("all")
-    fill(global_stroke_color)
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
     love.graphics.ellipse("line",_a,_b,_c/2,_c/2)
-  love.graphics.pop()
+    love.graphics.setColor(r, g, b, a)
 end
 
 function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! a quad implies an applied texture
   --for other # of sides, use processing api call createShape
   love.graphics.polygon(fillMode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4)
-  love.graphics.push("all")
-    fill(global_stroke_color)
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4)
-  love.graphics.pop()
+    love.graphics.setColor(r, g, b, a)
 end
 
 function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon 
   love.graphics.polygon(fillMode,_x1,_y1,_x2,_y2,_x3,_y3)
-  love.graphics.push("all")
-    fill(global_stroke_color)
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3)
-  love.graphics.pop()
+    love.graphics.setColor(r, g, b, a)
 end
 
 --TODO: Implement _h height! Maybe requires scale along y?
@@ -237,16 +275,16 @@ end
 function arc(_x,_y,_w,_h,_start,_stop,_arctype)
   if _arctype then
     love.graphics.arc(fillMode, _arctype, _x, _y, _w/2, _start, _stop)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.arc("line", _arctype, _x, _y, _w/2, _start, _stop)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.arc("line", _arctype, _x, _y, _w/2, _start, _stop)
+    love.graphics.setColor(r, g, b, a)
   else --no specified mode, use PIE default
     love.graphics.arc(fillMode, _x, _y, _w/2, _start, _stop)
-    love.graphics.push("all")
-      fill(global_stroke_color)
-      love.graphics.arc("line", _x, _y, _w/2, _start, _stop)
-    love.graphics.pop()
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.arc("line", _x, _y, _w/2, _start, _stop)
+    love.graphics.setColor(r, g, b, a)
   end
 end
 
@@ -256,11 +294,14 @@ function point(_x,_y)
 end
 
 function line(_x1,_y1,_x2,_y2)
-  love.graphics.line(_x1,_y1,_x2,_y2)
+  --a line is drawn in the stroke color
+    local r, g, b, a = love.graphics.getColor()
+    fill(table.unpack(global_stroke_color))
+    love.graphics.line(_x1,_y1,_x2,_y2)
+    love.graphics.setColor(r, g, b, a)
 end
 
 function background(_r,_g,_b,_a)
-
     if _g == nil then
         -- One argument = grayscale
 	_r,_g,_b,_a=_r,_r,_r,255
@@ -279,7 +320,19 @@ function background(_r,_g,_b,_a)
 end
 
 function fill(_r,_g,_b,_a)
-  love.graphics.setColor(love.math.colorFromBytes(_r, _g, _b,_a))
+  if _g == nil then
+    -- one argument = grayscale
+    _r,_g,_b,_a = _r,_r,_r,255
+  elseif _b == nil then
+    -- two arguments = grayscale, alpha
+    _a = _g
+    _r,_g,_b = _r,_r,_r
+  elseif _a == nil then
+    -- three arguments = r,g,b
+    _a = 255
+  end
+  --love.graphics.setColor(love.math.colorFromBytes(_r, _g, _b,_a))
+  love.graphics.setColor(_r/255,_g/255,_b/255,_a/255)
 end
 
 function rectMode(_mode)
@@ -302,8 +355,23 @@ function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
 end
 
-function stroke(_r,_g,_b)
-  global_stroke_color={_r,_g,_b}
+function stroke(_r,_g,_b,_a)
+  if _g == nil then
+    -- one argument = grayscale
+    _r,_g,_b,_a = _r,_r,_r,255
+  elseif _b == nil then
+    -- two arguments = grayscale, alpha
+    _a = _g
+    _r,_g,_b = _r,_r,_r
+  elseif _a == nil then
+    -- three arguments = r,g,b
+    _a = 255
+  end
+  global_stroke_color={_r,_g,_b,_a}
+end
+
+function noStroke()
+  global_stroke_color={0,0,0,0}
 end
 
 -------------------- VERTEX -------------------------
@@ -407,16 +475,46 @@ function dist(x1,y1,x2,y2)
   return ((x2-x1)^2+(y2-y1)^2)^0.5
 end
 
-function sin(_a)
-  return math.sin(_a)
+-------------------- TRIGONOMETRY --------------------
+
+function angleMode(_mode)
+    if not _mode then
+        return global_degree_mode
+    elseif _mode == RADIANS or _mode == DEGREES then
+        global_degree_mode = _mode
+    end
 end
 
-function cos()
-  return math.cos(_a)
+function degrees(_angle)
+  return math.deg(_angle)
 end
 
-function tan()
-  return math.tan(_a)
+function radians(_angle)
+  return math.rad(_angle)
+end
+
+function sin(_angle)
+  if global_degree_mode == RADIANS then
+    return math.sin(_angle)
+  else
+    return math.sin(radians(_angle))
+  end
+end
+
+function cos(_angle)
+  if global_degree_mode == RADIANS then
+    return math.cos(_angle)
+  else
+    return math.cos(radians(_angle))
+  end
+end
+
+function tan(_angle)
+  if global_degree_mode == RADIANS then
+    return math.tan(_angle)
+  else
+    return math.tan(radians(_angle))
+  end
 end
 
 ------------------- SYSTEM ------------------------
@@ -424,7 +522,7 @@ function exit()
   os.exit()
 end
 
-function setTitle(_title)
+function windowTitle(_title)
   love.window.setTitle(_title)
 end
 

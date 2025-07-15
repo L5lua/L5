@@ -22,7 +22,7 @@
 * [X] isLooping() -- equals true or false
 * [X] exit() (quits/stops/exits the program)
 * [X] redraw() (executes draw one time)
-* [X] setTitle() (sets window title)
+* [X] windowTitle() 
 * [X] function (used to define a new user-defined function)
 
 ## Control
@@ -53,7 +53,8 @@
 * [X] not 
 
 ## Environment
-* [X] print
+* [X] size()
+* [X] print()
 * [X] deltaTime
 * [ ] describe()
 * [ ] displayDensity()
@@ -144,7 +145,7 @@
 * [ ] colormode
 * [X] fill()
 * [ ] noFill()
-* [ ] noStroke()
+* [X] noStroke()
 * [X] stroke()
 
 ### Transform
@@ -175,6 +176,11 @@
 * [X] dist()
 * [X] max()
 * [X] min()
+
+### Trigonometry
+* [X] angleMode()
+* [X] degrees()
+* [X] radians()
 * [X] sin()
 * [X] cos()
 * [X] tan()
