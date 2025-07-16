@@ -8,7 +8,8 @@ function love.run()
   local dt = 0
   
   -- Main loop
-  return function()
+    return function()
+
     -- Process events
     if love.event then
       love.event.pump()
@@ -30,9 +31,7 @@ function love.run()
     
     -- Draw (without clearing!)
     if love.graphics and love.graphics.isActive() then
-      -- Reset transformation matrix at the beginning of each frame
       love.graphics.origin()
-
       -- DON'T call love.graphics.clear() here!
       if love.draw then love.draw() end
       love.graphics.present()
@@ -46,10 +45,13 @@ function love.load()
   love.math.setRandomSeed(os.time())
   defaults()
   if setup ~= nil then setup() end
+  love.window.setVSync(1)
 end
+
 function love.update()
   mouseX, mouseY = love.mouse.getPosition()
   deltaTime=love.timer.getDelta()
+  key = updateLastKeyPressed()
 end
 
 function love.draw()
@@ -70,6 +72,21 @@ function love.mousepressed(_x,_y, button, istouch, presses )
   --if mousePressed ~= nil then mousePressed() end
 end
 
+function love.keypressed(key, scancode, isrepeat)
+  if keyPressed ~= nil then keyPressed() end
+end
+
+function love.keyreleased(key)
+  if keyReleased ~= nil then keyReleased() end
+end
+
+function love.textinput(_text)
+  key = _text
+  if keyTyped ~= nil then keyTyped() end
+end
+
+------------------- CUSTOM FUNCTIONS -----------------
+
 function size(_w,_h)
   love.window.setMode(_w,_h) --leaving out optional flags for now
 
@@ -78,26 +95,26 @@ function size(_w,_h)
   --background(120,120,120)
 end
 
+function fullscreen(_bool)
+  if _bool then
+    love.window.setFullscreen(_bool)
+  else
+    return love.window.getFullscreen()
+  end
+end
+
 function environment() 
   --background(255,255,255)
 end
 
 function defaults()
   -- constants
-  frameCount = 0
-  drawing = true
-  wasPressed = false
   CORNER = "CORNER"
   RADIUS = "RADIUS"
   CORNERS = "CORNERS"
   CENTER = "CENTER"
   RADIANS = "RADIANS"
   DEGREES = "DEGREES"
-  global_degree_mode = RADIANS --also: DEGREES
-  global_rect_mode = CORNER --also: CORNERS, CENTER
-  global_ellipse_mode = CENTER
-  global_image_mode = CORNER
-  fillMode="fill"   --also: "line"
   PI=math.pi
   HALF_PI=math.pi/2
   QUARTER_PI=math.pi/4
@@ -106,13 +123,59 @@ function defaults()
   PIE="pie"
   OPEN="open"
   CHORD="closed"
+
+  -- environment global variables
+  frameCount = 0
+  drawing = true
+  wasPressed = false
+  global_degree_mode = RADIANS --also: DEGREES
+  global_rect_mode = CORNER --also: CORNERS, CENTER
+  global_ellipse_mode = CENTER
+  global_image_mode = CORNER
+  fillMode="fill"   --also: "line"
   global_stroke_color = {0,0,0}
   mouseX=0
   mouseY=0
   currentTint = {1, 1, 1, 1} -- Default: no tint white
+  --lastKeyPressed = nil
+  key = nil
+  keyIsPressed = false
 end
 
------------------------ TRANSFORM --------------------
+----------------------- EVENTS ----------------------
+
+---------------------- KEYBOARD ---------------------
+
+-- helper function referenced in love.update()
+function updateLastKeyPressed()
+  local commonKeys = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+                     "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+                     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+                     "space", "return", "escape", "up", "down", "left", "right",
+                     "lshift", "rshift", "lctrl", "rctrl", "lalt", "ralt"}
+
+    -- reset keyIsPressed to false initially
+    keyIsPressed = false
+
+    -- Check each key and update vars
+    for _, k in ipairs(commonKeys) do
+      if love.keyboard.isDown(k) then
+        key = k
+	keyIsPressed = true
+        break -- Take the first key found
+      end
+    end
+    
+  return key
+end
+
+function keyIsDown(_key) 
+  return love.keyboard.isDown(_key)
+end
+
+------------------------ MOUSE ----------------------
+
+---------------------- TRANSFORM ---------------------
 
 function push()
   love.graphics.push()

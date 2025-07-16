@@ -56,14 +56,14 @@
 * [X] size()
 * [X] print()
 * [X] deltaTime
-* [ ] describe()
+* [ ] describe() --cannot find in Love2d
 * [ ] displayDensity()
 * [ ] displayHeight() (or windowHeight)
 * [ ] displayWidth() (or windowHeight)
 * [ ] focused
 * [X] frameCount
 * [X] frameRate()
-* [ ] fullscreen()
+* [X] fullscreen() --returns true if in fullscreen, false otherwise. if passed true, turns on fullscreen, or turns off if passed false. equivalent to p5.js implementation
 * [X] width (width of canvas in pixels)
 * [X] height (height of canvas in pixels)
 * [X] resizeWindow() (function that runs when window is resized)
@@ -86,6 +86,37 @@
 * [X] day()
 * [X] month()
 * [X] year()
+
+## Events
+
+### Keyboard
+
+* [X] key
+* [ ] keyCode --not needed as key can detect all
+* [X] keyIsDown() --not in Processing
+* [X] keyIsPressed --boolean, called keyPressed in Processing
+* [X] keyPressed()
+* [X] keyReleased()
+* [X] keyTyped()
+
+### Mouse
+
+* [ ] mouseButton --which button is pressed?
+* [ ] mouseClicked() --called after a mouse button pressed and released
+* [ ] mouseDragged() -- called while mouse moves and a mouse button is pressed
+* [ ] mouseIsPressed --boolean, called mousePressed in Processing
+* [ ] mouseMoved() --called when mouse moved, no button pressed
+* [ ] mousePressed() --called once after mouse button pressed
+* [ ] mouseReleased() --called once when a mouse button released
+* [ ] mouseWheel() --runs while wheel is moving
+* [X] mouseX --horizontal coordinate of mouse
+* [X] mouseY --vertical coordinate of mouse
+* [ ] movedX --mouseX-pmouseX, not in Processing
+* [ ] movedY --mouseY-pmouseY, not in Processing
+* [ ] pmouseX --mouseX in previous frame
+* [ ] pmouseY --mouseY in previous frame
+
+### Touch -- Not under development. Could be added later if interest.
 
 ## SHAPE
 
