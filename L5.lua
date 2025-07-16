@@ -45,7 +45,6 @@ function love.load()
   love.math.setRandomSeed(os.time())
   defaults()
   if setup ~= nil then setup() end
-  love.window.setVSync(1)
 end
 
 function love.update()
