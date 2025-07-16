@@ -1,0 +1,7 @@
+# TODO
+
+## Shapes
+
+* [ ] test and fix arc to be consistent with p5 arc
+* [X] line should be stroke color
+* [ ] fix flickering on event handling - graphics in mousePressed(), keyTyped(), keyReleased() double draw call and cause flickering i think
