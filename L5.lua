@@ -31,7 +31,7 @@ function love.run()
     
     -- Draw (without clearing!)
     if love.graphics and love.graphics.isActive() then
-      love.graphics.origin()
+        love.graphics.origin()
       -- DON'T call love.graphics.clear() here!
       if love.draw then love.draw() end
       love.graphics.present()
@@ -112,8 +112,13 @@ function toColor(_r,_g,_b,_a)
     if type(_r) == "number" then
       _r,_g,_b,_a = _r,_r,_r,255
     elseif type(_r) == "string" then
-      _r,_g,_b=table.unpack(htmlColors[_r])
-      _a = 255
+      if _r:sub(1, 1) == "#" then --it's a hex color
+	_r, _g, _b = hexToRGB(_r)
+	_a = 255
+      else --it's a html color value
+	_r, _g, _b = table.unpack(htmlColors[_r])
+	_a = 255
+      end
     else
       --ERROR
     end
@@ -126,6 +131,29 @@ function toColor(_r,_g,_b,_a)
     _a = 255
   end
   return {_r/255,_g/255,_b/255,_a/255}
+end
+
+function hexToRGB(hex)
+    hex = hex:gsub("#", "") -- Remove # if present
+    
+    -- Check valid length
+    if #hex == 3 then
+        hex = hex:gsub("(.)", "%1%1") -- Convert 3 to 6-digit
+    elseif #hex ~= 6 then
+        return nil, "Invalid hex color format. Expected 3 or 6 characters."
+    end
+    
+    -- Extract RGB components
+    local r = tonumber(hex:sub(1, 2), 16)
+    local g = tonumber(hex:sub(3, 4), 16)
+    local b = tonumber(hex:sub(5, 6), 16)
+    
+    -- Check if conversion was successful
+    if not r or not g or not b then
+        return nil, "Invalid hex color format. Contains non-hex characters."
+    end
+    
+    return r, g, b
 end
 
 function defaults()
@@ -387,6 +415,7 @@ end
 
 function background(_r,_g,_b,_a)
   love.graphics.clear(table.unpack(toColor(_r,_g,_b,_a)))
+  clearscreen = true
 end
 
 function fill(_r,_g,_b,_a)
