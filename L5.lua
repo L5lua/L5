@@ -37,7 +37,13 @@ function love.run()
       love.graphics.present()
     end
     
-    if love.timer then love.timer.sleep(0.001) end
+    if love.timer then 
+      if framerate then --user-specified framerate
+	love.timer.sleep(1/framerate)
+      else --default framerate
+	love.timer.sleep(0.001) 
+      end
+    end
   end
 end
 
@@ -189,6 +195,7 @@ function defaults()
   --lastKeyPressed = nil
   key = nil
   keyIsPressed = false
+  framerate = nil
 end
 
 ----------------------- EVENTS ----------------------
@@ -764,7 +771,7 @@ end
 
 function frameRate(_inp)
   if _inp then --change frameRate
-
+    framerate = _inp
   else --get frameRate
     return love.timer.getFPS( )
   end
