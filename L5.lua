@@ -115,8 +115,15 @@ function love.draw()
     keyWasTyped = false
   end
 
+  -- Reset transformation matrix to identity at start of each frame
+  love.graphics.origin()
+  love.graphics.push()
+
   -- Call user draw function
   if draw ~= nil then draw() end
+
+  -- Pop transformation matrix after user draw
+  love.graphics.pop()
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
