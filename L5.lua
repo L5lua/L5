@@ -1,15 +1,13 @@
--- Custom love.run() function that doesn't clear screen between frames but does clear matrix transformation
+-- Custom love.run() function with proper double buffering
 function love.run()
   if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
   
-  -- We don't want to clear the screen automatically
   if love.timer then love.timer.step() end
   
   local dt = 0
   
   -- Main loop
-    return function()
-
+  return function()
     -- Process events
     if love.event then
       love.event.pump()
@@ -29,38 +27,69 @@ function love.run()
     -- Update
     if love.update then love.update(dt) end
     
-    -- Draw (without clearing!)
+    -- Draw with double buffering
     if love.graphics and love.graphics.isActive() then
-        love.graphics.origin()
-      -- DON'T call love.graphics.clear() here!
+      love.graphics.origin()
+      
+      -- Set render target to back buffer
+      if backBuffer then
+        love.graphics.setCanvas(backBuffer)
+      end
+      
+      -- Only clear if background() was called this frame
+      -- Draw current frame
       if love.draw then love.draw() end
+      
+      -- Reset to screen and draw the back buffer
+      love.graphics.setCanvas()
+      if backBuffer then
+        love.graphics.draw(backBuffer, 0, 0)
+      end
+      
       love.graphics.present()
     end
     
     if love.timer then 
       if framerate then --user-specified framerate
-	love.timer.sleep(1/framerate)
+       love.timer.sleep(1/framerate)
       else --default framerate
-	love.timer.sleep(0.001) 
+       love.timer.sleep(0.001) 
       end
     end
   end
 end
 
 function love.load()
+  love.window.setVSync(1)
   love.math.setRandomSeed(os.time())
+  
+  -- Create double buffers
+  local w, h = love.graphics.getDimensions()
+  backBuffer = love.graphics.newCanvas(w, h)
+  frontBuffer = love.graphics.newCanvas(w, h)
+  
+  -- Clear both buffers initially
+  love.graphics.setCanvas(backBuffer)
+  love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
+  love.graphics.setCanvas(frontBuffer)
+  love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
+  love.graphics.setCanvas()
+  
   defaults()
   if setup ~= nil then setup() end
 end
 
-function love.update()
+function love.update(dt)
   mouseX, mouseY = love.mouse.getPosition()
-  deltaTime=love.timer.getDelta()
+  deltaTime = dt
   key = updateLastKeyPressed()
+  
+  -- Call user update logic here (more p5.js-like)
+  if update ~= nil then update() end
 end
 
 function love.draw()
-  frameCount=frameCount+1
+  frameCount = frameCount + 1
   local isPressed = love.mouse.isDown(1)
     
   if isPressed and not wasPressed then
@@ -70,34 +99,81 @@ function love.draw()
     
   wasPressed = isPressed
 
+  -- Check for keyboard events in the draw cycle
+  if keyWasPressed then
+    if keyPressed ~= nil then keyPressed() end
+    keyWasPressed = false
+  end
+  
+  if keyWasReleased then
+    if keyReleased ~= nil then keyReleased() end
+    keyWasReleased = false
+  end
+  
+  if keyWasTyped then
+    if keyTyped ~= nil then keyTyped() end
+    keyWasTyped = false
+  end
+
+  -- Call user draw function
   if draw ~= nil then draw() end
 end
 
-function love.mousepressed(_x,_y, button, istouch, presses )
-  --if mousePressed ~= nil then mousePressed() end
+function love.mousepressed(_x, _y, button, istouch, presses)
+  if mousePressed ~= nil then mousePressed() end
 end
 
 function love.keypressed(key, scancode, isrepeat)
-  if keyPressed ~= nil then keyPressed() end
+  keyWasPressed = true
 end
 
 function love.keyreleased(key)
-  if keyReleased ~= nil then keyReleased() end
+  keyWasReleased = true
 end
 
 function love.textinput(_text)
   key = _text
-  if keyTyped ~= nil then keyTyped() end
+  keyWasTyped = true
+end
+
+function love.resize(w, h)
+  -- Recreate buffers when window is resized
+  if backBuffer then backBuffer:release() end
+  if frontBuffer then frontBuffer:release() end
+  
+  backBuffer = love.graphics.newCanvas(w, h)
+  frontBuffer = love.graphics.newCanvas(w, h)
+  
+  -- Clear new buffers
+  love.graphics.setCanvas(backBuffer)
+  love.graphics.clear(1, 1, 1, 1)
+  love.graphics.setCanvas(frontBuffer)
+  love.graphics.clear(1, 1, 1, 1)
+  love.graphics.setCanvas()
+  
+  width, height = w, h
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
 
-function size(_w,_h)
-  love.window.setMode(_w,_h) --leaving out optional flags for now
-
-  --dependent on window size
+function size(_w, _h)
+  love.window.setMode(_w, _h)
+  
+  -- Recreate buffers for new size
+  if backBuffer then backBuffer:release() end
+  if frontBuffer then frontBuffer:release() end
+  
+  backBuffer = love.graphics.newCanvas(_w, _h)
+  frontBuffer = love.graphics.newCanvas(_w, _h)
+  
+  -- Clear new buffers
+  love.graphics.setCanvas(backBuffer)
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  love.graphics.setCanvas(frontBuffer)
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  love.graphics.setCanvas()
+  
   width, height = love.graphics.getDimensions()
-  --background(120,120,120)
 end
 
 function fullscreen(_bool)
@@ -194,7 +270,12 @@ function defaults()
   currentTint = {1, 1, 1, 1} -- Default: no tint white
   key = nil
   keyIsPressed = false
+  keyWasPressed = false
+  keyWasReleased = false
+  keyWasTyped = false
   framerate = nil
+  backBuffer = nil
+  frontBuffer = nil
 end
 
 ----------------------- EVENTS ----------------------
@@ -421,7 +502,6 @@ end
 
 function background(_r,_g,_b,_a)
   love.graphics.clear(table.unpack(toColor(_r,_g,_b,_a)))
-  clearscreen = true
 end
 
 function fill(_r,_g,_b,_a)
