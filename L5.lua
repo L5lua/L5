@@ -5,6 +5,7 @@ function love.run()
   if love.timer then love.timer.step() end
   
   local dt = 0
+  local setupComplete = false
   
   -- Main loop
   return function()
@@ -36,9 +37,24 @@ function love.run()
         love.graphics.setCanvas(backBuffer)
       end
       
+     
       -- Only clear if background() was called this frame
+      if clearscreen then
+        -- background() already cleared with the right color
+        clearscreen = false
+      end
+      
       -- Draw current frame
-      if love.draw then love.draw() end
+      -- Run setup() once in the drawing context
+      if not setupComplete and setup then
+      local originalSize = size
+	size = function() end
+        setup()
+	size = originalSize
+        setupComplete = true
+      else
+	if love.draw then love.draw() end
+      end
       
       -- Reset to screen and draw the back buffer
       love.graphics.setCanvas()
@@ -51,9 +67,9 @@ function love.run()
     
     if love.timer then 
       if framerate then --user-specified framerate
-       love.timer.sleep(1/framerate)
+        love.timer.sleep(1/framerate)
       else --default framerate
-       love.timer.sleep(0.001) 
+        love.timer.sleep(0.001) 
       end
     end
   end
@@ -115,14 +131,13 @@ function love.draw()
     keyWasTyped = false
   end
 
-  -- Reset transformation matrix to identity at start of each frame
+-- Reset transformation matrix to identity at start of each frame
   love.graphics.origin()
   love.graphics.push()
-
+  
   -- Call user draw function
   if draw ~= nil then draw() end
 
-  -- Pop transformation matrix after user draw
   love.graphics.pop()
 end
 
@@ -281,8 +296,11 @@ function defaults()
   keyWasReleased = false
   keyWasTyped = false
   framerate = nil
+  clearscreen = false
   backBuffer = nil
   frontBuffer = nil
+
+  clearScreen = false 
 end
 
 ----------------------- EVENTS ----------------------
@@ -509,6 +527,7 @@ end
 
 function background(_r,_g,_b,_a)
   love.graphics.clear(table.unpack(toColor(_r,_g,_b,_a)))
+  clearscreen = true
 end
 
 function fill(_r,_g,_b,_a)
