@@ -103,10 +103,10 @@
 
 * [ ] mouseButton --which button is pressed?
 * [ ] mouseClicked() --called after a mouse button pressed and released
-* [ ] mouseDragged() -- called while mouse moves and a mouse button is pressed
-* [ ] mouseIsPressed --boolean, called mousePressed in Processing
+* [X] mouseDragged() -- called while mouse moves and a mouse button is pressed
+* [X] mouseIsPressed --boolean, called mousePressed in Processing
 * [ ] mouseMoved() --called when mouse moved, no button pressed
-* [ ] mousePressed() --called once after mouse button pressed
+* [X] mousePressed() --called once after mouse button pressed
 * [ ] mouseReleased() --called once when a mouse button released
 * [ ] mouseWheel() --runs while wheel is moving
 * [X] mouseX --horizontal coordinate of mouse
@@ -174,7 +174,7 @@
 * [X] clear()
 * [ ] HSB (see https://www.love2d.org/wiki/HSV_color hsv=hsb)
 * [ ] colormode
-* [X] fill()
+* [X] fill() - G, G,A R,G,B  R,G,B,A or html color name
 * [ ] noFill()
 * [X] noStroke()
 * [X] stroke()
