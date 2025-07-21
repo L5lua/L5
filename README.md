@@ -6,7 +6,7 @@ Built on the Love2d framework.
 
 ## Why?
 
-Lua. It's a dynamic scripting language like Javascript. The language is tiny in terms of bandwidth and in functions. It is easy to learn, works on old hardware, and stable. The syntax is consistently simple, and unlike Javascript, does not change. It is incredibly fast and works really well on desktop from powerful machines to Raspberry Pi. It is perfect for building an interactive installation and letting it run for months, or for a program that you need to integrate with your host OS, or for making games or interactive artworks on the computer. It's really fun to write.
+Lua is fun. It's a dynamic scripting language like Javascript. The language is tiny in terms of bandwidth and in functions. It is easy to learn, works on old hardware, and stable. The syntax is consistently simple, and unlike Javascript, rarely changes over its long history. It is incredibly fast and works really well on desktop from powerful machines to Raspberry Pi. It is perfect for building an interactive installation and letting it run for months, or for a program that you need to integrate with your host OS, or for making games or interactive artworks on the computer. It can be really fun to write in it.
 
 Lua itself is a language with mechanisms but unlike Python, few *batteries*. It isn't "everything and the kitchen sink". Unlike Javascript in the browser, it lacks a built-in canvas element. That's where Love2d comes in.
 
@@ -15,7 +15,7 @@ Love2d (stylized LÖVE) is a framework to build 2d games in Lua. It is free and 
 ## Gotchas
 
 * Lua is 1-indexed not 0-indexed
-* 2D only (unless you implement your own 3d library or 2.5D)
+* 2D only, at least for now (unless you implement a 3d library or 2.5D)
 
 ## Install
 

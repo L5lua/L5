@@ -111,10 +111,10 @@
 * [ ] mouseWheel() --runs while wheel is moving
 * [X] mouseX --horizontal coordinate of mouse
 * [X] mouseY --vertical coordinate of mouse
-* [ ] movedX --mouseX-pmouseX, not in Processing
-* [ ] movedY --mouseY-pmouseY, not in Processing
-* [ ] pmouseX --mouseX in previous frame
-* [ ] pmouseY --mouseY in previous frame
+* [X] movedX --mouseX-pmouseX, not in Processing
+* [X] movedY --mouseY-pmouseY, not in Processing
+* [X] pmouseX --mouseX in previous frame
+* [X] pmouseY --mouseY in previous frame
 
 ### Touch -- Not under development. Could be added later if interest.
 

@@ -10,4 +10,5 @@
 * [X] Hex code colors
 * [ ] debug mouseClicked - probably needs to be added to draw after mousePressed
 * [ ] add [HSB](https://www.love2d.org/wiki/HSV_color) and [HSL](https://www.love2d.org/wiki/HSL_color)
+  * [ ] add ability to set max value per val in table (RGBA, HSLA, HSBA)
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
