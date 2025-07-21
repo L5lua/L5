@@ -98,6 +98,8 @@ end
 
 function love.update(dt)
   mouseX, mouseY = love.mouse.getPosition()
+  movedX=mouseX-pmouseX
+  movedY=mouseY-pmouseY
   deltaTime = dt
   key = updateLastKeyPressed()
 
@@ -150,6 +152,8 @@ function love.draw()
 
   -- Call user draw function
   if draw ~= nil then draw() end
+
+  pmouseX, pmouseY = mouseX,mouseY
 
   love.graphics.pop()
 end
@@ -301,6 +305,7 @@ function defaults()
   mouseY=0
   keyIsPressed = false
   key = nil
+  pmouseX,pmouseY=0,0
 end
 
 -- environment global variables not user-facing
