@@ -102,7 +102,7 @@
 ### Mouse
 
 * [ ] mouseButton --which button is pressed?
-* [ ] mouseClicked() --called after a mouse button pressed and released
+* [X] mouseClicked() --called after a mouse button pressed and released
 * [X] mouseDragged() -- called while mouse moves and a mouse button is pressed
 * [X] mouseIsPressed --boolean, called mousePressed in Processing
 * [ ] mouseMoved() --called when mouse moved, no button pressed
@@ -111,10 +111,10 @@
 * [ ] mouseWheel() --runs while wheel is moving
 * [X] mouseX --horizontal coordinate of mouse
 * [X] mouseY --vertical coordinate of mouse
-* [ ] movedX --mouseX-pmouseX, not in Processing
-* [ ] movedY --mouseY-pmouseY, not in Processing
-* [ ] pmouseX --mouseX in previous frame
-* [ ] pmouseY --mouseY in previous frame
+* [X] movedX --mouseX-pmouseX, not in Processing
+* [X] movedY --mouseY-pmouseY, not in Processing
+* [X] pmouseX --mouseX in previous frame
+* [X] pmouseY --mouseY in previous frame
 
 ### Touch -- Not under development. Could be added later if interest.
 
