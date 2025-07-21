@@ -140,11 +140,13 @@ function love.draw()
     L5_env.keyWasTyped = false -- Changed
   end
 
-
-
   -- Check for mouse events in draw cycle??
   -- ????
   -- ????
+  if L5_env.wheelWasMoved then
+    if mouseWheel ~= nil then mouseWheel() end
+    L5_env.wheelWasMoved = false
+  end
 
 -- Reset transformation matrix to identity at start of each frame
   love.graphics.origin()
@@ -164,6 +166,12 @@ end
 
 function love.mousereleased( x, y, button, istouch, presses )
   if mouseClicked ~= nil then mouseClicked() end
+end
+
+function love.wheelmoved(_x,_y)
+  mouseWheel(_x,_y)
+  L5_env.wheelWasMoved = true
+  return _x,_y
 end
 
 function love.keypressed(key, scancode, isrepeat)
@@ -323,6 +331,7 @@ function define_env_globals()
   L5_env.keyWasPressed = false
   L5_env.keyWasReleased = false
   L5_env.keyWasTyped = false
+  L5_env.wheelWasMoved = false
   L5_env.framerate = nil
   L5_env.backBuffer = nil
   L5_env.frontBuffer = nil
@@ -395,7 +404,7 @@ end
 -------------------- TIME and DATE -------------------
 
 function millis()
-  return love.timer.getTime()
+  return 1000*love.timer.getTime()
 end
 
 function day()

@@ -108,7 +108,7 @@
 * [ ] mouseMoved() --called when mouse moved, no button pressed
 * [X] mousePressed() --called once after mouse button pressed
 * [ ] mouseReleased() --called once when a mouse button released
-* [ ] mouseWheel() --runs while wheel is moving
+* [X] mouseWheel() --runs once while wheel is moving if passed x,y then can return change of -1 or 1 for x (left or right), -1 or 1 for y (up or down)
 * [X] mouseX --horizontal coordinate of mouse
 * [X] mouseY --vertical coordinate of mouse
 * [X] movedX --mouseX-pmouseX, not in Processing
