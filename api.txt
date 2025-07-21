@@ -60,7 +60,7 @@
 * [ ] displayDensity()
 * [X] displayHeight() 
 * [X] displayWidth() 
-* [ ] focused
+* [X] focused --boolean var
 * [X] frameCount
 * [X] frameRate()
 * [X] fullscreen() --returns true if in fullscreen, false otherwise. if passed true, turns on fullscreen, or turns off if passed false. equivalent to p5.js implementation

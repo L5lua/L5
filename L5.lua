@@ -208,6 +208,10 @@ function love.resize(w, h)
   width, height = w, h
 end
 
+function love.focus(_focused)
+    focused = _focused
+end
+
 ------------------- CUSTOM FUNCTIONS -----------------
 
 function size(_w, _h)
@@ -349,6 +353,7 @@ function defaults()
   keyIsPressed = false
   key = nil
   pmouseX,pmouseY,movedX,movedY=0,0
+  focused = true
 end
 
 -- environment global variables not user-facing
