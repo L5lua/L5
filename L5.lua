@@ -305,7 +305,7 @@ function defaults()
   mouseY=0
   keyIsPressed = false
   key = nil
-  pmouseX,pmouseY=0,0
+  pmouseX,pmouseY,movedX,movedY=0,0
 end
 
 -- environment global variables not user-facing
