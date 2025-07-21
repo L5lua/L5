@@ -884,6 +884,16 @@ function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
 end
 
+function noSmooth()
+  love.graphics.setDefaultFilter("nearest", "nearest", 1)
+  love.graphics.setLineStyle('rough')
+end
+
+function smooth()
+  love.graphics.setDefaultFilter("linear", "linear", 1)
+  love.graphics.setLineStyle('smooth')
+end
+
 function stroke(_r,_g,_b,_a)
   L5_env.global_stroke_color = toColor(_r,_g,_b,_a) -- Changed
 end

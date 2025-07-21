@@ -137,8 +137,8 @@
 * [X] rectMode()
 * [ ] strokeCap()
 * [X] strokeWeight()
-* [ ] noSmooth()
-* [ ] smooth()
+* [X] noSmooth()
+* [X] smooth()
 * [ ] strokeJoin()
 
 ### Curves
