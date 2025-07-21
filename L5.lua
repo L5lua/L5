@@ -301,8 +301,7 @@ function defaults()
   mouseY=0
   keyIsPressed = false
   key = nil
-
-  end
+end
 
 -- environment global variables not user-facing
 function define_env_globals()
@@ -516,20 +515,128 @@ function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
     love.graphics.setColor(r, g, b, a)
 end
 
---TODO: Implement _h height! Maybe requires scale along y?
---p5 calls arctype paramater "mode"
-function arc(_x,_y,_w,_h,_start,_stop,_arctype)
-  if _arctype then
-    love.graphics.arc(L5_env.global_fill_mode, _arctype, _x, _y, _w/2, _start, _stop) -- Changed
+--p5 calls arctype parameter "mode"
+function arc(_x, _y, _w, _h, _start, _stop, _arctype)
+  local arctype = _arctype or "pie"
+  local radius_x = _w / 2
+  local radius_y = _h / 2
+  local center_x = _x
+  local center_y = _y
+  
+  -- Normalize angles to [0, 2π) range
+  local function normalize_angle(angle)
+    local TWO_PI = 2 * math.pi
+    angle = angle % TWO_PI
+    if angle < 0 then
+      angle = angle + TWO_PI
+    end
+    return angle
+  end
+  
+  local start_norm = normalize_angle(_start)
+  local stop_norm = normalize_angle(_stop)
+  
+  -- Processing always draws clockwise from start to stop
+  local arc_span
+  if stop_norm <= start_norm then
+    -- Arc crosses the 0° boundary - go the long way around
+    arc_span = (2 * math.pi - start_norm) + stop_norm
+  else
+    -- Normal case - direct clockwise arc
+    arc_span = stop_norm - start_norm
+  end
+  
+  -- Check if this should be a full circle
+  local epsilon = 1e-6
+  local is_full_circle = arc_span >= (2 * math.pi - epsilon)
+  
+  if is_full_circle then
+    -- Draw a full ellipse
+    if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" then
+      love.graphics.ellipse("fill", center_x, center_y, radius_x, radius_y)
+    end
+    
+    if L5_env.global_stroke_color then
+      local r, g, b, a = love.graphics.getColor()
+      love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+      love.graphics.ellipse("line", center_x, center_y, radius_x, radius_y)
+      love.graphics.setColor(r, g, b, a)
+    end
+  else
+    -- Handle elliptical arcs (when _w != _h)
+    if math.abs(radius_x - radius_y) < epsilon then
+      -- Circular arc - use Love2D's built-in arc function
+      local radius = radius_x
+      
+      if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" then
+        love.graphics.arc("fill", arctype, center_x, center_y, radius, start_norm, start_norm + arc_span)
+      end
+      
+      if L5_env.global_stroke_color then
+        local r, g, b, a = love.graphics.getColor()
+        love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+        love.graphics.arc("line", arctype, center_x, center_y, radius, start_norm, start_norm + arc_span)
+        love.graphics.setColor(r, g, b, a)
+      end
+    else
+      -- Elliptical arc - need to draw manually with vertices
+      draw_elliptical_arc(center_x, center_y, radius_x, radius_y, start_norm, arc_span, arctype)
+    end
+  end
+end
+
+-- Helper function to draw elliptical arcs
+function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
+  local segments = math.max(8, math.floor(math.abs(arc_span) * 12)) -- Adaptive segments
+  local vertices = {}
+  
+  -- Generate arc vertices
+  for i = 0, segments do
+    local angle = start_angle + (arc_span * i / segments)
+    local x = cx + rx * math.cos(angle)
+    local y = cy + ry * math.sin(angle)
+    table.insert(vertices, x)
+    table.insert(vertices, y)
+  end
+  
+  if arctype == "pie" then
+    -- Add center point for pie
+    table.insert(vertices, 1, cy) -- Insert at position 2 (after first vertex)
+    table.insert(vertices, 1, cx) -- Insert at position 1
+  elseif arctype == "chord" then
+    -- Close the arc by connecting endpoints
+    -- vertices already has the right points
+  end
+  -- "open" type doesn't need modification
+  
+  -- Draw filled arc
+  if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" and #vertices >= 6 then
+    if arctype == "pie" then
+      love.graphics.polygon("fill", vertices)
+    elseif arctype == "chord" then
+      love.graphics.polygon("fill", vertices)
+    end
+    -- "open" type doesn't get filled
+  end
+  
+  -- Draw stroke
+  if L5_env.global_stroke_color then
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
-    love.graphics.arc("line", _arctype, _x, _y, _w/2, _start, _stop)
-    love.graphics.setColor(r, g, b, a)
-  else --no specified mode, use PIE default
-    love.graphics.arc(L5_env.global_fill_mode, _x, _y, _w/2, _start, _stop) -- Changed
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
-    love.graphics.arc("line", _x, _y, _w/2, _start, _stop)
+    love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+    
+    if arctype == "open" then
+      -- Just draw the arc line
+      for i = 1, #vertices - 2, 2 do
+        love.graphics.line(vertices[i], vertices[i+1], vertices[i+2], vertices[i+3])
+      end
+    elseif arctype == "chord" then
+      -- Draw the arc and the closing line
+      love.graphics.polygon("line", vertices)
+    elseif arctype == "pie" then
+      -- Draw the arc and lines to center
+      love.graphics.polygon("line", vertices)
+    end
+    
     love.graphics.setColor(r, g, b, a)
   end
 end
