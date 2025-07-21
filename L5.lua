@@ -109,6 +109,7 @@ end
 
 function love.draw()
   frameCount = frameCount + 1
+
   local isPressed = love.mouse.isDown(1)
 
   if isPressed and not L5_env.wasPressed then -- Changed
@@ -161,7 +162,8 @@ function love.draw()
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
-  if mousePressed ~= nil then mousePressed() end
+  --turned off so as not to duplicate event handling running twice
+  --if mousePressed ~= nil then mousePressed() end
 end
 
 function love.mousereleased( x, y, button, istouch, presses )
@@ -288,6 +290,32 @@ function hexToRGB(hex)
 
     return r, g, b
 end
+
+function save()
+  print("running save")
+    love.graphics.captureScreenshot(function(imageData)
+        local timestamp = os.date("%Y%m%d_%H%M%S")
+        local filename = "screenshot_" .. timestamp .. ".png"
+        
+        -- Encode to memory (no file yet)
+        local pngData = imageData:encode("png")
+        
+        -- Write directly to current directory
+        local programDir = love.filesystem.getSource()
+        local targetPath = programDir .. "/" .. filename
+        
+        local file = io.open(targetPath, "wb")
+        if file then
+            file:write(pngData:getString())  -- Get the raw data string
+            file:close()
+            print("Screenshot saved to: " .. targetPath)
+        else
+            print("Could not write to current directory")
+        end
+    end)
+end
+
+
 
 function defaults()
   -- constants
