@@ -56,7 +56,7 @@
 * [X] size()
 * [X] print()
 * [X] deltaTime
-* [ ] describe() --cannot find in Love2d
+* [ ] describe() --implementing as text to console
 * [ ] displayDensity()
 * [ ] displayHeight() (or windowHeight)
 * [ ] displayWidth() (or windowHeight)
@@ -175,7 +175,7 @@
 * [ ] HSB (see https://www.love2d.org/wiki/HSV_color hsv=hsb)
 * [ ] colormode
 * [X] fill() - G, G,A R,G,B  R,G,B,A or html color name
-* [ ] noFill()
+* [X] noFill()
 * [X] noStroke()
 * [X] stroke()
 
@@ -230,6 +230,6 @@
 * [X] loadImage()
 * [X] noTint()
 * [X] tint()
-* [ ] save()
+* [X] save()
 * [X] cursor() (see https://www.love2d.org/wiki/love.mouse.setCursor )
 * [X] noCursor()
