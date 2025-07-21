@@ -58,8 +58,8 @@
 * [X] deltaTime
 * [X] describe() --implementing as text to console, takes string input, should be in setup
 * [ ] displayDensity()
-* [ ] displayHeight() (or windowHeight)
-* [ ] displayWidth() (or windowHeight)
+* [X] displayHeight() 
+* [X] displayWidth() 
 * [ ] focused
 * [X] frameCount
 * [X] frameRate()

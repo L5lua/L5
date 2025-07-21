@@ -82,6 +82,7 @@ function love.load()
 
   -- Create double buffers
   local w, h = love.graphics.getDimensions()
+displayWidth, displayHeight = love.window.getDesktopDimensions()
   L5_env.backBuffer = love.graphics.newCanvas(w, h) -- Changed
   L5_env.frontBuffer = love.graphics.newCanvas(w, h) -- Changed
 
