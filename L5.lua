@@ -336,6 +336,8 @@ function defaults()
   CENTER = "CENTER"
   RADIANS = "RADIANS"
   DEGREES = "DEGREES"
+  ROUND = "smooth"
+  SQUARE = "rough"
   PI=math.pi
   HALF_PI=math.pi/2
   QUARTER_PI=math.pi/4
@@ -888,6 +890,16 @@ end
 
 function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
+end
+
+function strokeCap(_style)
+  if _style == ROUND then
+    love.graphics.setLineStyle(ROUND)
+  elseif _style == SQUARE then
+    love.graphics.setLineStyle(SQUARE)
+  else
+    print("Error: not a strokeCap style.")
+  end
 end
 
 function noSmooth()
