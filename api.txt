@@ -139,7 +139,7 @@
 * [X] strokeWeight()
 * [X] noSmooth()
 * [X] smooth()
-* [ ] strokeJoin()
+* [X] strokeJoin() --MITER, BEVEL, NONE. No ROUND. MITER is default. Also affected by strokeCap (because of Love2d's internals)
 
 ### Curves
 * [X] curve()

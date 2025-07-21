@@ -338,6 +338,9 @@ function defaults()
   DEGREES = "DEGREES"
   ROUND = "smooth"
   SQUARE = "rough"
+  MITER = "miter"
+  BEVEL = "bevel"
+  NONE = "none"
   PI=math.pi
   HALF_PI=math.pi/2
   QUARTER_PI=math.pi/4
@@ -893,13 +896,11 @@ function strokeWeight(_w)
 end
 
 function strokeCap(_style)
-  if _style == ROUND then
-    love.graphics.setLineStyle(ROUND)
-  elseif _style == SQUARE then
-    love.graphics.setLineStyle(SQUARE)
-  else
-    print("Error: not a strokeCap style.")
-  end
+  love.graphics.setLineStyle(ROUND)
+end
+
+function strokeJoin(_style)
+  love.graphics.setLineJoin(_style)
 end
 
 function noSmooth()
