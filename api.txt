@@ -157,12 +157,12 @@
 * [ ] vertex()
 
 ### Creating & Reading
-* [ ] alpha() (gets alpha aka 4th value of a color)
-* [ ] blue() (gets blue aka 3rd value of a color)
-* [ ] red() (gets red value of a color)
+* [X] alpha() (gets alpha aka 4th value of a color)
+* [X] blue() (gets blue aka 3rd value of a color)
+* [X] red() (gets red value of a color)
 * [ ] brightness() (extracts HSB brightness value of a color)
-* [ ] color() (creates a color object)
-* [ ] green() (gets the green value of a color)
+* [X] color() (creates a color object)
+* [X] green() (gets the green value of a color)
 * [ ] hue() (gets the hue value of a color)
 * [ ] lerpColor()
 * [ ] lightness()

@@ -247,6 +247,12 @@ function environment()
 end
 
 function toColor(_r,_g,_b,_a)
+  --if _r is a table return it
+  if type(_r) == "table" and _g == nil and #_r == 4 then
+    return _r
+  end
+
+  --otherwise
   if _g == nil then
     -- one argument = grayscale or color name
     if type(_r) == "number" then
@@ -256,11 +262,18 @@ function toColor(_r,_g,_b,_a)
     _r, _g, _b = hexToRGB(_r)
     _a = 255
       else --it's a html color value
+	--TEST
+	if htmlColors[_r] then
+	  --END TEST
     _r, _g, _b = table.unpack(htmlColors[_r])
     _a = 255
+  else
+    error("Color '" .. _r .. "' not found in htmlColors table") 
+  end
       end
     else
       --ERROR
+      error("Invalid color argument")
     end
   elseif _b == nil then
     -- two arguments = grayscale, alpha
@@ -270,7 +283,8 @@ function toColor(_r,_g,_b,_a)
     -- three arguments = r,g,b
     _a = 255
   end
-  return {_r/255,_g/255,_b/255,_a/255}
+
+  return {_r/255, _g/255, _b/255, _a/255}
 end
 
 function hexToRGB(hex)
@@ -719,8 +733,42 @@ function background(_r,_g,_b,_a)
   L5_env.clearscreen = true -- Changed
 end
 
-function fill(_r,_g,_b,_a)
-  love.graphics.setColor(table.unpack(toColor(_r,_g,_b,_a)))
+--function fill(_r,_g,_b,_a)
+function fill(...)
+  love.graphics.setColor(table.unpack(toColor(...)))
+end
+
+--------------- CREATING and READING ----------------
+
+function color(...)
+    local args = {...}
+    if #args == 3 then
+        return toColor(args[1], args[2], args[3], 255)
+    elseif #args == 4 then
+        return toColor(args[1], args[2], args[3], args[4])
+    elseif #args == 2 then
+        return toColor(args[1], args[1], args[1], args[2])  -- This is fine for grayscale+alpha
+    elseif #args == 1 then
+        return toColor(args[1])  
+    else
+        error("color() requires 1-4 arguments")
+    end
+end
+
+function alpha(_color)
+  return _color[4]*255
+end
+
+function red(_color)
+  return _color[1]*255
+end
+
+function green(_color)
+  return _color[2]*255
+end
+
+function blue(_color)
+  return _color[3]*255
 end
 
 ----------------------- COLOR ------------------------
