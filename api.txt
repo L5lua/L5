@@ -194,7 +194,7 @@
 * [X] TWO_PI (6.28318...)
 
 ### Math
-* [X] random()
+* [X] random() --takes 1 or 2 arguments. if a table name is given, returns a random value from the table
 * [X] randomSeed()
 * [ ] noise() (see https://www.love2d.org/wiki/love.math.noise )
 * [ ] lerp()
@@ -217,12 +217,14 @@
 * [X] tan()
 
 ## Typography
-* [ ] loadFont()
-* [X] text()
-* [ ] textFont()
-* [ ] textMode()
+* [X] loadFont() --create new font
+* [X] text() --display text, at x,y
+* [X] textFont() --change to loaded font
+* [X] textWidth() --returns width of text
+* [X] textHeight() -- returns height of text
+* [ ] textMode() --not currently planning on implementing this 
 * [ ] textAlign()
-* [ ] textSize()
+* [X] textSize()
 
 ### Loading and Displaying
 * [X] image()

@@ -1026,7 +1026,16 @@ function random(_a,_b)
   if _b then
     return love.math.random()*(_b-_a)+_a
   else
-    return love.math.random()*_a
+    if type(_a) == 'table' then
+      -- more robust in case a table isn't ordered by integers
+      local keyset = {}
+      for k in pairs(_a) do
+	  table.insert(keyset, k)
+      end
+      return _a[keyset[math.random(#keyset)]]
+    elseif type(_a) == 'number' then
+      return love.math.random()*_a
+    end
   end
 end
 
