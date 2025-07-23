@@ -379,7 +379,7 @@ end
 function define_env_globals()
   L5_env = L5_env or {} -- Initialize L5_env if it doesn't exist
   L5_env.drawing = true
-  L5_env.wasPressed = false
+  -- drawing mode state
   L5_env.global_degree_mode = RADIANS --also: DEGREES
   L5_env.global_rect_mode = CORNER --also: CORNERS, CENTER
   L5_env.global_ellipse_mode = CENTER
@@ -387,15 +387,23 @@ function define_env_globals()
   L5_env.global_fill_mode="fill"   --also: "line"
   L5_env.global_stroke_color = {0,0,0}
   L5_env.currentTint = {1, 1, 1, 1} -- Default: no tint white
+  -- global key state
   L5_env.keyWasPressed = false
   L5_env.keyWasReleased = false
   L5_env.keyWasTyped = false
+  -- mouse state
+  L5_env.wasPressed = false
   L5_env.wheelWasMoved = false
+  -- screen buffer state
   L5_env.framerate = nil
   L5_env.backBuffer = nil
   L5_env.frontBuffer = nil
   L5_env.clearscreen = false
   L5_env.described = false
+  -- global font state
+  L5_env.fontPaths = {}
+  L5_env.currentFontPath = nil
+  L5_env.currentFontSize = 12
 end
 
 ----------------------- EVENTS ----------------------
@@ -1112,7 +1120,60 @@ function tan(_angle)
   end
 end
 
-------------------- SYSTEM ------------------------
+------------------- TYPOGRAPHY ---------------------
+
+function loadFont(fontPath)
+  local font = love.graphics.newFont(fontPath)
+  -- Store the path so we can recreate the font at different sizes
+  L5_env.fontPaths[font] = fontPath
+  return font
+end
+
+function textFont(font, size)
+  -- Update size if provided
+  if size then
+    L5_env.currentFontSize = size
+  end
+  
+  -- Font object - look up its stored path
+  L5_env.currentFontPath = L5_env.fontPaths[font]
+  if L5_env.currentFontPath then
+    -- Recreate font with current size using stored path
+    L5_env.currentFont = love.graphics.newFont(L5_env.currentFontPath, L5_env.currentFontSize)
+  else
+    -- No path found, use font as-is (won't be resizable)
+    L5_env.currentFont = font
+  end
+  love.graphics.setFont(L5_env.currentFont)
+end
+
+function textSize(size)
+  L5_env.currentFontSize = size
+  if L5_env.currentFontPath then
+    -- We have a path, recreate with new size
+    L5_env.currentFont = love.graphics.newFont(L5_env.currentFontPath, size)
+  else
+    -- No path stored, use default font
+    L5_env.currentFont = love.graphics.newFont(size)
+  end
+  love.graphics.setFont(L5_env.currentFont)
+end
+
+function textWidth(text)
+  if L5_env.currentFont then
+    return L5_env.currentFont:getWidth(text)
+  end
+  return 0
+end
+
+function textHeight()
+  if L5_env.currentFont then
+    return L5_env.currentFont:getHeight()
+  end
+  return 0
+end
+
+--------------------- SYSTEM -----------------------
 function exit()
   os.exit()
 end
