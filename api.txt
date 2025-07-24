@@ -71,15 +71,15 @@
 ## I/O
 
 ### Input
-* [ ] loadJSON()
-* [ ] loadStrings()
-* [ ] loadTable()
-* [ ] loadXML()
+* [ ] loadJSON() --Not included currently. A simple parser could be written, or a robust library used.
+* [X] loadStrings() --takes filename as arg, returns table
+* [X] loadTable() --takes 1 or 2 arguments: filename, optional "header" string if header in csv or tsv present. Detects suffix (csv, tsv or lua) and processes accordingly. Saves to a table.
+* [ ] loadXML() --Not included currently.
 
 ### Output
-* [ ] saveJSON()
-* [ ] saveStrings()
-* [ ] saveTable()
+* [ ] saveJSON() --Not included currently.
+* [X] saveStrings() --takes table and output filename as arguments
+* [X] saveTable() --takes table and filename as arguments, and optional format "csv","tsv" or "lua". Auto-selects output based on filename suffix if third argument empty.
 
 ### Time and Date
 * [X] millis()
