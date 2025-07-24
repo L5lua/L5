@@ -1,13 +1,11 @@
--- Custom love.run() function with proper double buffering
+-- Custom love.run() function with proper double buffering and mouse events
 function love.run()
   define_env_globals()
   if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
-
   if love.timer then love.timer.step() end
-
   local dt = 0
   local setupComplete = false
-
+  
   -- Main loop
   return function()
     -- Process events
@@ -19,56 +17,82 @@ function love.run()
             return a or 0
           end
         end
-        love.handlers[name](a,b,c,d,e,f)
+        
+        -- Handle mouse events - store them for drawing phase
+        if name == "mousepressed" then
+          -- a = x, b = y, c = button, d = istouch, e = presses
+          L5_env.pendingMouseClicked = {x = a, y = b, button = c}
+        elseif name == "mousereleased" then
+          -- a = x, b = y, c = button, d = istouch, e = presses
+          L5_env.pendingMouseReleased = {x = a, y = b, button = c}
+        end
+        
+        -- Handle other events through the default handlers
+        if love.handlers[name] then
+          love.handlers[name](a,b,c,d,e,f)
+        end
       end
     end
-
+    
     -- Update dt
     if love.timer then dt = love.timer.step() end
-
+    
     -- Update
     if love.update then love.update(dt) end
-
+    
     -- Draw with double buffering
     if love.graphics and love.graphics.isActive() then
       love.graphics.origin()
-
+      
       -- Set render target to back buffer
-      if L5_env.backBuffer then -- Changed
-        love.graphics.setCanvas(L5_env.backBuffer) -- Changed
+      if L5_env.backBuffer then
+        love.graphics.setCanvas(L5_env.backBuffer)
       end
-
-
+      
       -- Only clear if background() was called this frame
-      if L5_env.clearscreen then -- Changed
+      if L5_env.clearscreen then
         -- background() already cleared with the right color
-        L5_env.clearscreen = false -- Changed
+        L5_env.clearscreen = false
       end
-
+      
       -- Draw current frame
       -- Run setup() once in the drawing context
       if not setupComplete and setup then
-      local originalSize = size
-    size = function() end
+        local originalSize = size
+        size = function() end
         setup()
-    size = originalSize
+        size = originalSize
         setupComplete = true
       else
-    if love.draw then love.draw() end
+        if love.draw then love.draw() end
       end
-
+      
+      -- Handle pending mouse events in drawing context
+      if L5_env.pendingMouseClicked then
+        if mouseClicked then
+          mouseClicked(L5_env.pendingMouseClicked.x, L5_env.pendingMouseClicked.y, L5_env.pendingMouseClicked.button)
+        end
+        L5_env.pendingMouseClicked = nil
+      end
+      
+      if L5_env.pendingMouseReleased then
+        if mouseReleased then
+          mouseReleased(L5_env.pendingMouseReleased.x, L5_env.pendingMouseReleased.y, L5_env.pendingMouseReleased.button)
+        end
+        L5_env.pendingMouseReleased = nil
+      end
+      
       -- Reset to screen and draw the back buffer
       love.graphics.setCanvas()
-      if L5_env.backBuffer then -- Changed
-        love.graphics.draw(L5_env.backBuffer, 0, 0) -- Changed
+      if L5_env.backBuffer then
+        love.graphics.draw(L5_env.backBuffer, 0, 0)
       end
-
       love.graphics.present()
     end
-
+    
     if love.timer then
-      if L5_env.framerate then -- Changed --user-specified framerate
-        love.timer.sleep(1/L5_env.framerate) -- Changed
+      if L5_env.framerate then --user-specified framerate
+        love.timer.sleep(1/L5_env.framerate)
       else --default framerate
         love.timer.sleep(0.001)
       end
@@ -176,7 +200,8 @@ function love.mousepressed(_x, _y, button, istouch, presses)
 end
 
 function love.mousereleased( x, y, button, istouch, presses )
-  if mouseClicked ~= nil then mouseClicked() end
+  --if mouseClicked ~= nil then mouseClicked() end
+  --if focused and mouseReleased ~= nil then mouseReleased() end
 end
 
 function love.wheelmoved(_x,_y)
@@ -406,6 +431,8 @@ function define_env_globals()
   -- mouse state
   L5_env.wasPressed = false
   L5_env.wheelWasMoved = false
+  L5_env.pendingMouseClicked = nil
+  L5_env.pendingMouseReleased = nil
   -- screen buffer state
   L5_env.framerate = nil
   L5_env.backBuffer = nil

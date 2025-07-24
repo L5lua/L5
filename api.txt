@@ -102,12 +102,12 @@
 ### Mouse
 
 * [X] mouseButton --A variable that returns which mouse button was last pressed: LEFT, RIGHT or CENTER
-* [X] mouseClicked() --called after a mouse button pressed and released
+* [X] mouseClicked() --called once after a mouse button pressed and released
 * [X] mouseDragged() -- called while mouse moves and a mouse button is pressed
 * [X] mouseIsPressed --boolean, called mousePressed in Processing
 * [ ] mouseMoved() --called when mouse moved, no button pressed
 * [X] mousePressed() --called once after mouse button pressed
-* [ ] mouseReleased() --called once when a mouse button released
+* [X] mouseReleased() --called once when a mouse button released
 * [X] mouseWheel() --runs once while wheel is moving if passed x,y then can return change of -1 or 1 for x (left or right), -1 or 1 for y (up or down)
 * [X] mouseX --horizontal coordinate of mouse
 * [X] mouseY --vertical coordinate of mouse

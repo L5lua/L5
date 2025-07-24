@@ -1,4 +1,5 @@
 require("L5")
+--adapted from Processing reference CC BY-NC-SA 4.0
 
 function setup()
   size(400,400)
