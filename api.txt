@@ -101,7 +101,7 @@
 
 ### Mouse
 
-* [ ] mouseButton --which button is pressed?
+* [X] mouseButton --A variable that returns which mouse button was last pressed: LEFT, RIGHT or CENTER
 * [X] mouseClicked() --called after a mouse button pressed and released
 * [X] mouseDragged() -- called while mouse moves and a mouse button is pressed
 * [X] mouseIsPressed --boolean, called mousePressed in Processing

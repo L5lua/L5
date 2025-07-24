@@ -111,13 +111,14 @@ end
 function love.draw()
   frameCount = frameCount + 1
 
-  local isPressed = love.mouse.isDown(1)
+  local isPressed = love.mouse.isDown(1) or love.mouse.isDown(2) or love.mouse.isDown(3)
 
   if isPressed and not L5_env.wasPressed then -- Changed
-    -- Mouse was just pressed this frame
-    if mousePressed ~= nil then mousePressed() end
+  -- Mouse was just pressed this frame
+
+  if mousePressed ~= nil then mousePressed() end
     mouseIsPressed = true
-  elseif isPressed then --now released
+  elseif isPressed then -- Still pressed (dragging)
     if mouseDragged ~= nil then mouseDragged() end
     mouseIsPressed = true
   else
@@ -165,6 +166,13 @@ end
 function love.mousepressed(_x, _y, button, istouch, presses)
   --turned off so as not to duplicate event handling running twice
   --if mousePressed ~= nil then mousePressed() end
+  if button==1 then
+    mouseButton=LEFT
+  elseif button==2 then
+    mouseButton=RIGHT
+  elseif button==3 then
+    mouseButton=CENTER
+  end
 end
 
 function love.mousereleased( x, y, button, istouch, presses )
@@ -172,7 +180,7 @@ function love.mousereleased( x, y, button, istouch, presses )
 end
 
 function love.wheelmoved(_x,_y)
-  mouseWheel(_x,_y)
+  if mouseWheel ~= nil then mouseWheel(_x,_y) end
   L5_env.wheelWasMoved = true
   return _x,_y
 end
@@ -355,6 +363,9 @@ function defaults()
   MITER = "miter"
   BEVEL = "bevel"
   NONE = "none"
+  LEFT = "left"
+  RIGHT = "right"
+  CENTER = "center"
   PI=math.pi
   HALF_PI=math.pi/2
   QUARTER_PI=math.pi/4
@@ -372,6 +383,7 @@ function defaults()
   keyIsPressed = false
   key = nil
   pmouseX,pmouseY,movedX,movedY=0,0
+  mouseButton = nil
   focused = true
 end
 
