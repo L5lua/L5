@@ -394,6 +394,9 @@ function defaults()
   LEFT = "left"
   RIGHT = "right"
   CENTER = "center"
+  TOP = "top"
+  BOTTOM = "bottom"
+  BASELINE = "baseline"
   PI=math.pi
   HALF_PI=math.pi/2
   QUARTER_PI=math.pi/4
@@ -448,6 +451,8 @@ function define_env_globals()
   L5_env.fontPaths = {}
   L5_env.currentFontPath = nil
   L5_env.currentFontSize = 12
+  L5_env.textAlignX = LEFT
+  L5_env.textAlignY = BASELINE
 end
 
 ----------------------- INPUT -----------------------
@@ -1496,7 +1501,40 @@ end
 --------------------- TYPOGRAPHY ---------------------
 
 function text(_msg,_x,_y)
-  love.graphics.print(_msg,_x,_y)
+  local x_offset
+  local y_offset
+  
+  -- set x-offset
+  if L5_env.textAlignX==LEFT then
+    x_offset = 0
+  elseif L5_env.textAlignX == RIGHT then
+    x_offset = love.graphics.getFont():getWidth(_msg)
+  elseif L5_env.textAlignX == CENTER then
+    x_offset = (love.graphics.getFont():getWidth(_msg))/2
+  end
+  -- set y-offset
+  if L5_env.textAlignY == BASELINE then
+    y_offset=0
+  elseif L5_env.textAlignY == TOP then
+    y_offset=0
+  elseif L5_env.textAlignY == CENTER then
+    y_offset = (love.graphics.getFont():getHeight(_msg))/2
+  elseif L5_env.textAlignY == BOTTOM then
+    y_offset = love.graphics.getFont():getHeight(_msg)
+  end
+
+    love.graphics.print(_msg, _x - x_offset, _y - y_offset)
+end
+
+function textAlign(x_alignment,y_alignment)
+  if x_alignment == LEFT or x_alignment == RIGHT or x_alignment == CENTER then
+    L5_env.textAlignX=x_alignment
+  end
+  if y_alignment and (y_alignment == TOP or y_alignment == CENTER or y_alignment == BOTTOM or y_alignment == BASELINE) then
+    L5_env.textAlignY=y_alignment
+  else
+    L5_env.textAlignY=BASELINE
+  end
 end
 
 ---------------- LOADING & DISPLAYING ----------------

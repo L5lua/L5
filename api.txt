@@ -223,7 +223,7 @@
 * [X] textWidth() --returns width of text
 * [X] textHeight() -- returns height of text
 * [ ] textMode() --not currently planning on implementing this 
-* [ ] textAlign()
+* [X] textAlign()
 * [X] textSize()
 
 ### Loading and Displaying
