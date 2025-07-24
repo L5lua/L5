@@ -149,25 +149,29 @@ function love.draw()
     mouseIsPressed = false
   end
 
-  L5_env.wasPressed = isPressed -- Changed
+  L5_env.wasPressed = isPressed
 
   -- Check for keyboard events in the draw cycle
-  if L5_env.keyWasPressed then -- Changed
+  if L5_env.keyWasPressed then
     if keyPressed ~= nil then keyPressed() end
-    L5_env.keyWasPressed = false -- Changed
+    L5_env.keyWasPressed = false
   end
 
-  if L5_env.keyWasReleased then -- Changed
+  if L5_env.keyWasReleased then
     if keyReleased ~= nil then keyReleased() end
-    L5_env.keyWasReleased = false -- Changed
+    L5_env.keyWasReleased = false
   end
 
-  if L5_env.keyWasTyped then -- Changed
+  if L5_env.keyWasTyped then
     if keyTyped ~= nil then keyTyped() end
-    L5_env.keyWasTyped = false -- Changed
+    L5_env.keyWasTyped = false 
   end
 
   -- Check for mouse events in draw cycle
+  if L5_env.mouseWasMoved then
+    if mouseMoved ~= nil then mouseMoved() end
+    L5_env.mouseWasMoved = false    
+  end
   if L5_env.wheelWasMoved then
     if mouseWheel ~= nil then 
       mouseWheel(L5_env.wheelX or 0,L5_env.wheelY or 0) 
@@ -211,6 +215,10 @@ function love.wheelmoved(_x,_y)
   L5_env.wheelX = _x
   L5_env.wheelY = _y
   return _x, _y
+end
+
+function love.mousemoved(x,y,dx,dy,istouch)
+  L5_env.mouseWasMoved = true
 end
 
 function love.keypressed(key, scancode, isrepeat)
@@ -435,6 +443,7 @@ function define_env_globals()
   L5_env.keyWasReleased = false
   L5_env.keyWasTyped = false
   -- mouse state
+  L5_env.mouseWasMoved = false
   L5_env.wasPressed = false
   L5_env.wheelWasMoved = false
   L5_env.wheelX = nil

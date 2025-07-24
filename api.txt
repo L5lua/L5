@@ -105,7 +105,7 @@
 * [X] mouseClicked() --called once after a mouse button pressed and released
 * [X] mouseDragged() -- called while mouse moves and a mouse button is pressed
 * [X] mouseIsPressed --boolean, called mousePressed in Processing
-* [ ] mouseMoved() --called when mouse moved, no button pressed
+* [X] mouseMoved() --called when mouse moved, no button pressed
 * [X] mousePressed() --called once after mouse button pressed
 * [X] mouseReleased() --called once when a mouse button released
 * [X] mouseWheel() --runs once while wheel is moving if passed x,y then can return change of -1 or 1 for x (left or right), -1 or 1 for y (up or down)
@@ -223,7 +223,7 @@
 * [X] textWidth() --returns width of text
 * [X] textHeight() -- returns height of text
 * [ ] textMode() --not currently planning on implementing this 
-* [X] textAlign()
+* [X] textAlign() --first parameter sets horizontal alignment LEFT (default), CENTER, or RIGHT. Optional second parameter sets TOP, CENTER or BOTTOM vertical alignment.
 * [X] textSize()
 
 ### Loading and Displaying
