@@ -1467,6 +1467,10 @@ function clear()
   love.graphics.clear()
 end
 
+function displayDensity()
+  return love.graphics.getDPIScale()
+end
+
 function frameRate(_inp)
   if _inp then --change frameRate
     L5_env.framerate = _inp -- Changed

@@ -57,9 +57,9 @@
 * [X] print()
 * [X] deltaTime
 * [X] describe() --implementing as text to console, takes string input, should be in setup
-* [ ] displayDensity()
-* [X] displayHeight() 
-* [X] displayWidth() 
+* [X] displayDensity()
+* [X] displayHeight 
+* [X] displayWidth 
 * [X] focused --boolean var
 * [X] frameCount
 * [X] frameRate()
