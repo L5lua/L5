@@ -406,6 +406,225 @@ function define_env_globals()
   L5_env.currentFontSize = 12
 end
 
+----------------------- INPUT -----------------------
+
+function loadStrings(_file)
+  local lines = {} 
+  for line in love.filesystem.lines(_file) do 
+    table.insert(lines, line)
+  end
+  return lines
+end
+
+function loadTable(_file, _header)
+  -- Extract file extension
+  local extension = _file:match("%.([^%.]+)$")
+  
+  if extension == "csv" or extension == "tsv" then
+    -- Determine separator based on file type
+    local separator = (extension == "csv") and "," or "\t"
+    local pattern = (extension == "csv") and "[^,]+" or "[^\t]+"
+    
+    local function splitLine(line)
+      local values = {}
+      for value in line:gmatch(pattern) do
+        if     tonumber(value)  then  table.insert(values, tonumber(value))
+        elseif value == "true"  then  table.insert(values, true)
+        elseif value == "false" then  table.insert(values, false)
+        else                          table.insert(values, value)
+        end
+      end
+      return values
+    end
+    
+    local function loadDelimitedFile(filename)
+      local data = {}
+      local headers = {}
+      local first_line = true
+      
+      for line in love.filesystem.lines(filename) do
+        local row = splitLine(line)
+        
+        if _header == "header" and first_line then
+          for value in line:gmatch(pattern) do
+            table.insert(headers, value)
+          end
+          first_line = false
+        else
+          if _header == "header" then
+            local record = {}
+            for i, value in ipairs(row) do
+              if headers[i] then
+                record[headers[i]] = value
+              end
+            end
+            table.insert(data, record)
+          else
+            table.insert(data, row)
+          end
+        end
+      end
+      return data
+    end
+    
+    return loadDelimitedFile(_file)
+    
+  elseif extension == "lua" then
+    local chunk = love.filesystem.load(_file)
+    if chunk then
+      return chunk()
+    else
+      error("Could not load Lua file: " .. _file)
+    end
+    
+  else
+    error("Unsupported file type: " .. (extension or "no extension") .. " for file: " .. _file)
+  end
+end
+
+function saveStrings(data, filename)
+  local lines = {}
+  for i, value in ipairs(data) do
+    table.insert(lines, tostring(value))
+  end
+  local content = table.concat(lines, "\n")
+  
+  -- Use io.open to write directly to current directory
+  local file = io.open(filename, "w")
+  if file then
+    file:write(content)
+    file:close()
+    return true
+  else
+    print("Error: Could not open file for writing: " .. filename)
+    return false
+  end
+end
+
+function saveTable(data, filename, format)
+  -- Auto-detect format from filename if not specified
+  if not format then
+    local extension = filename:match("%.([^%.]+)$")
+    format = extension or "lua"
+  end
+  
+  if format == "lua" then
+    -- Save as Lua file with return
+    local function serializeValue(val)
+      if type(val) == "string" then
+        return string.format("%q", val)
+      elseif type(val) == "number" or type(val) == "boolean" then
+        return tostring(val)
+      elseif val == nil then
+        return "nil"
+      else
+        return tostring(val)
+      end
+    end
+    
+    local function serializeTable(tbl, indent)
+      indent = indent or ""
+      local lines = {}
+      table.insert(lines, "{")
+      
+      for i, value in ipairs(tbl) do
+        if type(value) == "table" then
+          table.insert(lines, indent .. "  " .. serializeTable(value, indent .. "  ") .. ",")
+        else
+          table.insert(lines, indent .. "  " .. serializeValue(value) .. ",")
+        end
+      end
+      
+      -- Handle named keys
+      for key, value in pairs(tbl) do
+        if type(key) ~= "number" or key > #tbl then
+          local keyStr = type(key) == "string" and key or "[" .. serializeValue(key) .. "]"
+          if type(value) == "table" then
+            table.insert(lines, indent .. "  " .. keyStr .. " = " .. serializeTable(value, indent .. "  ") .. ",")
+          else
+            table.insert(lines, indent .. "  " .. keyStr .. " = " .. serializeValue(value) .. ",")
+          end
+        end
+      end
+      
+      table.insert(lines, indent .. "}")
+      return table.concat(lines, "\n")
+    end
+    
+    local content = "return " .. serializeTable(data)
+    
+    local file = io.open(filename, "w")
+    if file then
+      file:write(content)
+      file:close()
+      return true
+    end
+    
+  elseif format == "csv" or format == "tsv" then
+    -- Save as CSV or TSV
+    local separator = (format == "csv") and "," or "\t"
+    local lines = {}
+    
+    -- Get headers from first row if it's a table with named keys
+    local headers = {}
+    if #data > 0 and type(data[1]) == "table" then
+      for key, _ in pairs(data[1]) do
+        if type(key) == "string" then
+          table.insert(headers, key)
+        end
+      end
+      
+      if #headers > 0 then
+        -- Add header row
+        table.insert(lines, table.concat(headers, separator))
+        
+        -- Add data rows using headers
+        for i, row in ipairs(data) do
+          local values = {}
+          for _, header in ipairs(headers) do
+            table.insert(values, tostring(row[header] or ""))
+          end
+          table.insert(lines, table.concat(values, separator))
+        end
+      else
+        -- Array-style table, just use indices
+        for i, row in ipairs(data) do
+          if type(row) == "table" then
+            local values = {}
+            for _, value in ipairs(row) do
+              table.insert(values, tostring(value))
+            end
+            table.insert(lines, table.concat(values, separator))
+          else
+            table.insert(lines, tostring(row))
+          end
+        end
+      end
+    else
+      -- Simple array
+      for i, value in ipairs(data) do
+        table.insert(lines, tostring(value))
+      end
+    end
+    
+    local content = table.concat(lines, "\n")
+    
+    local file = io.open(filename, "w")
+    if file then
+      file:write(content)
+      file:close()
+      return true
+    end
+    
+  else
+    print("Error: Unsupported format '" .. format .. "'. Use 'lua', 'csv', or 'tsv'")
+    return false
+  end
+  
+  print("Error: Could not open file for writing: " .. filename)
+  return false
+end
+
 ----------------------- EVENTS ----------------------
 
 ---------------------- KEYBOARD ---------------------
