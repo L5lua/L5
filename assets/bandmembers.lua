@@ -1,0 +1,21 @@
+return {
+  {name = "Marshall Allen", instrument = "alto saxophone flute & EVI", joined = 1958},
+  {name = "Vincent Chancey", instrument = "french horn", joined = 1976},
+  {name = "Michael Ray", instrument = "trumpet & vocals", joined = 1978},
+  {name = "Knoel Scott", instrument = "baritone & alto saxophone", joined = 1979},
+  {name = "Fred Adams", instrument = "trumpet", joined = 1982},
+  {name = "Tyler Mitchell", instrument = "bass", joined = 1985},
+  {name = "Elson Nascimento", instrument = "surdo percussion", joined = 1988},
+  {name = "Jorge Silva", instrument = "repinique and percussion", joined = 1989},
+  {name = "Kash Killion", instrument = "cello", joined = 1989},
+  {name = "Dave Davis", instrument = "trombone", joined = 1997},
+  {name = "D. Hotep", instrument = "guitar and electronics", joined = 2000},
+  {name = "James Stewart", instrument = "tenor sax and flute", joined = 2011},
+  {name = "Farid Abdul-bari Barron", instrument = "piano", joined = nil},
+  {name = "Cecil Brooks", instrument = "trumpet", joined = nil},
+  {name = "George Gray", instrument = "drums", joined = nil},
+  {name = "Chris Hemingway", instrument = "alto & soprano saxophone", joined = nil},
+  {name = "Tara Middleton", instrument = "voice percussion and violin", joined = 2012},
+  {name = "Anthony Nelson", instrument = "baritone saxophone", joined = nil},
+  {name = "Robert Stringer", instrument = "trombone", joined = nil}
+}
