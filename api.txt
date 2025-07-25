@@ -196,7 +196,7 @@
 ### Math
 * [X] random() --takes 1 or 2 arguments. if a table name is given, returns a random value from the table
 * [X] randomSeed()
-* [ ] noise() (see https://www.love2d.org/wiki/love.math.noise )
+* [X] noise() --1, 2 or 3 dimensional Simplex noise generation
 * [ ] lerp()
 * [X] abs()
 * [X] ceil()

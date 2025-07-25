@@ -1002,7 +1002,11 @@ end
 
 function point(_x,_y)
   --Points unaffected by love.graphics.scale - size is always in pixels
+  --a line is drawn in the stroke color
+  local r, g, b, a = love.graphics.getColor()
+  love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
   love.graphics.points(_x,_y)
+  love.graphics.setColor(r, g, b, a)
 end
 
 function line(_x1,_y1,_x2,_y2)
@@ -1226,6 +1230,7 @@ end
 
 function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
+  love.graphics.setPointSize(_w) --also sets sizingon points
 end
 
 function strokeCap(_style)
@@ -1314,6 +1319,10 @@ function random(_a,_b)
       return love.math.random()*_a
     end
   end
+end
+
+function noise(_x,_y,_z)
+  return love.math.noise(_x,_y,_z)
 end
 
 function abs(_a)
