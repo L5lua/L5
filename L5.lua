@@ -287,7 +287,7 @@ function fullscreen(_bool)
 end
 
 function environment()
-  --background(255,255,255)
+  --background(L5_env.color_max,L5_env.color_max,L5_env.color_max)
 end
 
 function toColor(_r,_g,_b,_a)
@@ -300,17 +300,17 @@ function toColor(_r,_g,_b,_a)
   if _g == nil then
     -- one argument = grayscale or color name
     if type(_r) == "number" then
-      _r,_g,_b,_a = _r,_r,_r,255
+      _r,_g,_b,_a = _r,_r,_r,L5_env.color_max
     elseif type(_r) == "string" then
       if _r:sub(1, 1) == "#" then --it's a hex color
     _r, _g, _b = hexToRGB(_r)
-    _a = 255
+    _a = L5_env.color_max
       else --it's a html color value
 	--TEST
 	if htmlColors[_r] then
 	  --END TEST
     _r, _g, _b = table.unpack(htmlColors[_r])
-    _a = 255
+    _a = L5_env.color_max
   else
     error("Color '" .. _r .. "' not found in htmlColors table") 
   end
@@ -325,10 +325,10 @@ function toColor(_r,_g,_b,_a)
     _r,_g,_b = _r,_r,_r
   elseif _a == nil then
     -- three arguments = r,g,b
-    _a = 255
+    _a = L5_env.color_max  
   end
 
-  return {_r/255, _g/255, _b/255, _a/255}
+  return {_r/L5_env.color_max, _g/L5_env.color_max, _b/L5_env.color_max, _a/L5_env.color_max}
 end
 
 function hexToRGB(hex)
@@ -431,13 +431,15 @@ function define_env_globals()
   L5_env = L5_env or {} -- Initialize L5_env if it doesn't exist
   L5_env.drawing = true
   -- drawing mode state
-  L5_env.global_degree_mode = RADIANS --also: DEGREES
-  L5_env.global_rect_mode = CORNER --also: CORNERS, CENTER
-  L5_env.global_ellipse_mode = CENTER
-  L5_env.global_image_mode = CORNER
-  L5_env.global_fill_mode="fill"   --also: "line"
-  L5_env.global_stroke_color = {0,0,0}
+  L5_env.degree_mode = RADIANS --also: DEGREES
+  L5_env.rect_mode = CORNER --also: CORNERS, CENTER
+  L5_env.ellipse_mode = CENTER
+  L5_env.image_mode = CORNER
+  -- global color state 
+  L5_env.fill_mode="fill"   --also: "line"
+  L5_env.stroke_color = {0,0,0}
   L5_env.currentTint = {1, 1, 1, 1} -- Default: no tint white
+  L5_env.color_max = 255
   -- global key state
   L5_env.keyWasPressed = false
   L5_env.keyWasReleased = false
@@ -731,7 +733,7 @@ function translate(_x,_y)
 end
 
 function rotate(_angle)
-  if L5_env.global_degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then -- Changed
     love.graphics.rotate(_angle)
   else
     love.graphics.rotate(radians(_angle))
@@ -769,28 +771,28 @@ end
 -------------------- 2D Primitives -------------------
 
 function rect(_a,_b,_c,_d)
-  if L5_env.global_rect_mode=="CORNERS" then -- Changed --x1,y1,x2,y2
-    love.graphics.rectangle(L5_env.global_fill_mode,_a,_b,_c-_a,_d-_b) -- Changed
+  if L5_env.rect_mode=="CORNERS" then -- Changed --x1,y1,x2,y2
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.global_rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.global_fill_mode, _a-_c/2,_b-_d/2,_c,_d) -- Changed
+  elseif L5_env.rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.global_rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r1*2,r2*2
-    love.graphics.rectangle(L5_env.global_fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) -- Changed
+  elseif L5_env.rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r1*2,r2*2
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
     love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.global_fill_mode,_a,_b,_c,_d) -- Changed
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
   end
@@ -798,22 +800,22 @@ end
 
 function square(_a,_b,_c)
   --CORNERS mode doesn't exist for squares
-  if L5_env.global_rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.global_fill_mode, _a-_c/2,_b-_c/2,_c,_c) -- Changed
+  if L5_env.rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.global_rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r*2,r*2
-    love.graphics.rectangle(L5_env.global_fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) -- Changed
+  elseif L5_env.rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r*2,r*2
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
     love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.global_fill_mode,_a,_b,_c,_c) -- Changed
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.rectangle("line",_a,_b,_c,_c)
     love.graphics.setColor(r, g, b, a)
   end
@@ -821,28 +823,28 @@ end
 
 function ellipse(_a,_b,_c,_d)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  if L5_env.global_ellipse_mode=="RADIUS" then -- Changed
-    love.graphics.ellipse(L5_env.global_fill_mode,_a,_b,_c,_d) -- Changed
+  if L5_env.ellipse_mode=="RADIUS" then -- Changed
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.ellipse("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.global_ellipse_mode=="CORNER" then -- Changed
-    love.graphics.ellipse(L5_env.global_fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) -- Changed
+  elseif L5_env.ellipse_mode=="CORNER" then -- Changed
+    love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.global_ellipse_mode=="CORNERS" then -- Changed
-    love.graphics.ellipse(L5_env.global_fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) -- Changed
+  elseif L5_env.ellipse_mode=="CORNERS" then -- Changed
+    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
     love.graphics.setColor(r, g, b, a)
   else --default CENTER x,y,w/2,h/2
-    love.graphics.ellipse(L5_env.global_fill_mode,_a,_b,_c/2,_d/2) -- Changed
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_d/2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.ellipse("line",_a,_b,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
   end
@@ -850,26 +852,26 @@ end
 
 function circle(_a,_b,_c)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  love.graphics.ellipse(L5_env.global_fill_mode,_a,_b,_c/2,_c/2) -- Changed
+  love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.ellipse("line",_a,_b,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
 end
 
 function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! a quad implies an applied texture
   --for other # of sides, use processing api call createShape
-  love.graphics.polygon(L5_env.global_fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) -- Changed
+  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4)
     love.graphics.setColor(r, g, b, a)
 end
 
 function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
-  love.graphics.polygon(L5_env.global_fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) -- Changed
+  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) -- Changed
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3)
     love.graphics.setColor(r, g, b, a)
 end
@@ -911,13 +913,13 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
   
   if is_full_circle then
     -- Draw a full ellipse
-    if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" then
+    if L5_env.fill_mode and L5_env.fill_mode ~= "line" then
       love.graphics.ellipse("fill", center_x, center_y, radius_x, radius_y)
     end
     
-    if L5_env.global_stroke_color then
+    if L5_env.stroke_color then
       local r, g, b, a = love.graphics.getColor()
-      love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+      love.graphics.setColor(table.unpack(L5_env.stroke_color))
       love.graphics.ellipse("line", center_x, center_y, radius_x, radius_y)
       love.graphics.setColor(r, g, b, a)
     end
@@ -927,13 +929,13 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
       -- Circular arc - use Love2D's built-in arc function
       local radius = radius_x
       
-      if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" then
+      if L5_env.fill_mode and L5_env.fill_mode ~= "line" then
         love.graphics.arc("fill", arctype, center_x, center_y, radius, start_norm, start_norm + arc_span)
       end
       
-      if L5_env.global_stroke_color then
+      if L5_env.stroke_color then
         local r, g, b, a = love.graphics.getColor()
-        love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+        love.graphics.setColor(table.unpack(L5_env.stroke_color))
         love.graphics.arc("line", arctype, center_x, center_y, radius, start_norm, start_norm + arc_span)
         love.graphics.setColor(r, g, b, a)
       end
@@ -969,7 +971,7 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
   -- "open" type doesn't need modification
   
   -- Draw filled arc
-  if L5_env.global_fill_mode and L5_env.global_fill_mode ~= "line" and #vertices >= 6 then
+  if L5_env.fill_mode and L5_env.fill_mode ~= "line" and #vertices >= 6 then
     if arctype == "pie" then
       love.graphics.polygon("fill", vertices)
     elseif arctype == "chord" then
@@ -979,9 +981,9 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
   end
   
   -- Draw stroke
-  if L5_env.global_stroke_color then
+  if L5_env.stroke_color then
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color))
+    love.graphics.setColor(table.unpack(L5_env.stroke_color))
     
     if arctype == "open" then
       -- Just draw the arc line
@@ -1004,7 +1006,7 @@ function point(_x,_y)
   --Points unaffected by love.graphics.scale - size is always in pixels
   --a line is drawn in the stroke color
   local r, g, b, a = love.graphics.getColor()
-  love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+  love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
   love.graphics.points(_x,_y)
   love.graphics.setColor(r, g, b, a)
 end
@@ -1012,7 +1014,7 @@ end
 function line(_x1,_y1,_x2,_y2)
   --a line is drawn in the stroke color
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.global_stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
     love.graphics.line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
@@ -1032,7 +1034,7 @@ end
 function color(...)
     local args = {...}
     if #args == 3 then
-        return toColor(args[1], args[2], args[3], 255)
+        return toColor(args[1], args[2], args[3], L5_env.color_max)
     elseif #args == 4 then
         return toColor(args[1], args[2], args[3], args[4])
     elseif #args == 2 then
@@ -1045,19 +1047,19 @@ function color(...)
 end
 
 function alpha(_color)
-  return _color[4]*255
+  return _color[4]*L5_env.color_max
 end
 
 function red(_color)
-  return _color[1]*255
+  return _color[1]*L5_env.color_max
 end
 
 function green(_color)
-  return _color[2]*255
+  return _color[2]*L5_env.color_max
 end
 
 function blue(_color)
-  return _color[3]*255
+  return _color[3]*L5_env.color_max
 end
 
 ----------------------- COLOR ------------------------
@@ -1213,19 +1215,19 @@ htmlColors = {
 }
 
 function rectMode(_mode)
-  L5_env.global_rect_mode=_mode -- Changed
+  L5_env.rect_mode=_mode -- Changed
 end
 
 function ellipseMode(_mode)
-  L5_env.global_ellipse_mode=_mode -- Changed
+  L5_env.ellipse_mode=_mode -- Changed
 end
 
 function imageMode(_mode)
-  L5_env.global_image_mode=_mode -- Changed
+  L5_env.image_mode=_mode -- Changed
 end
 
 function noFill()
-  L5_env.global_fill_mode="line" -- Changed --fill is transparent
+  L5_env.fill_mode="line" -- Changed --fill is transparent
 end
 
 function strokeWeight(_w)
@@ -1252,11 +1254,11 @@ function smooth()
 end
 
 function stroke(_r,_g,_b,_a)
-  L5_env.global_stroke_color = toColor(_r,_g,_b,_a) -- Changed
+  L5_env.stroke_color = toColor(_r,_g,_b,_a) -- Changed
 end
 
 function noStroke()
-  L5_env.global_stroke_color={0,0,0,0} -- Changed
+  L5_env.stroke_color={0,0,0,0} -- Changed
 end
 
 -------------------- VERTEX -------------------------
@@ -1377,9 +1379,9 @@ end
 
 function angleMode(_mode)
     if not _mode then
-        return L5_env.global_degree_mode -- Changed
+        return L5_env.degree_mode -- Changed
     elseif _mode == RADIANS or _mode == DEGREES then
-        L5_env.global_degree_mode = _mode -- Changed
+        L5_env.degree_mode = _mode -- Changed
     end
 end
 
@@ -1392,7 +1394,7 @@ function radians(_angle)
 end
 
 function sin(_angle)
-  if L5_env.global_degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then -- Changed
     return math.sin(_angle)
   else
     return math.sin(radians(_angle))
@@ -1400,7 +1402,7 @@ function sin(_angle)
 end
 
 function cos(_angle)
-  if L5_env.global_degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then -- Changed
     return math.cos(_angle)
   else
     return math.cos(radians(_angle))
@@ -1408,7 +1410,7 @@ function cos(_angle)
 end
 
 function tan(_angle)
-  if L5_env.global_degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then -- Changed
     return math.tan(_angle)
   else
     return math.tan(radians(_angle))
@@ -1572,7 +1574,7 @@ function image(_img,_x,_y,_w,_h)
   local xscale = _w and (_w/originalWidth) or 1
   local yscale = _h and (_h/originalHeight) or xscale
 
-  if L5_env.global_image_mode==CENTER then -- Changed
+  if L5_env.image_mode==CENTER then -- Changed
     ox=originalWidth/2
     oy=originalHeight/2
   else --TODO: add in CORNERS mode
@@ -1588,13 +1590,13 @@ function tint(r, g, b, a)
         L5_env.currentTint = {1, 1, 1, 1} -- Changed
     elseif g == nil then
         -- One argument = grayscale
-        local gray = r / 255
+        local gray = r / L5_env.color_max
         L5_env.currentTint = {gray, gray, gray, 1} -- Changed
     elseif a == nil then
-        L5_env.currentTint = {r/255, g/255, b/255, 1} -- Changed
+        L5_env.currentTint = {r/L5_env.color_max, g/L5_env.color_max, b/L5_env.color_max, 1} -- Changed
     else
-        -- Four arguments = RGBA (assume 0-255 range)
-        L5_env.currentTint = {r/255, g/255, b/255, a/255} -- Changed
+        -- Four arguments = RGBA 
+        L5_env.currentTint = {r/L5_env.color_max, g/L5_env.color_max, b/L5_env.color_max, a/L5_env.color_max} -- Changed
     end
 end
 
