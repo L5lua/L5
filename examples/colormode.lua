@@ -31,7 +31,7 @@ function setup()
 
   -- Hue, saturation, and brightness values
   -- On scales of 0-360°, 0-100%, and 0-100% respectively
-  --colorMode(HSB)
+  colorMode(HSB)
 
   -- Light green
   fill(120, 70, 90)
@@ -52,7 +52,7 @@ function setup()
   -- This is similar to HSB (above),
   -- but whereas 100% brightness is the brightest version of that hue,
   -- 100% lightness is always white.
-  --colorMode(HSL)
+  colorMode(HSL)
 
   -- Light green
   fill(120, 70, 90)
@@ -65,7 +65,7 @@ function setup()
   push()
 
   -- Switch back to red, green, blue color mode
-  --colorMode(RGB)
+  colorMode(RGB)
 
   -- Navy blue
   stroke(20, 10, 80)
@@ -85,6 +85,6 @@ function setup()
   stroke('#EFD8D8')
 
   -- Draw without inner color
-  --noFill();
+  noFill();
   quad(500, 250, 550, 200, 700, 300, 650, 350)
 end

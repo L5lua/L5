@@ -161,7 +161,7 @@
 * [X] blue() (gets blue aka 3rd value of a color)
 * [X] red() (gets red value of a color)
 * [ ] brightness() (extracts HSB brightness value of a color)
-* [X] color() (creates a color object)
+* [X] color() (creates a color object) --G, G,A R,G,B  R,G,B,A or html color name. affected by colormode.
 * [X] green() (gets the green value of a color)
 * [ ] hue() (gets the hue value of a color)
 * [ ] lerpColor()
@@ -170,14 +170,15 @@
 * [ ] saturation()
 
 ### Setting
-* [X] background()
+* [X] background() --G, G,A R,G,B  R,G,B,A or html color name. affected by colorMode.
 * [X] clear()
-* [ ] HSB (see https://www.love2d.org/wiki/HSV_color hsv=hsb)
-* [ ] colormode
-* [X] fill() - G, G,A R,G,B  R,G,B,A or html color name
+* [X] HSB --mode, a constant
+* [X] HSL --mode, a constant
+* [X] colorMode() --default: RGB. alternately: HSB, HSL. optional second val sets max color values.
+* [X] fill() - G, G,A R,G,B  R,G,B,A or html color name. affected by colorMode.
 * [X] noFill()
 * [X] noStroke()
-* [X] stroke()
+* [X] stroke() --G, G,A R,G,B  R,G,B,A or html color name. affected by colorMode.
 
 ### Transform
 * [X] push() (saves previous drawing style settings)
