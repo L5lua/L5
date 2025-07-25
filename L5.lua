@@ -1514,8 +1514,8 @@ end
 --------------------- TYPOGRAPHY ---------------------
 
 function text(_msg,_x,_y)
-  local x_offset
-  local y_offset
+  local x_offset=0
+  local y_offset=0
   
   -- set x-offset
   if L5_env.textAlignX==LEFT then
