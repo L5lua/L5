@@ -279,7 +279,8 @@ function size(_w, _h)
 end
 
 function fullscreen(_bool)
-  if _bool then
+  --only switch to fullscreen if true and not already fullscreen
+  if _bool and not love.window.getFullscreen() then
     love.window.setFullscreen(_bool)
   else
     return love.window.getFullscreen()

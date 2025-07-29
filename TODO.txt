@@ -1,20 +1,55 @@
 # TODO
 
-## Shapes
+## Environment
 
+* [X] fullscreen seems currently broken. called inside L5 at wrong time or related to setup events drawing call rewrite?
 * [ ] error detection with useful error messages
-* [ ] test and fix arc to be consistent with p5 arc
-* [X] line should be stroke color
 * [X] fix flickering on event handling - graphics in mousePressed(), keyTyped(), keyReleased() double draw call and cause flickering i think
+* [X] debug mouseClicked - probably needs to be added to draw after mousePressed
+* [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
+* [ ] check transforms reset at correct time? see the rotating square example.
+
+## Color
+
+* [X] line should be stroke color
 * [X] html color names
 * [X] Hex code colors
-* [ ] debug mouseClicked - probably needs to be added to draw after mousePressed
 * [ ] add [HSB](https://www.love2d.org/wiki/HSV_color) and [HSL](https://www.love2d.org/wiki/HSL_color)
-  * [ ] add ability to set max value per val in table (RGBA, HSLA, HSBA)
-* [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
+  * [X] add ability to set max value per val in table (RGBA, HSLA, HSBA)
+* [ ] using html color name should assume RGB mode despite actual global L5_env.color_mode (or other way to handle this since stored as RGB value tables, values max 255)
+* [X] colorMode should also allow setting individual max values for RGBA (or HSL/HSB) etc
+* [X] fix: noFill seems to turn off all fill going forward, overriding fill()
+* [ ] tint didn't seem to work when specified as 2-values: grayness,alpha
+
+## Shapes
+
+* [ ] test and fix arc to be consistent with p5 arc
+* [ ] ellipseMode doesn't seem to work? 
+
+## Typography
+
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
+
+## Events
+
+* [X] error on mouseWheel() function.
+
+## Documentation
+
+* [ ] Build website and reference
+  * [ ] landing page
+  * [ ] download
+  * [ ] reference index and pages
+  * [ ] tutorials
+  * [ ] examples pages
+  * [ ] about
+
+## Integration into Processing IDE
+
+* [ ] add new L5 mode to Processing IDE
 
 ## Libraries
 
 * [ ] camera
 * [ ] sound
+
