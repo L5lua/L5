@@ -7,7 +7,7 @@
 * [X] fix flickering on event handling - graphics in mousePressed(), keyTyped(), keyReleased() double draw call and cause flickering i think
 * [X] debug mouseClicked - probably needs to be added to draw after mousePressed
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
-* [ ] check transforms reset at correct time? see the rotating square example.
+* [X] check transforms reset at correct time? see the rotating square example.
 
 ## Color
 
@@ -24,7 +24,7 @@
 ## Shapes
 
 * [ ] test and fix arc to be consistent with p5 arc
-* [ ] ellipseMode doesn't seem to work? 
+* [X] ellipseMode doesn't seem to work? 
 
 ## Typography
 

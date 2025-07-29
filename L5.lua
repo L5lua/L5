@@ -906,25 +906,25 @@ end
 -------------------- 2D Primitives -------------------
 
 function rect(_a,_b,_c,_d)
-  if L5_env.rect_mode=="CORNERS" then --x1,y1,x2,y2
+  if L5_env.rect_mode==CORNERS then --x1,y1,x2,y2
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="CENTER" then --x-w/2,y-h/2,w,h
+  elseif L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="RADIUS" then --x-w/2,y-h/2,r1*2,r2*2
+  elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r1*2,r2*2
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
     love.graphics.setColor(r, g, b, a)
-  else --CORNER default x,y,w,h
+  elseif L5_env.rect_mode==CORNER then --CORNER default x,y,w,h
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
@@ -935,19 +935,19 @@ end
 
 function square(_a,_b,_c)
   --CORNERS mode doesn't exist for squares
-  if L5_env.rect_mode=="CENTER" then --x-w/2,y-h/2,w,h
+  if L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="RADIUS" then --x-w/2,y-h/2,r*2,r*2
+  elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r*2,r*2
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
     love.graphics.setColor(r, g, b, a)
-  else --CORNER default x,y,w,h
+  elseif L5_env.rect_mode==CORNER then -- CORNER default x,y,w,h
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
@@ -958,19 +958,19 @@ end
 
 function ellipse(_a,_b,_c,_d)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  if L5_env.ellipse_mode=="RADIUS" then 
+  if L5_env.ellipse_mode==RADIUS then 
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.ellipse_mode=="CORNER" then 
+  elseif L5_env.ellipse_mode==CORNER then 
     love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.ellipse_mode=="CORNERS" then 
+  elseif L5_env.ellipse_mode==CORNERS then 
     love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
@@ -986,13 +986,34 @@ function ellipse(_a,_b,_c,_d)
 end
 
 function circle(_a,_b,_c)
---love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) 
+  if L5_env.ellipse_mode==RADIUS then 
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_c) 
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.ellipse("line",_a,_b,_c,_d)
+    love.graphics.setColor(r, g, b, a)
+  elseif L5_env.ellipse_mode==CORNER then 
+    love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_c/2,_c/2,_c/2) 
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.ellipse("line",_a+_c/2,_b+_c/2,_c/2,_c/2)
+    love.graphics.setColor(r, g, b, a)
+  elseif L5_env.ellipse_mode==CORNERS then 
+    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2) 
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2)
+    love.graphics.setColor(r, g, b, a)
+  elseif L5_env.ellipse_mode==CENTER then --default CENTER x,y,w/2,h/2
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
+  end
 end
+
+
 
 function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! a quad implies an applied texture
   --for other # of sides, use processing api call createShape
