@@ -108,13 +108,13 @@ function love.load()
   -- Create double buffers
   local w, h = love.graphics.getDimensions()
 displayWidth, displayHeight = love.window.getDesktopDimensions()
-  L5_env.backBuffer = love.graphics.newCanvas(w, h) -- Changed
-  L5_env.frontBuffer = love.graphics.newCanvas(w, h) -- Changed
+  L5_env.backBuffer = love.graphics.newCanvas(w, h) 
+  L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
 
   -- Clear both buffers initially
-  love.graphics.setCanvas(L5_env.backBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.backBuffer) 
   love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
-  love.graphics.setCanvas(L5_env.frontBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.frontBuffer) 
   love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
   love.graphics.setCanvas()
 
@@ -137,7 +137,7 @@ function love.draw()
 
   local isPressed = love.mouse.isDown(1) or love.mouse.isDown(2) or love.mouse.isDown(3)
 
-  if isPressed and not L5_env.wasPressed then -- Changed
+  if isPressed and not L5_env.wasPressed then 
   -- Mouse was just pressed this frame
 
   if mousePressed ~= nil then mousePressed() end
@@ -222,30 +222,30 @@ function love.mousemoved(x,y,dx,dy,istouch)
 end
 
 function love.keypressed(key, scancode, isrepeat)
-  L5_env.keyWasPressed = true -- Changed
+  L5_env.keyWasPressed = true 
 end
 
 function love.keyreleased(key)
-  L5_env.keyWasReleased = true -- Changed
+  L5_env.keyWasReleased = true 
 end
 
 function love.textinput(_text)
   key = _text
-  L5_env.keyWasTyped = true -- Changed
+  L5_env.keyWasTyped = true 
 end
 
 function love.resize(w, h)
   -- Recreate buffers when window is resized
-  if L5_env.backBuffer then L5_env.backBuffer:release() end -- Changed
-  if L5_env.frontBuffer then L5_env.frontBuffer:release() end -- Changed
+  if L5_env.backBuffer then L5_env.backBuffer:release() end 
+  if L5_env.frontBuffer then L5_env.frontBuffer:release() end 
 
-  L5_env.backBuffer = love.graphics.newCanvas(w, h) -- Changed
-  L5_env.frontBuffer = love.graphics.newCanvas(w, h) -- Changed
+  L5_env.backBuffer = love.graphics.newCanvas(w, h) 
+  L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
 
   -- Clear new buffers
-  love.graphics.setCanvas(L5_env.backBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.backBuffer) 
   love.graphics.clear(1, 1, 1, 1)
-  love.graphics.setCanvas(L5_env.frontBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.frontBuffer) 
   love.graphics.clear(1, 1, 1, 1)
   love.graphics.setCanvas()
 
@@ -262,16 +262,16 @@ function size(_w, _h)
   love.window.setMode(_w, _h)
 
   -- Recreate buffers for new size
-  if L5_env.backBuffer then L5_env.backBuffer:release() end -- Changed
-  if L5_env.frontBuffer then L5_env.frontBuffer:release() end -- Changed
+  if L5_env.backBuffer then L5_env.backBuffer:release() end 
+  if L5_env.frontBuffer then L5_env.frontBuffer:release() end 
 
-  L5_env.backBuffer = love.graphics.newCanvas(_w, _h) -- Changed
-  L5_env.frontBuffer = love.graphics.newCanvas(_w, _h) -- Changed
+  L5_env.backBuffer = love.graphics.newCanvas(_w, _h) 
+  L5_env.frontBuffer = love.graphics.newCanvas(_w, _h) 
 
   -- Clear new buffers
-  love.graphics.setCanvas(L5_env.backBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.backBuffer) 
   love.graphics.clear(0.5, 0.5, 0.5, 1)
-  love.graphics.setCanvas(L5_env.frontBuffer) -- Changed
+  love.graphics.setCanvas(L5_env.frontBuffer) 
   love.graphics.clear(0.5, 0.5, 0.5, 1)
   love.graphics.setCanvas()
 
@@ -868,7 +868,7 @@ function translate(_x,_y)
 end
 
 function rotate(_angle)
-  if L5_env.degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then 
     love.graphics.rotate(_angle)
   else
     love.graphics.rotate(radians(_angle))
@@ -906,28 +906,28 @@ end
 -------------------- 2D Primitives -------------------
 
 function rect(_a,_b,_c,_d)
-  if L5_env.rect_mode=="CORNERS" then -- Changed --x1,y1,x2,y2
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b) -- Changed
+  if L5_env.rect_mode=="CORNERS" then --x1,y1,x2,y2
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d) -- Changed
+  elseif L5_env.rect_mode=="CENTER" then --x-w/2,y-h/2,w,h
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r1*2,r2*2
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) -- Changed
+  elseif L5_env.rect_mode=="RADIUS" then --x-w/2,y-h/2,r1*2,r2*2
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
     love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d) -- Changed
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
   end
@@ -935,22 +935,22 @@ end
 
 function square(_a,_b,_c)
   --CORNERS mode doesn't exist for squares
-  if L5_env.rect_mode=="CENTER" then -- Changed --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c) -- Changed
+  if L5_env.rect_mode=="CENTER" then --x-w/2,y-h/2,w,h
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.rect_mode=="RADIUS" then -- Changed --x-w/2,y-h/2,r*2,r*2
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) -- Changed
+  elseif L5_env.rect_mode=="RADIUS" then --x-w/2,y-h/2,r*2,r*2
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
     love.graphics.setColor(r, g, b, a)
   else --CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c) -- Changed
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c,_c)
     love.graphics.setColor(r, g, b, a)
   end
@@ -958,28 +958,28 @@ end
 
 function ellipse(_a,_b,_c,_d)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  if L5_env.ellipse_mode=="RADIUS" then -- Changed
-    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) -- Changed
+  if L5_env.ellipse_mode=="RADIUS" then 
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.ellipse_mode=="CORNER" then -- Changed
-    love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) -- Changed
+  elseif L5_env.ellipse_mode=="CORNER" then 
+    love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
-  elseif L5_env.ellipse_mode=="CORNERS" then -- Changed
-    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) -- Changed
+  elseif L5_env.ellipse_mode=="CORNERS" then 
+    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
     love.graphics.setColor(r, g, b, a)
   else --default CENTER x,y,w/2,h/2
-    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_d/2) -- Changed
+    love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_d/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
   end
@@ -987,26 +987,26 @@ end
 
 function circle(_a,_b,_c)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
-  love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) -- Changed
+  love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
 end
 
 function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! a quad implies an applied texture
   --for other # of sides, use processing api call createShape
-  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) -- Changed
+  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4)
     love.graphics.setColor(r, g, b, a)
 end
 
 function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
-  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) -- Changed
+  love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3)
     love.graphics.setColor(r, g, b, a)
 end
@@ -1141,7 +1141,7 @@ function point(_x,_y)
   --Points unaffected by love.graphics.scale - size is always in pixels
   --a line is drawn in the stroke color
   local r, g, b, a = love.graphics.getColor()
-  love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+  love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
   love.graphics.points(_x,_y)
   love.graphics.setColor(r, g, b, a)
 end
@@ -1149,14 +1149,14 @@ end
 function line(_x1,_y1,_x2,_y2)
   --a line is drawn in the stroke color
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) -- Changed
+    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
     love.graphics.line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
 
 function background(_r,_g,_b,_a)
   love.graphics.clear(table.unpack(toColor(_r,_g,_b,_a)))
-  L5_env.clearscreen = true -- Changed
+  L5_env.clearscreen = true 
 end
 
 function colorMode(_mode, _max)
@@ -1363,19 +1363,19 @@ htmlColors = {
 }
 
 function rectMode(_mode)
-  L5_env.rect_mode=_mode -- Changed
+  L5_env.rect_mode=_mode 
 end
 
 function ellipseMode(_mode)
-  L5_env.ellipse_mode=_mode -- Changed
+  L5_env.ellipse_mode=_mode 
 end
 
 function imageMode(_mode)
-  L5_env.image_mode=_mode -- Changed
+  L5_env.image_mode=_mode 
 end
 
 function noFill()
-  L5_env.fill_mode="line" -- Changed --fill is transparent
+  L5_env.fill_mode="line" 
 end
 
 function strokeWeight(_w)
@@ -1402,11 +1402,11 @@ function smooth()
 end
 
 function stroke(_r,_g,_b,_a)
-  L5_env.stroke_color = toColor(_r,_g,_b,_a) -- Changed
+  L5_env.stroke_color = toColor(_r,_g,_b,_a) 
 end
 
 function noStroke()
-  L5_env.stroke_color={0,0,0,0} -- Changed
+  L5_env.stroke_color={0,0,0,0} 
 end
 
 -------------------- VERTEX -------------------------
@@ -1527,9 +1527,9 @@ end
 
 function angleMode(_mode)
     if not _mode then
-        return L5_env.degree_mode -- Changed
+        return L5_env.degree_mode 
     elseif _mode == RADIANS or _mode == DEGREES then
-        L5_env.degree_mode = _mode -- Changed
+        L5_env.degree_mode = _mode 
     end
 end
 
@@ -1542,7 +1542,7 @@ function radians(_angle)
 end
 
 function sin(_angle)
-  if L5_env.degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then 
     return math.sin(_angle)
   else
     return math.sin(radians(_angle))
@@ -1550,7 +1550,7 @@ function sin(_angle)
 end
 
 function cos(_angle)
-  if L5_env.degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then 
     return math.cos(_angle)
   else
     return math.cos(radians(_angle))
@@ -1558,7 +1558,7 @@ function cos(_angle)
 end
 
 function tan(_angle)
-  if L5_env.degree_mode == RADIANS then -- Changed
+  if L5_env.degree_mode == RADIANS then 
     return math.tan(_angle)
   else
     return math.tan(radians(_angle))
@@ -1641,7 +1641,7 @@ end
 
 function frameRate(_inp)
   if _inp then --change frameRate
-    L5_env.framerate = _inp -- Changed
+    L5_env.framerate = _inp 
   else --get frameRate
     return love.timer.getFPS( )
   end
@@ -1649,16 +1649,16 @@ end
 
 function noLoop()
   love.draw = function() end
-  L5_env.drawing = false -- Changed
+  L5_env.drawing = false 
 end
 
 function loop()
   love.draw = draw()
-  L5_env.drawing = true -- Changed
+  L5_env.drawing = true 
 end
 
 function isLooping()
-  if L5_env.drawing then -- Changed
+  if L5_env.drawing then 
     return true
   else
     return false
@@ -1722,7 +1722,7 @@ function image(_img,_x,_y,_w,_h)
   local xscale = _w and (_w/originalWidth) or 1
   local yscale = _h and (_h/originalHeight) or xscale
 
-  if L5_env.image_mode==CENTER then -- Changed
+  if L5_env.image_mode==CENTER then 
     ox=originalWidth/2
     oy=originalHeight/2
   else --TODO: add in CORNERS mode
@@ -1735,21 +1735,21 @@ end
 function tint(r, g, b, a)
     if r == nil then
         -- No arguments = no tint (white)
-        L5_env.currentTint = {1, 1, 1, 1} -- Changed
+        L5_env.currentTint = {1, 1, 1, 1} 
     elseif g == nil then
         -- One argument = grayscale
         local gray = r / L5_env.color_max[1]
-        L5_env.currentTint = {gray, gray, gray, 1} -- Changed
+        L5_env.currentTint = {gray, gray, gray, 1} 
     elseif a == nil then
-        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], 1} -- Changed
+        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], 1} 
     else
         -- Four arguments = RGBA 
-        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], a/L5_env.color_max[4]} -- Changed
+        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], a/L5_env.color_max[4]} 
     end
 end
 
 function noTint()
-    L5_env.currentTint = {1, 1, 1, 1} -- Changed
+    L5_env.currentTint = {1, 1, 1, 1} 
 end
 
 -- Override love.graphics.draw to automatically apply tint
@@ -1759,7 +1759,7 @@ function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
 
     -- Apply tint
-    love.graphics.setColor(L5_env.currentTint[1], L5_env.currentTint[2], L5_env.currentTint[3], L5_env.currentTint[4]) -- Changed
+    love.graphics.setColor(L5_env.currentTint[1], L5_env.currentTint[2], L5_env.currentTint[3], L5_env.currentTint[4]) 
 
     -- Call original draw function
     originalDraw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
