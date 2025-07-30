@@ -236,3 +236,8 @@
 * [X] save()
 * [X] cursor() (see https://www.love2d.org/wiki/love.mouse.setCursor )
 * [X] noCursor()
+
+### Pixels
+
+* [X] filter() --implemented basic implementation with shaders
+* [ ] -- remaining pixel functions not at this time
