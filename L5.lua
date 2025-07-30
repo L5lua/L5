@@ -1500,7 +1500,7 @@ end
 function random(_a,_b)
   if _b then
     return love.math.random()*(_b-_a)+_a
-  else
+  elseif _a then
     if type(_a) == 'table' then
       -- more robust in case a table isn't ordered by integers
       local keyset = {}
@@ -1511,6 +1511,8 @@ function random(_a,_b)
     elseif type(_a) == 'number' then
       return love.math.random()*_a
     end
+  else
+    return love.math.random()
   end
 end
 
