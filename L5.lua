@@ -68,34 +68,45 @@ function love.run()
         if love.draw then love.draw() end
       end
       
-      -- Handle pending mouse events in drawing context
-      if L5_env.pendingMouseClicked then
-        if mouseClicked then
-          mouseClicked(L5_env.pendingMouseClicked.x, L5_env.pendingMouseClicked.y, L5_env.pendingMouseClicked.button)
-        end
-        L5_env.pendingMouseClicked = nil
-      end
+	-- Handle pending mouse events in drawing context
+	if L5_env.pendingMouseClicked then
+	  if mouseClicked then
+	    mouseClicked(L5_env.pendingMouseClicked.x, L5_env.pendingMouseClicked.y, L5_env.pendingMouseClicked.button)
+	  end
+	  L5_env.pendingMouseClicked = nil
+	end
       
-      if L5_env.pendingMouseReleased then
-        if mouseReleased then
-          mouseReleased(L5_env.pendingMouseReleased.x, L5_env.pendingMouseReleased.y, L5_env.pendingMouseReleased.button)
-        end
-        L5_env.pendingMouseReleased = nil
+	if L5_env.pendingMouseReleased then
+	  if mouseReleased then
+	    mouseReleased(L5_env.pendingMouseReleased.x, L5_env.pendingMouseReleased.y, L5_env.pendingMouseReleased.button)
+	  end
+	  L5_env.pendingMouseReleased = nil
+	end
+	
+	-- Reset to screen and draw the back buffer
+	love.graphics.setCanvas()
+	if L5_env.backBuffer then
+
+	  if L5_env.filterOn then
+	    love.graphics.setShader(L5_env.filter)
+	  end
+
+	  love.graphics.draw(L5_env.backBuffer, 0, 0)
+
+	  if L5_env.filterOn then
+	    love.graphics.setShader()
+	    L5_env.filterOn = false
+	  end
+
+	love.graphics.present()
       end
-      
-      -- Reset to screen and draw the back buffer
-      love.graphics.setCanvas()
-      if L5_env.backBuffer then
-        love.graphics.draw(L5_env.backBuffer, 0, 0)
-      end
-      love.graphics.present()
-    end
     
-    if love.timer then
-      if L5_env.framerate then --user-specified framerate
-        love.timer.sleep(1/L5_env.framerate)
-      else --default framerate
-        love.timer.sleep(0.001)
+      if love.timer then
+	if L5_env.framerate then --user-specified framerate
+	  love.timer.sleep(1/L5_env.framerate)
+	else --default framerate
+	  love.timer.sleep(0.001)
+	end
       end
     end
   end
@@ -539,14 +550,22 @@ function defaults()
   RGB = "rgb"
   HSB = "hsb"
   HSL = "hsl"
-  PI=math.pi
-  HALF_PI=math.pi/2
+  PI = math.pi
+  HALF_PI = math.pi/2
   QUARTER_PI=math.pi/4
-  TWO_PI=2*math.pi
-  TAU=TWO_PI
-  PIE="pie"
-  OPEN="open"
-  CHORD="closed"
+  TWO_PI = 2 * math.pi
+  TAU = TWO_PI
+  PIE = "pie"
+  OPEN = "open"
+  CHORD = "closed"
+  -- filters (shaders)
+  GRAY = "gray"
+  THRESHOLD = "threshold"
+  INVERT = "invert"
+  POSTERIZE = "posterize"
+  BLUR = "blur"
+  ERODE = "erode"
+  DILATE = "dilate"
 
   -- global user vars - can be read by user but shouldn't be altered by user
   frameCount = 0
@@ -599,6 +618,9 @@ function define_env_globals()
   L5_env.currentFontSize = 12
   L5_env.textAlignX = LEFT
   L5_env.textAlignY = BASELINE
+  -- filters (shaders)
+  L5_env.filterOn = false
+  L5_env.filter = nil
 end
 
 ----------------------- INPUT -----------------------
@@ -1799,3 +1821,192 @@ end
 function noCursor()
   love.mouse.setVisible(false)
 end
+
+---------------------- Pixels ----------------------
+
+function filter(_name, _param)
+  if _name == GRAY then
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.grayscale
+  elseif _name == THRESHOLD then
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.threshold
+  elseif _name == INVERT then
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.invert
+  elseif _name == POSTERIZE then
+    if _param then
+      L5_filter.posterize:send("levels", _param)
+    end
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.posterize
+  elseif _name == BLUR then
+    if _param then
+      L5_filter.blur:send("blurSize", _param)
+    end
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.blur
+  elseif _name == ERODE then
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.erode
+  elseif _name == DILATE then
+    L5_env.filterOn = true 
+    L5_env.filter = L5_filter.dilate
+  else
+    error("Error: not a filter name.")
+  end
+end
+
+--- shaders
+L5_filter = {}
+L5_filter.grayscale = love.graphics.newShader([[
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
+    {
+        vec4 pixel = Texel(texture, texture_coords);
+        float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114)); // luminance formula
+        return vec4(gray, gray, gray, pixel.a) * color;
+    }
+]])
+
+--from https://www.love2d.org/forums/viewtopic.php?t=3733&start=300
+L5_filter.threshold = love.graphics.newShader([[
+extern float soft = 0.3;
+extern float threshold = 0.3;
+vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords )
+  {
+	float f = soft/2.0;
+	float a = threshold - f;
+	float b = threshold + f;
+
+	vec4 tx = Texel( texture, texture_coords );
+	float l = (tx.x + tx.y + tx.z) / 3.0;
+	vec3 col = vec3( smoothstep(a, b, l) );
+	
+	return vec4( col, 1 )*color;
+  }
+]])
+
+-- from https://www.reddit.com/r/love2d/comments/ee8n0j/how_to_make_inverted_colornegative_shader/fcaouw5/
+L5_filter.invert = love.graphics.newShader([[ 
+vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords) 
+  { 
+	vec4 col = texture2D( texture, texture_coords ); 
+	return vec4(1-col.r, 1-col.g, 1-col.b, col.a); 
+  } 
+]])
+
+L5_filter.posterize = love.graphics.newShader([[
+    uniform float levels = 4.0; // number of color levels per channel
+    
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec4 pixel = Texel(texture, texture_coords);
+        
+        // Posterize each color channel
+        pixel.r = floor(pixel.r * levels) / levels;
+        pixel.g = floor(pixel.g * levels) / levels;
+        pixel.b = floor(pixel.b * levels) / levels;
+        
+        return pixel * color;
+    }
+]])
+
+
+L5_filter.blur = love.graphics.newShader([[
+    uniform float blurSize = 2.0;
+    uniform vec2 textureSize;
+    
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec2 pixelSize = 1.0 / textureSize;
+        vec4 sum = vec4(0.0);
+        float totalWeight = 0.0;
+        
+        // 5-tap Gaussian approximation
+        vec2 offsets[5];
+        float weights[5];
+        
+        offsets[0] = vec2(0.0, 0.0);
+        offsets[1] = vec2(-blurSize * pixelSize.x, 0.0);
+        offsets[2] = vec2(blurSize * pixelSize.x, 0.0);
+        offsets[3] = vec2(0.0, -blurSize * pixelSize.y);
+        offsets[4] = vec2(0.0, blurSize * pixelSize.y);
+        
+        weights[0] = 0.4;
+        weights[1] = 0.15;
+        weights[2] = 0.15;
+        weights[3] = 0.15;
+        weights[4] = 0.15;
+        
+        for (int i = 0; i < 5; i++) {
+            sum += Texel(texture, texture_coords + offsets[i]) * weights[i];
+        }
+        
+        return sum * color;
+    }
+]])
+
+L5_filter.erode = love.graphics.newShader([[
+    uniform float strength = 0.5;
+    uniform vec2 textureSize;
+    
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec2 pixelSize = 1.0 / textureSize;
+        
+        vec4 centerColor = Texel(texture, texture_coords);
+        vec4 result = centerColor;
+        
+        // Simple 3x3 erosion with mixing
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if (x == 0 && y == 0) continue;
+                
+                vec2 offset = vec2(float(x), float(y)) * pixelSize * strength;
+                vec4 neighborColor = Texel(texture, texture_coords + offset);
+                
+                // Mix with darker neighbors
+                result = mix(result, min(result, neighborColor), 0.3);
+            }
+        }
+        
+        return result * color;
+    }
+]])
+
+L5_filter.dilate = love.graphics.newShader([[
+    uniform float strength = 1.0;
+    uniform float threshold = 0.1;
+    uniform vec2 textureSize;
+    
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec2 pixelSize = 1.0 / textureSize;
+        
+        vec4 centerColor = Texel(texture, texture_coords);
+        vec4 maxColor = centerColor;
+        
+        float centerBrightness = dot(centerColor.rgb, vec3(0.299, 0.587, 0.114));
+        
+        // Only dilate if center pixel is bright enough
+        if (centerBrightness > threshold) {
+            for (int x = -2; x <= 2; x++) {
+                for (int y = -2; y <= 2; y++) {
+                    if (x == 0 && y == 0) continue;
+                    
+                    float distance = sqrt(float(x*x + y*y));
+                    if (distance > strength) continue;
+                    
+                    vec2 offset = vec2(float(x), float(y)) * pixelSize;
+                    vec4 neighborColor = Texel(texture, texture_coords + offset);
+                    
+                    float neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+                    
+                    // Only consider bright neighbors
+                    if (neighborBrightness > threshold) {
+                        float weight = 1.0 - distance / (strength + 1.0);
+                        maxColor = max(maxColor, neighborColor * weight);
+                    }
+                }
+            }
+        }
+        
+        return maxColor * color;
+    }
+]])
