@@ -8,6 +8,8 @@
 * [X] debug mouseClicked - probably needs to be added to draw after mousePressed
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
 * [X] check transforms reset at correct time? see the rotating square example.
+* [ ] only call setup code once
+* [ ] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
 
 ## Color
 
@@ -27,6 +29,12 @@
 * [ ] test and fix arc to be consistent with p5 arc
 * [X] ellipseMode doesn't seem to work? 
 
+## Filter
+
+* [ ] Improve blur algorithm
+* [ ] review optional params for consistency with processing/p5
+* [ ] filter doesn't currently apply to setup, only in draw
+
 ## Typography
 
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
@@ -38,8 +46,8 @@
 ## Documentation
 
 * [ ] Build website and reference
-  * [ ] landing page
-  * [ ] download
+  * [X] landing page
+  * [x] download
   * [ ] reference index and pages
   * [ ] tutorials
   * [ ] examples pages

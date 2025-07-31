@@ -1436,8 +1436,9 @@ function strokeJoin(_style)
 end
 
 function noSmooth()
-  love.graphics.setDefaultFilter("nearest", "nearest", 1)
+  love.graphics.setDefaultFilter("nearest", "nearest", 8)
   love.graphics.setLineStyle('rough')
+
 end
 
 function smooth()
