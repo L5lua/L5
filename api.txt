@@ -135,7 +135,6 @@
 
 * [X] ellipseMode()
 * [X] rectMode()
-* [X] strokeCap() --default: ROUND, also SQUARE. no EXTEND.
 * [X] strokeWeight()
 * [X] noSmooth()
 * [X] smooth()

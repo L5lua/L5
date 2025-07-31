@@ -23,6 +23,7 @@
 * [X] fix: noFill seems to turn off all fill going forward, overriding fill()
 * [ ] tint didn't seem to work when specified as 2-values: grayness,alpha
 * [ ] test / fix ability to switch between filters
+* [ ] noSmooth() does not appear to work well? test more and improve
 
 ## Shapes
 
