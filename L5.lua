@@ -927,53 +927,54 @@ end
 
 -------------------- 2D Primitives -------------------
 
-function rect(_a,_b,_c,_d)
+function rect(_a,_b,_c,_d,_e)
   if L5_env.rect_mode==CORNERS then --x1,y1,x2,y2
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b) 
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b)
+    love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d) 
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d)
+    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r1*2,r2*2
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2) 
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c*2,_d*2,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2)
+    love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c*2,_d*2,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CORNER then --CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d) 
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line",_a,_b,_c,_d)
+    love.graphics.rectangle("line",_a,_b,_c,_d,_e,_e)
     love.graphics.setColor(r, g, b, a)
   end
 end
 
-function square(_a,_b,_c)
+function square(_a,_b,_c, _d)
+  --note: _d is not height! it is radius of rounded corners!
   --CORNERS mode doesn't exist for squares
   if L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c) 
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c)
+    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c,_d,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r*2,r*2
-    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2) 
+    love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c*2,_c*2,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2)
+    love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c*2,_c*2,_d,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CORNER then -- CORNER default x,y,w,h
-    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c) 
+    love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
-    love.graphics.rectangle("line",_a,_b,_c,_c)
+    love.graphics.rectangle("line",_a,_b,_c,_c,_d,_d)
     love.graphics.setColor(r, g, b, a)
   end
 end
