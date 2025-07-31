@@ -130,6 +130,7 @@ displayWidth, displayHeight = love.window.getDesktopDimensions()
   love.graphics.setCanvas()
 
   if setup ~= nil then setup() end
+  fill(255)
 end
 
 function love.update(dt)
@@ -1061,7 +1062,7 @@ end
 
 --p5 calls arctype parameter "mode"
 function arc(_x, _y, _w, _h, _start, _stop, _arctype)
-  local arctype = _arctype or "pie"
+  local arctype = _arctype or PIE
   local radius_x = _w / 2
   local radius_y = _h / 2
   local center_x = _x
