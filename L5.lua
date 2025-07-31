@@ -982,6 +982,9 @@ end
 
 function ellipse(_a,_b,_c,_d)
 --love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
+  if not _d then
+    _d = _c
+  end
   if L5_env.ellipse_mode==RADIUS then 
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
