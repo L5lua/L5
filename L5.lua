@@ -538,6 +538,7 @@ function defaults()
   DEGREES = "DEGREES"
   ROUND = "smooth"
   SQUARE = "rough"
+  PROJECT = "project"
   MITER = "miter"
   BEVEL = "bevel"
   NONE = "none"
@@ -1425,10 +1426,6 @@ end
 function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
   love.graphics.setPointSize(_w) --also sets sizingon points
-end
-
-function strokeCap(_style)
-  love.graphics.setLineStyle(ROUND)
 end
 
 function strokeJoin(_style)
