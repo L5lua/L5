@@ -334,7 +334,7 @@ function toColor(_a, _b, _c, _d)
 	a = L5_env.color_max[4]
       else -- HTML color name
         if htmlColors[_a] then
-	  r, g, b = table.unpack(htmlColors[_a])
+	  r, g, b = unpack(htmlColors[_a])
           a = L5_env.color_max[4]
         else
           error("Color '" .. _a .. "' not found in htmlColors table")
@@ -933,25 +933,25 @@ function rect(_a,_b,_c,_d,_e)
   if L5_env.rect_mode==CORNERS then --x1,y1,x2,y2
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_d/2,_c,_d,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r1*2,r2*2
     love.graphics.rectangle(L5_env.fill_mode, _a-_c,_b-_d,_c*2,_d*2,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c,_b-_d,_c*2,_d*2,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CORNER then --CORNER default x,y,w,h
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_d,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c,_d,_e,_e)
     love.graphics.setColor(r, g, b, a)
   end
@@ -963,19 +963,19 @@ function square(_a,_b,_c, _d)
   if L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_c/2,_c,_c,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c/2,_b-_c/2,_c,_c,_d,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==RADIUS then --x-w/2,y-h/2,r*2,r*2
     love.graphics.rectangle(L5_env.fill_mode, _a-_c,_b-_c,_c*2,_c*2,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line", _a-_c,_b-_c,_c*2,_c*2,_d,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CORNER then -- CORNER default x,y,w,h
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c,_c,_d,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c,_c,_d,_d)
     love.graphics.setColor(r, g, b, a)
   end
@@ -989,25 +989,25 @@ function ellipse(_a,_b,_c,_d)
   if L5_env.ellipse_mode==RADIUS then 
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_d) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNER then 
     love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_d/2,_c/2,_d/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNERS then 
     love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
     love.graphics.setColor(r, g, b, a)
   else --default CENTER x,y,w/2,h/2
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_d/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
   end
@@ -1017,25 +1017,25 @@ function circle(_a,_b,_c)
   if L5_env.ellipse_mode==RADIUS then 
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c,_d)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNER then 
     love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_c/2,_c/2,_c/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+_c/2,_b+_c/2,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNERS then 
     love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CENTER then --default CENTER x,y,w/2,h/2
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.ellipse("line",_a,_b,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
   end
@@ -1047,7 +1047,7 @@ function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygo
   --for other # of sides, use processing api call createShape
   love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4)
     love.graphics.setColor(r, g, b, a)
 end
@@ -1055,7 +1055,7 @@ end
 function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
   love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) 
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.polygon("line",_x1,_y1,_x2,_y2,_x3,_y3)
     love.graphics.setColor(r, g, b, a)
 end
@@ -1103,7 +1103,7 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
     
     if L5_env.stroke_color then
       local r, g, b, a = love.graphics.getColor()
-      love.graphics.setColor(table.unpack(L5_env.stroke_color))
+      love.graphics.setColor(unpack(L5_env.stroke_color))
       love.graphics.ellipse("line", center_x, center_y, radius_x, radius_y)
       love.graphics.setColor(r, g, b, a)
     end
@@ -1119,7 +1119,7 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
       
       if L5_env.stroke_color then
         local r, g, b, a = love.graphics.getColor()
-        love.graphics.setColor(table.unpack(L5_env.stroke_color))
+        love.graphics.setColor(unpack(L5_env.stroke_color))
         love.graphics.arc("line", arctype, center_x, center_y, radius, start_norm, start_norm + arc_span)
         love.graphics.setColor(r, g, b, a)
       end
@@ -1167,7 +1167,7 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
   -- Draw stroke
   if L5_env.stroke_color then
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color))
+    love.graphics.setColor(unpack(L5_env.stroke_color))
     
     if arctype == "open" then
       -- Just draw the arc line
@@ -1190,7 +1190,7 @@ function point(_x,_y)
   --Points unaffected by love.graphics.scale - size is always in pixels
   --a line is drawn in the stroke color
   local r, g, b, a = love.graphics.getColor()
-  love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+  love.graphics.setColor(unpack(L5_env.stroke_color)) 
   love.graphics.points(_x,_y)
   love.graphics.setColor(r, g, b, a)
 end
@@ -1198,13 +1198,13 @@ end
 function line(_x1,_y1,_x2,_y2)
   --a line is drawn in the stroke color
     local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(table.unpack(L5_env.stroke_color)) 
+    love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
 
 function background(_r,_g,_b,_a)
-  love.graphics.clear(table.unpack(toColor(_r,_g,_b,_a)))
+  love.graphics.clear(unpack(toColor(_r,_g,_b,_a)))
   L5_env.clearscreen = true 
 end
 
@@ -1223,7 +1223,7 @@ end
 --function fill(_r,_g,_b,_a)
 function fill(...)
   L5_env.fill_mode="fill" 
-  love.graphics.setColor(table.unpack(toColor(...)))
+  love.graphics.setColor(unpack(toColor(...)))
 end
 
 --------------- CREATING and READING ----------------
@@ -1541,12 +1541,12 @@ end
 
 function max(...)
   local args={...}
-  return math.max(table.unpack(args))
+  return math.max(unpack(args))
 end
 
 function min(...)
   local args={...}
-  return math.min(table.unpack(args))
+  return math.min(unpack(args))
 end
 
 function constrain(_val,_min,_max)
