@@ -129,6 +129,8 @@ displayWidth, displayHeight = love.window.getDesktopDimensions()
   love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
   love.graphics.setCanvas()
 
+initShaderDefaults()
+
   if setup ~= nil then setup() end
   fill(255)
 end
@@ -623,6 +625,28 @@ function define_env_globals()
   -- filters (shaders)
   L5_env.filterOn = false
   L5_env.filter = nil
+end
+------------------ INIT SHADERS ---------------------
+-- initialize shader default values
+function initShaderDefaults()
+    -- Set default values for threshold shader
+    L5_filter.threshold:send("soft", 0.3)
+    L5_filter.threshold:send("threshold", 0.3)
+    
+    -- Set default value for posterize
+    L5_filter.posterize:send("levels", 4.0)
+    -- Set default values for blur
+    L5_filter.blur:send("blurSize", 2.0)
+    L5_filter.blur:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    
+    -- Set default values for erode
+    L5_filter.erode:send("strength", 0.5)
+    L5_filter.erode:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    
+    -- Set default values for dilate
+    L5_filter.dilate:send("strength", 1.0)
+    L5_filter.dilate:send("threshold", 0.1)
+    L5_filter.dilate:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
 end
 
 ----------------------- INPUT -----------------------
@@ -1834,6 +1858,9 @@ function filter(_name, _param)
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.grayscale
   elseif _name == THRESHOLD then
+    if _param then
+      L5_filter.threshold:send("threshold", _param)
+    end
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.threshold
   elseif _name == INVERT then
@@ -1852,9 +1879,15 @@ function filter(_name, _param)
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.blur
   elseif _name == ERODE then
+    if _param then
+      L5_filter.erode:send("strength", _param)
+    end
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.erode
   elseif _name == DILATE then
+    if _param then
+      L5_filter.dilate:send("strength", _param)
+    end
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.dilate
   else
@@ -1864,6 +1897,7 @@ end
 
 --- shaders
 L5_filter = {}
+
 L5_filter.grayscale = love.graphics.newShader([[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
     {
@@ -1875,19 +1909,19 @@ L5_filter.grayscale = love.graphics.newShader([[
 
 --from https://www.love2d.org/forums/viewtopic.php?t=3733&start=300
 L5_filter.threshold = love.graphics.newShader([[
-extern float soft = 0.3;
-extern float threshold = 0.3;
+extern float soft;
+extern float threshold;
 vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords )
   {
-	float f = soft/2.0;
+	float f = soft * 0.5;
 	float a = threshold - f;
 	float b = threshold + f;
 
 	vec4 tx = Texel( texture, texture_coords );
-	float l = (tx.x + tx.y + tx.z) / 3.0;
+	float l = (tx.r + tx.g + tx.b) * 0.333333;
 	vec3 col = vec3( smoothstep(a, b, l) );
 	
-	return vec4( col, 1 )*color;
+	return vec4( col, 1.0 ) * color;
   }
 ]])
 
@@ -1895,13 +1929,13 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 L5_filter.invert = love.graphics.newShader([[ 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords) 
   { 
-	vec4 col = texture2D( texture, texture_coords ); 
-	return vec4(1-col.r, 1-col.g, 1-col.b, col.a); 
+	vec4 col = Texel( texture, texture_coords ); 
+	return vec4(1.0-col.r, 1.0-col.g, 1.0-col.b, col.a) * color; 
   } 
 ]])
 
 L5_filter.posterize = love.graphics.newShader([[
-    uniform float levels = 4.0; // number of color levels per channel
+    uniform float levels; // number of color levels per channel
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec4 pixel = Texel(texture, texture_coords);
@@ -1915,42 +1949,27 @@ L5_filter.posterize = love.graphics.newShader([[
     }
 ]])
 
-
 L5_filter.blur = love.graphics.newShader([[
-    uniform float blurSize = 2.0;
+    uniform float blurSize;
     uniform vec2 textureSize;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 pixelSize = 1.0 / textureSize;
         vec4 sum = vec4(0.0);
-        float totalWeight = 0.0;
         
-        // 5-tap Gaussian approximation
-        vec2 offsets[5];
-        float weights[5];
-        
-        offsets[0] = vec2(0.0, 0.0);
-        offsets[1] = vec2(-blurSize * pixelSize.x, 0.0);
-        offsets[2] = vec2(blurSize * pixelSize.x, 0.0);
-        offsets[3] = vec2(0.0, -blurSize * pixelSize.y);
-        offsets[4] = vec2(0.0, blurSize * pixelSize.y);
-        
-        weights[0] = 0.4;
-        weights[1] = 0.15;
-        weights[2] = 0.15;
-        weights[3] = 0.15;
-        weights[4] = 0.15;
-        
-        for (int i = 0; i < 5; i++) {
-            sum += Texel(texture, texture_coords + offsets[i]) * weights[i];
-        }
+        // 5-tap Gaussian approximation - unrolled for Mac compatibility
+        sum += Texel(texture, texture_coords + vec2(0.0, 0.0)) * 0.4;
+        sum += Texel(texture, texture_coords + vec2(-blurSize * pixelSize.x, 0.0)) * 0.15;
+        sum += Texel(texture, texture_coords + vec2(blurSize * pixelSize.x, 0.0)) * 0.15;
+        sum += Texel(texture, texture_coords + vec2(0.0, -blurSize * pixelSize.y)) * 0.15;
+        sum += Texel(texture, texture_coords + vec2(0.0, blurSize * pixelSize.y)) * 0.15;
         
         return sum * color;
     }
 ]])
 
 L5_filter.erode = love.graphics.newShader([[
-    uniform float strength = 0.5;
+    uniform float strength;
     uniform vec2 textureSize;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
@@ -1959,26 +1978,50 @@ L5_filter.erode = love.graphics.newShader([[
         vec4 centerColor = Texel(texture, texture_coords);
         vec4 result = centerColor;
         
-        // Simple 3x3 erosion with mixing
-        for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++) {
-                if (x == 0 && y == 0) continue;
-                
-                vec2 offset = vec2(float(x), float(y)) * pixelSize * strength;
-                vec4 neighborColor = Texel(texture, texture_coords + offset);
-                
-                // Mix with darker neighbors
-                result = mix(result, min(result, neighborColor), 0.3);
-            }
-        }
+        // Simple 3x3 erosion - unrolled for Mac compatibility
+        vec2 offset;
+        vec4 neighborColor;
+        
+        // Manually unroll the 3x3 kernel (excluding center)
+        offset = vec2(-1.0, -1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(0.0, -1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(1.0, -1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(-1.0, 0.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(1.0, 0.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(-1.0, 1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(0.0, 1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
+        
+        offset = vec2(1.0, 1.0) * pixelSize * strength;
+        neighborColor = Texel(texture, texture_coords + offset);
+        result = mix(result, min(result, neighborColor), 0.3);
         
         return result * color;
     }
 ]])
 
 L5_filter.dilate = love.graphics.newShader([[
-    uniform float strength = 1.0;
-    uniform float threshold = 0.1;
+    uniform float strength;
+    uniform float threshold;
     uniform vec2 textureSize;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
@@ -1991,24 +2034,75 @@ L5_filter.dilate = love.graphics.newShader([[
         
         // Only dilate if center pixel is bright enough
         if (centerBrightness > threshold) {
-            for (int x = -2; x <= 2; x++) {
-                for (int y = -2; y <= 2; y++) {
-                    if (x == 0 && y == 0) continue;
-                    
-                    float distance = sqrt(float(x*x + y*y));
-                    if (distance > strength) continue;
-                    
-                    vec2 offset = vec2(float(x), float(y)) * pixelSize;
-                    vec4 neighborColor = Texel(texture, texture_coords + offset);
-                    
-                    float neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
-                    
-                    // Only consider bright neighbors
-                    if (neighborBrightness > threshold) {
-                        float weight = 1.0 - distance / (strength + 1.0);
-                        maxColor = max(maxColor, neighborColor * weight);
-                    }
-                }
+            // Simplified 3x3 dilation instead of 5x5 for Mac compatibility
+            vec2 offset;
+            vec4 neighborColor;
+            float neighborBrightness;
+            float weight;
+            
+            // Unroll 3x3 kernel (excluding center)
+            offset = vec2(-1.0, -1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.414 / (strength + 1.0); // diagonal distance ~1.414
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(0.0, -1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.0 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(1.0, -1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.414 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(-1.0, 0.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.0 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(1.0, 0.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.0 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(-1.0, 1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.414 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(0.0, 1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.0 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
+            }
+            
+            offset = vec2(1.0, 1.0) * pixelSize;
+            neighborColor = Texel(texture, texture_coords + offset);
+            neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
+            if (neighborBrightness > threshold) {
+                weight = 1.0 - 1.414 / (strength + 1.0);
+                maxColor = max(maxColor, neighborColor * weight);
             }
         }
         
