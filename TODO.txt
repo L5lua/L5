@@ -1,5 +1,11 @@
 # TODO
 
+## Debugging
+
+* [ ] Test on Mac
+ * [ ] what do do about shader inconsistencies between platforms? possibly separate into separately called files depending on machine architecture. alternatively, maybe there is a way to rewrite globally?
+* [X] Test on Windows 
+
 ## Environment
 
 * [X] fullscreen seems currently broken. called inside L5 at wrong time or related to setup events drawing call rewrite?
@@ -27,7 +33,7 @@
 
 ## Shapes
 
-* [ ] test and fix arc to be consistent with p5 arc
+* [X] test and fix arc to be consistent with p5 arc
 * [X] ellipseMode doesn't seem to work? 
 
 ## Filter
@@ -44,6 +50,17 @@
 
 * [X] error on mouseWheel() function.
 
+## Platform
+
+* [ ] add new L5 mode to Processing IDE
+* [ ] custom launcher for L5 programs?
+  * [ ] [VSCode launcher fork that packages L5?](https://marketplace.visualstudio.com/items?itemName=Menerv.love2d-launcher)
+* [ ] VSCode extension for L5
+  * [ ] VSCode setup instructions/starter
+* [ ] Exporter
+  * [ ] Wrapper to simplify export to Mac Application, PC executable or Linux appImage (compare to Processing's Export Application, basic GUI) - examples: [love-export](https://github.com/dmoa/love-export) (CLI, older), [love-build](https://github.com/ellraiser/love-build) (GUI built in Love, current)
+  * [ ] web export using love.js?
+
 ## Documentation
 
 * [ ] Build website and reference
@@ -52,11 +69,7 @@
   * [ ] reference index and pages
   * [ ] tutorials
   * [ ] examples pages
-  * [ ] about
-
-## Integration into Processing IDE
-
-* [ ] add new L5 mode to Processing IDE
+  * [X] about
 
 ## Libraries
 
