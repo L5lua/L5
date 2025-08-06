@@ -1,67 +1,124 @@
-# L5
+# Welcome to L5
 
-An implementation of a Processing-like API in Lua.
+![L5 logo](assets/L5-logo-blob.png)
 
-Built on the Love2d framework.
+L5 is a fun, fast, cross-platform, and lightweight implementation of the Processing API in Lua. It is a free and open source coding library to make interactive artwork on the computer, aimed at artists, students, and anyone that wants a flexible way to prototype art, games, toys, and other software experiments in code.
 
-## Why?
+## Overview
 
-Lua is fun. It's a dynamic scripting language like Javascript. The language is tiny in terms of bandwidth and in functions. It is easy to learn, works on old hardware, and stable. The syntax is consistently simple, and unlike Javascript, rarely changes over its long history. It is incredibly fast and works really well on desktop from powerful machines to Raspberry Pi. It is perfect for building an interactive installation and letting it run for months, or for a program that you need to integrate with your host OS, or for making games or interactive artworks on the computer. It can be really fun to write in it.
+L5 brings the familiar Processing creative coding environment to Lua, offering some of the best aspects of both Processing and p5.js with some twists of its own. But you don't need to know Processing already to get started with L5. L5 is built on top of the Love2D framework, and offers near-instant loading times and excellent performance while maintaining the intuitive API that makes [Processing](https://processing.org/) accessible to artists and designers. *L5 is not an official implementation of Processing or the Processing Foundation. It is a community-created project.*
 
-Lua itself is a language with mechanisms but unlike Python, few *batteries*. It isn't "everything and the kitchen sink". Unlike Javascript in the browser, it lacks a built-in canvas element. That's where Love2d comes in.
+> Processing is not a single programming language, but an arts-centric system for learning, teaching, and making visual form with code. *-[Processing.py reference](https://py.processing.org/reference/)*
 
-Love2d (stylized LÖVE) is a framework to build 2d games in Lua. It is free and open-source and works on Mac, Windows, PC, Android and iOS. Building L5 in Love2d means that L5 is cross-platform as well. Surpisingly, with [love.js](https://github.com/Davidobot/love.js) you can even package many projects for the web. L5 is a framework built on top of Love2d so that you can write the Processing API you may already know or you're getting started learning and you don't need to learn Love2d at all.  So why not learn Love2d instead? I have. It's great. But if you want to quickly use intuitive Processing commands, and want to be able to rapidly build projects, and want to join a worldwide community of artists that share projects in the extended creative coding community, then L5 might be for you.
 
-## Compared to Processing and p5.js
+## Key Features
 
-L5 blends the Processing and p5.js paradigms, offering some advantages with this combination. But choice of language is a personal thing! Here is a summary:
+- **Lightning fast**: Scripts, images, and audio load near-instantly
+- **Minimal footprint**: L5 (~6MB, from Love2D ~4.5MB + LuaJIT ~1.5MB) vs Processing (~500MB) vs p5.js (~1-4MB + browser ~250-355MB)
+- **Cross-platform**: Runs on Windows, macOS, Linux, and even Raspberry Pi
+- **Synchronous execution**: Code runs in predictable order, no async complexity
+- **Desktop-focused**: Optimized for installations and standalone applications
 
-L5's syntax is somewhat more similar to p5.js. For example, it is a dynamically typed language. You do not need to declare strings, objects, integers, floats, etc.
+## How L5 Compares
 
-But where p5.js is asyncronous and requires methods to deal with this, L5 is simply syncronous, which is more like Processing. Lines of code are guaranteed to run in order and we only need a setup() and draw(). In fact draw() is optional and you can use event functions like mousePressed() or keyTyped().
+### vs Processing
+- **Similar**: Synchronous execution, desktop-focused, compiled with error checking
+- **Different**: Dynamic typing (no need to declare variable types), smaller footprint
 
-L5 has adopted some of the helper functions that p5.js added on top of the Processing API. For example, you can use hexcodes and html color names. There is a describe() function for screen readers in the command line. We use mouseIsPressed rather than mousePressed.
+### vs p5.js
+- **Similar**: Dynamic typing, helper functions (hex colors, HTML color names, `describe()`)
+- **Different**: Synchronous (no callbacks), desktop-native, much faster loading
 
-Like Processing, L5 gets compiled, so if you have a syntax or other error, your program won't compile and will give an error message. In p5.js, it has a built-in friendly error system, and your script.js will continue to run even if you make an error.
+## Why Choose L5?
 
-Like Processing, L5 is focused on desktop, not web. Though there are libraries such as [love.js](https://github.com/Davidobot/love.js) that do allow for web use.
+**Lua Advantages**
+- Simple, consistent syntax that rarely changes
+- Excellent performance, especially with LuaJIT
+- Stable and works well on old hardware
+- Perfect for long-running installations
+- Easy integration with host operating system
 
-L5 is extremely fast and minimal. Scripts, images and audio load near-instantly, which makes it a good candidate to run on recent as well as ancient or low-spec hardware. The Love2d library that L5 is built on is about 4.5MB with LuaJIT 1.5MB. In contrast, Processing on my system is about 500MB. p5.js is about 1MB minified or 4MB unminified, though it also requires a browser (Firefox is 250MB and Chromium is 355MB on my system).
+**Love2D Foundation**
+- Mature, well-tested 2D game framework
+- Cross-platform compatibility out of the box
+- Optional web deployment via love.js
+- Active community and ongoing development
 
-Like Processing-java (a tool to run Processing on the command line), L5 can be scripted from the command line and it does run on a server. p5.js is not intended to run on a server. 
+**Processing API Familiarity**
+- No need to learn Love2D directly
+- Leverage existing Processing knowledge and tutorials
+- Join the worldwide creative coding community
+- Rapid prototyping and project development
 
-In terms of community and support, I've found the Processing community to be one of the most welcoming and positive code-based communities online, and there is over a decade of documentation, example code, video tutorials and books to help learners, along with thriving forums. The Processing Foundation are caretakers of the languages and this vibrant community. As L5 is a nascent project, there is more limited documentation, examples and support.
+## Important Notes
 
-## Gotchas
+- **1-indexed**: Lua arrays start at 1, not 0 (use `#` to get array/string length)
+- **2D only**: Currently limited to 2D graphics (3D libraries possible but not built-in)
+- **Tables everywhere**: Lua uses tables for arrays, objects, and data structures
+- **OOP patterns**: Check Lua documentation for object-oriented programming approaches
 
-* Lua is 1-indexed, not 0-indexed. There are some nice advantages to this, particularly in loops. Lengths of arrays, strings, etc can be found by affixing # before its name.
-* 2D only, at least for now (unless you implement a 3d library or your own 2.5D)
-* Lua features the table to build data structures. Arrays and objects are built out of them. For OOP, you should look up the paradigms for how to do so in Lua, or check out the example code.
+## Getting Started
 
-## Install
+1. **Install Love2D** from [love2d.org](https://www.love2d.org/)
+2. **Download L5** (clone the repository or download the L5.lua file to your project directory)
+3. **Create or edit main.lua** in the same directory as L5.lua
+4. **Require L5** at the top of your main.lua file with `require ("L5")`
+5. **Write** your program code in main.lua
+6. **Run** your program by dragging main.lua onto Love2D icon or running `love .` in terminal
 
-[Install Love2d](https://www.love2d.org/) for your system.
+### Basic Example
 
-Clone or download L5. 
+```lua
+--main.lua
+require("L5")
 
-Create a new main.lua in the same directory as L5.lua. You should import the L5.lua file at the beginning of your main.lua file. Open main.lua in the IDE of your choice, then save and drag it onto the Love icon or launch it by running `love .` in your terminal from the same directory. 
+function setup()
+    size(400, 400)
+    windowTitle("My L5 Sketch")
+end
 
-## Reference
+function draw()
+    background(220)
+    
+    -- Draw a circle that follows the mouse
+    fill(100, 150, 200)
+    circle(mouseX, mouseY, 50)
+    
+    -- Draw some text
+    fill(0)
+    text("Hello L5!", 20, 30)
+end
+```
 
-Coming soon
+## Community and Support
+
+While L5 is a new project with growing documentation, it benefits from:
+- The welcoming Processing community and their decade+ of resources
+- Extensive Processing tutorials, books, and forums that translate well to L5
+- The stable Lua and Love2D ecosystems
+- Active development and community contributions
+
+*Note: As L5 is nascent, documentation and examples are still growing compared to the mature Processing ecosystem.*
 
 ## Contributing
 
-This is a nascent project. Contributions are welcomed. You can send an [email](https://leetusman.com/info/) or open up an issue. Opening an issue and proposing changes are preferred prior to submitting pull requests.
+We welcome contributions! Before submitting pull requests, please open an issue to discuss proposed changes.
 
-### Ways to help out
+### Ways to Help
+- **Spread the word** through social media and community
+- **Create documentation** and tutorials
+- **Build example programs** showcasing L5 capabilities
+- **Teach workshops** using L5
+- **Test on different systems** and report compatibility
+- **File bug reports** with detailed reproduction steps
+- **Fix code issues** and improve functionality
+- **Create educational content** like zines or video tutorials
+- **Develop add-on libraries** or document Lua ecosystem integration
 
-* Get the word out about L5 through social media or word-of-mouth
-* Contribute documentation or create tutorials
-* Create example programs
-* Teach a workshop using L5
-* Test L5 on various systems
-* File a bug report
-* Fix something in the code
-* Make a zine about L5
-* Contribute an add-on library or document how to integrate with the wider Lua ecosystem
+## Reference Documentation
+
+Coming soon - comprehensive API reference and examples.
+
+---
+
+*L5 aims to make creative coding accessible, fast, and fun while leveraging the power and simplicity of Lua.*
