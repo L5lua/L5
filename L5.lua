@@ -1907,7 +1907,7 @@ L5_filter.grayscale = love.graphics.newShader([[
     }
 ]])
 
---from https://www.love2d.org/forums/viewtopic.php?t=3733&start=300
+--from https://www.love2d.org/forums/viewtopic.php?t=3733&start=300, modified to work on Mac
 L5_filter.threshold = love.graphics.newShader([[
 extern float soft;
 extern float threshold;
@@ -1978,7 +1978,7 @@ L5_filter.erode = love.graphics.newShader([[
         vec4 centerColor = Texel(texture, texture_coords);
         vec4 result = centerColor;
         
-        // Simple 3x3 erosion - unrolled for Mac compatibility
+        // 3x3 erosion - unrolled for Mac compatibility
         vec2 offset;
         vec4 neighborColor;
         

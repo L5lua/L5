@@ -2,8 +2,8 @@
 
 ## Debugging
 
-* [ ] Test on Mac
- * [ ] what do do about shader inconsistencies between platforms? possibly separate into separately called files depending on machine architecture. alternatively, maybe there is a way to rewrite globally?
+* [X] pre-alpha tests on Mac
+ * [X] correct shader differences between OSes
 * [X] Test on Windows 
 
 ## Environment
