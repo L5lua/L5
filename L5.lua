@@ -1808,19 +1808,7 @@ function image(_img,_x,_y,_w,_h)
 end
 
 function tint(r, g, b, a)
-    if r == nil then
-        -- No arguments = no tint (white)
-        L5_env.currentTint = {1, 1, 1, 1} 
-    elseif g == nil then
-        -- One argument = grayscale
-        local gray = r / L5_env.color_max[1]
-        L5_env.currentTint = {gray, gray, gray, 1} 
-    elseif a == nil then
-        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], 1} 
-    else
-        -- Four arguments = RGBA 
-        L5_env.currentTint = {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], a/L5_env.color_max[4]} 
-    end
+    L5_env.currentTint = toColor(r,g,b,a)
 end
 
 function noTint()

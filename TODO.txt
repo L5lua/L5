@@ -1,5 +1,8 @@
 # TODO
 
+## Style
+* [ ] Need to run a linter on L5
+
 ## Debugging
 
 * [X] pre-alpha tests on Mac
@@ -15,10 +18,14 @@
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
 * [X] check transforms reset at correct time? see the rotating square example.
 * [ ] only call setup code once
-* [ ] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
+* [x] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
+  * [X] width not set if fullscreen in use or no size()
+* [ ] review noise() - how important is it that L5 does not implement Value Noise, which both Processing and p5.js use? (they may move to Simplex or Perlin so maybe this is not an issue!)
+* [ ] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
 
 ## Color
 
+* [X] set default fill color (black?)
 * [X] line should be stroke color
 * [X] html color names
 * [X] Hex code colors
@@ -27,8 +34,10 @@
 * [ ] using html color name should assume RGB mode despite actual global L5_env.color_mode (or other way to handle this since stored as RGB value tables, values max 255)
 * [X] colorMode should also allow setting individual max values for RGBA (or HSL/HSB) etc
 * [X] fix: noFill seems to turn off all fill going forward, overriding fill()
-* [ ] tint didn't seem to work when specified as 2-values: grayness,alpha
+* [X] tint should work when specified as 2-values: grayness,alpha
+* [ ] flickering happens in specific circumstances that need to be debugged such as transparency-related 
 * [ ] test / fix ability to switch between filters
+  * [ ] needs to use a fixed toColor() function
 * [ ] noSmooth() does not appear to work well? test more and improve
 
 ## Shapes
@@ -38,7 +47,7 @@
 
 ## Filter
 
-* [ ] Improve blur algorithm
+* [ ] Improve blur algorithm - exponential blur, not Gaussian blur
 * [ ] review optional params for consistency with processing/p5
 * [ ] filter doesn't currently apply to setup, only in draw
 
