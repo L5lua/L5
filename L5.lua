@@ -296,6 +296,7 @@ function fullscreen(_bool)
   --only switch to fullscreen if true and not already fullscreen
   if _bool and not love.window.getFullscreen() then
     love.window.setFullscreen(_bool)
+    width, height = love.graphics.getDimensions()
   else
     return love.window.getFullscreen()
   end
@@ -572,6 +573,8 @@ function defaults()
   DILATE = "dilate"
 
   -- global user vars - can be read by user but shouldn't be altered by user
+  width = 800 --default, overridden with size() or fullscreen()
+  height = 600 --ditto
   frameCount = 0
   mouseIsPressed = false
   mouseX=0
