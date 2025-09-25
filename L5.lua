@@ -1558,6 +1558,29 @@ function round(_a)
   return math.floor(_a + 0.5 * (_a >= 0 and 1 or -1))
 end
 
+function int(_a)
+    local num
+    
+    if type(_a) == "string" then
+        num = tonumber(_a)
+        if num == nil then return nil end
+    elseif type(_a) == "boolean" then
+        num = _a and 1 or 0
+    elseif type(_a) == "number" then
+        num = _a
+    else
+        return nil
+    end
+    
+    -- check for invalid numbers
+    if num ~= num or num == math.huge or num == -math.huge then
+        return nil
+    end
+    
+    -- strip decimal via floor
+    return math.floor(num)
+end
+
 function ceil(_a)
   return math.ceil(_a)
 end

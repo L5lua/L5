@@ -202,6 +202,7 @@
 * [X] ceil()
 * [X] floor()
 * [X] round()
+* [X] int()
 * [X] constrain()
 * [X] map()
 * [X] dist()
