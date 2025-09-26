@@ -179,6 +179,10 @@
 * [X] noStroke()
 * [X] stroke() --G, G,A R,G,B  R,G,B,A or html color name. affected by colorMode.
 
+### Rendering
+
+* [X] createGraphics -- creates an offscreen buffer to draw to, with beginDraw() and endDraw() methods
+
 ### Transform
 * [X] push() (saves previous drawing style settings)
 * [X] pop() (restores previous drawing style settings)

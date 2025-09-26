@@ -1482,6 +1482,45 @@ function noStroke()
   L5_env.stroke_color={0,0,0,0} 
 end
 
+------------------ RENDERING ------------------------
+function createGraphics(_width, _height)
+    local pg = {}
+    
+    -- Create the offscreen buffer
+    pg._canvas = love.graphics.newCanvas(_width, _height)
+    pg.width = _width
+    pg.height = _height
+    pg._previousCanvas = nil
+    pg._drawing = false
+    
+    -- Begin drawing to this graphics buffer
+    function pg:beginDraw()
+        if self._drawing then
+            error("beginDraw() called while already drawing to this buffer")
+        end
+        self._previousCanvas = love.graphics.getCanvas()
+        love.graphics.setCanvas(self._canvas)
+        self._drawing = true
+    end
+    
+    -- End drawing to this graphics buffer
+    function pg:endDraw()
+        if not self._drawing then
+            error("endDraw() called without beginDraw()")
+        end
+        love.graphics.setCanvas(self._previousCanvas)
+        self._previousCanvas = nil
+        self._drawing = false
+    end
+    
+    -- Get the canvas for drawing to screen
+    function pg:getCanvas()
+        return self._canvas
+    end
+    
+    return pg
+end
+
 -------------------- VERTEX -------------------------
 
 function bezier(x1,y1,x2,y2,x3,y3,x4,y4)

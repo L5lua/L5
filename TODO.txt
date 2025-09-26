@@ -18,10 +18,14 @@
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
 * [X] check transforms reset at correct time? see the rotating square example.
 * [ ] only call setup code once
+  * [ ] in fact - fix so that you don't need a setup. the environment L5_env should be setup before
+  * [ ] i think don't run it in love.load, only need to grab screensize from size() function out of it?
 * [x] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
   * [X] width not set if fullscreen in use or no size()
 * [ ] review noise() - how important is it that L5 does not implement Value Noise, which both Processing and p5.js use? (they may move to Simplex or Perlin so maybe this is not an issue!)
 * [ ] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
+* [ ] save() function ignores specified filename argument to save the file under
+* [X] add createGraphics() drawing to offscreen buffer
 
 ## Color
 
