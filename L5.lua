@@ -2003,19 +2003,35 @@ L5_filter.posterize = love.graphics.newShader([[
 ]])
 
 L5_filter.blur = love.graphics.newShader([[
-    uniform float blurSize;
+  uniform float blurSize;
     uniform vec2 textureSize;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 pixelSize = 1.0 / textureSize;
         vec4 sum = vec4(0.0);
+        float totalWeight = 0.0;
         
-        // 5-tap Gaussian approximation - unrolled for Mac compatibility
-        sum += Texel(texture, texture_coords + vec2(0.0, 0.0)) * 0.4;
-        sum += Texel(texture, texture_coords + vec2(-blurSize * pixelSize.x, 0.0)) * 0.15;
-        sum += Texel(texture, texture_coords + vec2(blurSize * pixelSize.x, 0.0)) * 0.15;
-        sum += Texel(texture, texture_coords + vec2(0.0, -blurSize * pixelSize.y)) * 0.15;
-        sum += Texel(texture, texture_coords + vec2(0.0, blurSize * pixelSize.y)) * 0.15;
+        // Exponential decay parameter
+	// 0.2 to 0.6. lower = more blur. higher = sharper
+        float k = 0.4;
+        
+        // Sample in a circular pattern
+	// between 3 - 7. 
+	// lower = faster, less smooth. higher=slower, smoother
+        int samples = 5;
+        for(int x = -samples; x <= samples; x++) {
+            for(int y = -samples; y <= samples; y++) {
+                vec2 offset = vec2(float(x), float(y)) * blurSize * pixelSize;
+                float distance = length(vec2(float(x), float(y)));
+                float weight = exp(-k * distance);
+                
+                sum += Texel(texture, texture_coords + offset) * weight;
+                totalWeight += weight;
+            }
+        }
+        
+        // Normalize
+        sum /= totalWeight;
         
         return sum * color;
     }

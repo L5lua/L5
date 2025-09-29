@@ -51,7 +51,7 @@
 
 ## Filter
 
-* [ ] Improve blur algorithm - exponential blur, not Gaussian blur
+* [X] Improve blur algorithm - exponential blur, not Gaussian blur
 * [ ] review optional params for consistency with processing/p5
 * [ ] filter doesn't currently apply to setup, only in draw
 
