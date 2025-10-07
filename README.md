@@ -122,3 +122,7 @@ Coming soon - comprehensive API reference and examples.
 ---
 
 *L5 aims to make creative coding accessible, fast, and fun while leveraging the power and simplicity of Lua.*
+
+## Credits
+
+Rockies image cc0 by volvob12b on Flickr.

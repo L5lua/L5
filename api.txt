@@ -244,4 +244,7 @@
 ### Pixels
 
 * [X] filter() --implemented basic implementation with shaders
-* [ ] -- remaining pixel functions not at this time
+* [X] PixelDensity() - get or set pixel density for normal or high pixel density displays. Default is 1.
+* [X] loadPixels() - loads current canvas into pixel array
+* [X] pixels - global variable holding pixel array of colors for each pixel on screen
+* [X] updatePixels() - draws the pixel array to screen as series of RGBA values

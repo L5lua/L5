@@ -584,6 +584,7 @@ function defaults()
   pmouseX,pmouseY,movedX,movedY=0,0
   mouseButton = nil
   focused = true
+  pixels = {}
 end
 
 -- environment global variables not user-facing
@@ -628,6 +629,10 @@ function define_env_globals()
   -- filters (shaders)
   L5_env.filterOn = false
   L5_env.filter = nil
+  -- pixel array
+  L5_env.pixels = {}
+  L5_env.imageData = nil
+  L5_env.pixelsLoaded = false
 end
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
@@ -1946,6 +1951,108 @@ function filter(_name, _param)
   else
     error("Error: not a filter name.")
   end
+end
+
+-- Get or set pixel density (for high DPI displays)
+function pixelDensity(density)
+    if density then
+        -- Set pixel density (not commonly changed in LÖVE2D)
+        -- This would require recreating canvases, which L5 handles
+        -- For now, just return the current density
+        return love.graphics.getDPIScale()
+    else
+        -- Get current pixel density
+        return love.graphics.getDPIScale()
+    end
+end
+-- Load pixels from the back buffer into the pixels array
+function loadPixels()
+    if not L5_env.backBuffer then
+        error("L5_env.backBuffer not initialized. Make sure L5 is loaded properly.")
+    end
+    
+    -- Must unbind canvas to call newImageData() on it
+    local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+    love.graphics.setCanvas()
+    L5_env.imageData = L5_env.backBuffer:newImageData()
+    if wasActive then
+        love.graphics.setCanvas(L5_env.backBuffer)
+    end
+    
+    local w = L5_env.imageData:getWidth()
+    local h = L5_env.imageData:getHeight()
+    
+    -- Clear the pixels array
+    pixels = {}
+    
+    -- Fill pixels array with RGBA values (0-255 like p5.js)
+    -- Index: (x + y * width) * 4
+    for y = 0, h - 1 do
+        for x = 0, w - 1 do
+            local r, g, b, a = L5_env.imageData:getPixel(x, y)
+            local idx = (x + y * w) * 4
+            pixels[idx] = r * 255
+            pixels[idx + 1] = g * 255
+            pixels[idx + 2] = b * 255
+            pixels[idx + 3] = a * 255
+        end
+    end
+    
+    pixelsLoaded = true
+end
+
+-- Update the back buffer with modified pixel data
+function updatePixels()
+    if not pixelsLoaded then
+        error("Must call loadPixels() before updatePixels()")
+    end
+    
+    local w = L5_env.imageData:getWidth()
+    local h = L5_env.imageData:getHeight()
+    
+    -- Write pixels array back to imageData
+    for y = 0, h - 1 do
+        for x = 0, w - 1 do
+            local idx = (x + y * w) * 4
+            local r = (pixels[idx] or 0) / 255
+            local g = (pixels[idx + 1] or 0) / 255
+            local b = (pixels[idx + 2] or 0) / 255
+            local a = (pixels[idx + 3] or 255) / 255
+            L5_env.imageData:setPixel(x, y, r, g, b, a)
+        end
+    end
+    
+    -- Create a new image from the modified imageData and draw it to the backBuffer
+    local tempImage = love.graphics.newImage(L5_env.imageData)
+    local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+    love.graphics.setCanvas(L5_env.backBuffer)
+    love.graphics.draw(tempImage, 0, 0)
+    if not wasActive then
+        love.graphics.setCanvas()
+    end
+    
+    L5_env.pixelsLoaded = false
+end
+
+-- Helper function to get pixel index
+function getPixelIndex(x, y)
+    local w = L5_env.imageData:getWidth()
+    return (x + y * w) * 4
+end
+
+-- Helper to set a pixel color (optional convenience function)
+function setPixel(x, y, r, g, b, a)
+    local idx = getPixelIndex(x, y)
+    pixels[idx] = r
+    pixels[idx + 1] = g
+    pixels[idx + 2] = b
+    pixels[idx + 3] = a or 255
+end
+
+-- Helper to get a pixel color (optional convenience function)
+function getPixel(x, y)
+    local idx = getPixelIndex(x, y)
+    return pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]
 end
 
 --- shaders
