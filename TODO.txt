@@ -59,6 +59,10 @@
 
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
 
+## Pixels
+
+* [X] add pixel array and functions for working with pixels
+
 ## Events
 
 * [X] error on mouseWheel() function.
