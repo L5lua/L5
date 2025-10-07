@@ -2003,8 +2003,10 @@ end
 
 -- Update the back buffer with modified pixel data
 function updatePixels()
-    if not pixelsLoaded then
-        error("Must call loadPixels() before updatePixels()")
+    if not L5_env.pixelsLoaded then
+        -- If loadPixels() wasn't called, there's nothing to update, so no-op
+        -- pixels can still be drawn with set() w/o need for this function
+        return
     end
     
     local w = L5_env.imageData:getWidth()
@@ -2014,10 +2016,10 @@ function updatePixels()
     for y = 0, h - 1 do
         for x = 0, w - 1 do
             local idx = (x + y * w) * 4
-            local r = (pixels[idx] or 0) / 255
-            local g = (pixels[idx + 1] or 0) / 255
-            local b = (pixels[idx + 2] or 0) / 255
-            local a = (pixels[idx + 3] or 255) / 255
+            local r = (L5_env.pixels[idx] or 0) / 255
+            local g = (L5_env.pixels[idx + 1] or 0) / 255
+            local b = (L5_env.pixels[idx + 2] or 0) / 255
+            local a = (L5_env.pixels[idx + 3] or 255) / 255
             L5_env.imageData:setPixel(x, y, r, g, b, a)
         end
     end
@@ -2049,10 +2051,77 @@ function setPixel(x, y, r, g, b, a)
     pixels[idx + 3] = a or 255
 end
 
--- Helper to get a pixel color (optional convenience function)
-function getPixel(x, y)
-    local idx = getPixelIndex(x, y)
-    return pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]
+function get(x, y, w, h)
+    if not x then
+        -- No parameters: return entire window as image
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas()
+        local imageData = L5_env.backBuffer:newImageData()
+        if wasActive then
+            love.graphics.setCanvas(L5_env.backBuffer)
+        end
+        return love.graphics.newImage(imageData)
+    elseif not w then
+        -- Two parameters: return pixel RGBA (0-255 range)
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas()
+        local imageData = L5_env.backBuffer:newImageData()
+        local r, g, b, a = imageData:getPixel(x, y)
+        if wasActive then
+            love.graphics.setCanvas(L5_env.backBuffer)
+        end
+        return r * 255, g * 255, b * 255, a * 255
+    else
+        -- Four parameters: return sub-region as image
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas()
+        local fullImageData = L5_env.backBuffer:newImageData()
+        
+        -- Create a new ImageData for the sub-region
+        local subImageData = love.image.newImageData(w, h)
+        subImageData:paste(fullImageData, 0, 0, x, y, w, h)
+        
+        if wasActive then
+            love.graphics.setCanvas(L5_env.backBuffer)
+        end
+        return love.graphics.newImage(subImageData)
+    end
+end
+
+function set(x, y, c)
+    if type(c) == "table" and c.type and c:type() == "Image" then
+        -- c is an image, draw it at x,y
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas(L5_env.backBuffer)
+        love.graphics.draw(c, x, y)
+        if not wasActive then
+            love.graphics.setCanvas()
+        end
+    elseif type(c) == "table" then
+        -- c is a color table {r, g, b, a} (in 0-1 range)
+        -- Draw a 1x1 point at x,y with this color
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas(L5_env.backBuffer)
+        local prevColor = {love.graphics.getColor()}
+        love.graphics.setColor(c[1], c[2], c[3], c[4] or 1)
+        love.graphics.points(x, y)
+        love.graphics.setColor(unpack(prevColor))
+        if not wasActive then
+            love.graphics.setCanvas()
+        end
+    elseif type(c) == "number" then
+        -- c is a grayscale value (0-255)
+        local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
+        love.graphics.setCanvas(L5_env.backBuffer)
+        local prevColor = {love.graphics.getColor()}
+        local normalized = c / 255
+        love.graphics.setColor(normalized, normalized, normalized, 1)
+        love.graphics.points(x, y)
+        love.graphics.setColor(unpack(prevColor))
+        if not wasActive then
+            love.graphics.setCanvas()
+        end
+    end
 end
 
 --- shaders

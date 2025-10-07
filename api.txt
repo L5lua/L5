@@ -248,3 +248,5 @@
 * [X] loadPixels() - loads current canvas into pixel array
 * [X] pixels - global variable holding pixel array of colors for each pixel on screen
 * [X] updatePixels() - draws the pixel array to screen as series of RGBA values
+* [X] get() - get value of a pixel or a region of the window
+* [X] set() - set color of a pixel or draw an image to canvas
