@@ -957,6 +957,18 @@ function year()
   return tonumber(os.date("%Y"))
 end
 
+function hour()
+  return tonumber(os.date("%H"))
+end
+
+function minute()
+  return tonumber(os.date("%M"))
+end
+
+function second()
+  return tonumber(os.date("%S"))
+end
+
 ------------------------ SHAPE -----------------------
 
 -------------------- 2D Primitives -------------------

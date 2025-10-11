@@ -82,10 +82,13 @@
 * [X] saveTable() --takes table and filename as arguments, and optional format "csv","tsv" or "lua". Auto-selects output based on filename suffix if third argument empty.
 
 ### Time and Date
-* [X] millis()
-* [X] day()
-* [X] month()
-* [X] year()
+* [X] millis() - returns time since start of program in milliseconds
+* [X] day() - returns day 1 - 31
+* [X] month() - returns month 1 - 12
+* [X] year() - returns year YYYY
+* [X] hour() - returns hour 0 - 23
+* [X] minute() - returns minute 0-59
+* [X] second() - returns seconds 0-59
 
 ## Events
 
