@@ -48,6 +48,8 @@
 
 * [X] test and fix arc to be consistent with p5 arc
 * [X] ellipseMode doesn't seem to work? 
+* [ ] imageMode(): add CORNERS mode
+* [X] add custom shape creation via createShape() (processing) / beginShape() (p5.js), vertex() and endShape() (using love2d polygon - pass vertices as table?)
 
 ## Filter
 

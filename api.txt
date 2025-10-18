@@ -148,15 +148,15 @@
 
 ### Vertex
 * [ ] beginContour()
-* [ ] beginShape()
+* [X] beginShape()
 * [X] bezier()
 * [ ] curveVertex()
 * [ ] endContour()
-* [ ] endShape()
+* [X] endShape()
 * [ ] quadraticVertex()
 * [ ] texture()
 * [ ] textureMode()
-* [ ] vertex()
+* [X] vertex()
 
 ### Creating & Reading
 * [X] alpha() (gets alpha aka 4th value of a color)

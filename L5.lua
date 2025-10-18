@@ -629,6 +629,8 @@ function define_env_globals()
   L5_env.pixels = {}
   L5_env.imageData = nil
   L5_env.pixelsLoaded = false
+  -- custom shape drawing 
+  L5_env.vertices = {}
 end
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
@@ -1533,6 +1535,29 @@ function createGraphics(_width, _height)
 end
 
 -------------------- VERTEX -------------------------
+
+function beginShape()
+  -- reset custom shape vertices tabl
+  L5_env.vertices = {}
+end
+
+function vertex(x, y)
+    -- add vertex (x, y) to the custom shape vertices table
+    table.insert(L5_env.vertices, x)
+    table.insert(L5_env.vertices, y)
+end
+
+function endShape()
+    -- draw the custom shape
+    if #L5_env.vertices > 0 then
+        love.graphics.polygon("fill", L5_env.vertices)
+	local r, g, b, a = love.graphics.getColor()
+	love.graphics.setColor(unpack(L5_env.stroke_color))
+
+        love.graphics.polygon("line", L5_env.vertices)
+	love.graphics.setColor(r, g, b, a)
+    end
+end
 
 function bezier(x1,y1,x2,y2,x3,y3,x4,y4)
   love.graphics.line(love.math.newBezierCurve({x1,y1,x2,y2,x3,y3,x4,y4}):render())
