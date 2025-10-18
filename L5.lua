@@ -1,4 +1,4 @@
--- Custom love.run() function with proper double buffering and mouse events
+-- Override love.run() - adds double buffering and custom events
 function love.run()
   defaults()
   define_env_globals()
@@ -142,7 +142,7 @@ function love.update(dt)
   deltaTime = dt
   key = updateLastKeyPressed()
 
-  -- Call user update logic here (more p5.js-like)
+  -- Optional update (not typically Processing-like but available)
   if update ~= nil then update() end
 end
 
@@ -300,10 +300,6 @@ function fullscreen(_bool)
   else
     return love.window.getFullscreen()
   end
-end
-
-function environment()
-  --background(L5_env.color_max[1],L5_env.color_max[2],L5_env.color_max[3],L5_env.color_max[4])
 end
 
 function toColor(_a, _b, _c, _d)
@@ -907,8 +903,6 @@ function keyIsDown(_key)
   return love.keyboard.isDown(_key)
 end
 
------------------------- MOUSE ----------------------
-
 ---------------------- TRANSFORM ---------------------
 
 function push()
@@ -1473,7 +1467,7 @@ end
 
 function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
-  love.graphics.setPointSize(_w) --also sets sizingon points
+  love.graphics.setPointSize(_w) --also sets sizing on points
 end
 
 function strokeJoin(_style)
