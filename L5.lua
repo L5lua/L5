@@ -147,8 +147,7 @@ function love.update(dt)
 end
 
 function love.draw()
-  frameCount = frameCount + 1
-
+  -- checking user events happens regardless of whether the user draw() function is currently looping 
   local isPressed = love.mouse.isDown(1) or love.mouse.isDown(2) or love.mouse.isDown(3)
 
   if isPressed and not L5_env.wasPressed then 
@@ -195,16 +194,21 @@ function love.draw()
     L5_env.wheelY = nil
   end
 
--- Reset transformation matrix to identity at start of each frame
-  love.graphics.origin()
-  love.graphics.push()
+  -- only run if user draw() function is looping
+  if L5_env.drawing then
+    frameCount = frameCount + 1
 
-  -- Call user draw function
-  if draw ~= nil then draw() end
+  -- Reset transformation matrix to identity at start of each frame
+    love.graphics.origin()
+    love.graphics.push()
 
-  pmouseX, pmouseY = mouseX,mouseY
+    -- Call user draw function
+    if draw ~= nil then draw() end
 
-  love.graphics.pop()
+    pmouseX, pmouseY = mouseX,mouseY
+
+    love.graphics.pop()
+  end
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
@@ -1821,12 +1825,12 @@ function frameRate(_inp)
 end
 
 function noLoop()
-  love.draw = function() end
+  --love.draw = function() end
   L5_env.drawing = false 
 end
 
 function loop()
-  love.draw = draw()
+  --love.draw = draw()
   L5_env.drawing = true 
 end
 

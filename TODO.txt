@@ -23,7 +23,7 @@
 * [x] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
   * [X] width not set if fullscreen in use or no size()
 * [ ] review noise() - how important is it that L5 does not implement Value Noise, which both Processing and p5.js use? (they may move to Simplex or Perlin so maybe this is not an issue!)
-* [ ] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
+* [X] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
 * [ ] save() function ignores specified filename argument to save the file under
 * [X] add createGraphics() drawing to offscreen buffer
 

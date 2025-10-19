@@ -148,15 +148,15 @@
 
 ### Vertex
 * [ ] beginContour()
-* [X] beginShape()
+* [X] beginShape() -- resets table of vertices for a custom shape
 * [X] bezier()
 * [ ] curveVertex()
 * [ ] endContour()
-* [X] endShape()
+* [X] endShape() -- draws a polygon with the table of vertices for a custom shape
 * [ ] quadraticVertex()
 * [ ] texture()
 * [ ] textureMode()
-* [X] vertex()
+* [X] vertex() -- adds a x,y pair to table of vertices for a custom shape
 
 ### Creating & Reading
 * [X] alpha() (gets alpha aka 4th value of a color)
