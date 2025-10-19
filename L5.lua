@@ -635,6 +635,9 @@ function define_env_globals()
   L5_env.pixelsLoaded = false
   -- custom shape drawing 
   L5_env.vertices = {}
+  -- custom texture mesh
+  L5_env.currentTexture = nil
+  L5_env.useTexture = false
 end
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
@@ -1540,26 +1543,44 @@ end
 
 -------------------- VERTEX -------------------------
 
-function beginShape()
-  -- reset custom shape vertices tabl
-  L5_env.vertices = {}
+function texture(_img)
+  -- to be applied to vertices
+  L5_env.currentTexture = _img
+  L5_env.useTexture = true
 end
 
-function vertex(x, y)
+function beginShape()
+  -- reset custom shape vertices table
+  L5_env.vertices = {}
+  L5_env.useTexture = false
+end
+
+function vertex(_x, _y, _u, _v)
     -- add vertex (x, y) to the custom shape vertices table
-    table.insert(L5_env.vertices, x)
-    table.insert(L5_env.vertices, y)
+    if _u ~= nil and _v ~= nil then
+      table.insert(L5_env.vertices, {_x, _y, _u, _v})
+    else
+      table.insert(L5_env.vertices, _x)
+      table.insert(L5_env.vertices, _y)
+    end
 end
 
 function endShape()
     -- draw the custom shape
     if #L5_env.vertices > 0 then
+      if L5_env.useTexture and L5_env.currentTexture then
+	-- Use mesh for textured polygon
+	local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
+	mesh:setTexture(L5_env.currentTexture)
+	love.graphics.draw(mesh)
+      else
+        -- Use regular polygon for non-textured shapes
         love.graphics.polygon("fill", L5_env.vertices)
 	local r, g, b, a = love.graphics.getColor()
 	love.graphics.setColor(unpack(L5_env.stroke_color))
-
         love.graphics.polygon("line", L5_env.vertices)
 	love.graphics.setColor(r, g, b, a)
+      end
     end
 end
 
