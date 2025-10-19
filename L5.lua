@@ -1505,8 +1505,8 @@ function createGraphics(_width, _height)
     
     -- Create the offscreen buffer
     pg._canvas = love.graphics.newCanvas(_width, _height)
-    pg.width = _width
-    pg.height = _height
+    pg.width = _width or width
+    pg.height = _height or height
     pg._previousCanvas = nil
     pg._drawing = false
     
