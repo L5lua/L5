@@ -154,9 +154,10 @@
 * [ ] endContour()
 * [X] endShape() -- draws a polygon with the table of vertices for a custom shape
 * [ ] quadraticVertex()
-* [ ] texture()
-* [ ] textureMode()
-* [X] vertex() -- adds a x,y pair to table of vertices for a custom shape
+* [X] texture() -- draw texture mesh to polygon
+* [X] textureMode() -- change coodinate system for uv coordinates of drawing textures. default is IMAGE mode, or NORMAL (0-1) mode.
+* [X] textureWrap() -- define if textures CLAMP or REPEAT on texture mesh. default: CLAMP
+* [X] vertex() -- adds a x,y pair to table of vertices for a custom shape, or x, y, u, v for wrapping texture
 
 ### Creating & Reading
 * [X] alpha() (gets alpha aka 4th value of a color)

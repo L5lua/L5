@@ -571,6 +571,11 @@ function defaults()
   BLUR = "blur"
   ERODE = "erode"
   DILATE = "dilate"
+  -- for applying texture wrapping
+  NORMAL = "NORMAL"
+  IMAGE = "IMAGE"
+  CLAMP = "clamp"
+  REPEAT = "repeat"
 
   -- global user vars - can be read by user but shouldn't be altered by user
   width = 800 --default, overridden with size() or fullscreen()
@@ -638,6 +643,8 @@ function define_env_globals()
   -- custom texture mesh
   L5_env.currentTexture = nil
   L5_env.useTexture = false
+  L5_env.textureMode=IMAGE -- NORMAL or IMAGE
+  L5_env.textureWrap=CLAMP -- wrap mode CLAMP or REPEAT
 end
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
@@ -1549,6 +1556,27 @@ function texture(_img)
   L5_env.useTexture = true
 end
 
+function textureMode(_mode)
+    -- Set how texture coordinates are interpreted
+    -- NORMAL - coordinates are 0 to 1 (default)
+    -- IMAGE - coordinates are in pixel dimensions
+    if _mode == NORMAL or _mode == IMAGE then
+        L5_env.textureMode = _mode
+    else
+        error("textureMode must be NORMAL or IMAGE")
+    end
+end
+
+function textureWrap(_mode)
+    -- Set texture wrapping mode
+    -- Valid modes: CLAMP or REPEAT
+    if _mode == CLAMP or _mode == REPEAT then
+      L5_env.textureWrap = _mode
+    else
+      error("textureWrap must be CLAMP or REPEAT")
+    end
+end
+
 function beginShape()
   -- reset custom shape vertices table
   L5_env.vertices = {}
@@ -1558,7 +1586,14 @@ end
 function vertex(_x, _y, _u, _v)
     -- add vertex (x, y) to the custom shape vertices table
     if _u ~= nil and _v ~= nil then
-      table.insert(L5_env.vertices, {_x, _y, _u, _v})
+      local texU, texV = _u, _v
+
+      if L5_env.textureMode == IMAGE and L5_env.currentTexture then
+	-- Convert from pixel coordinates to normalized 0-1 range
+	texU = _u / L5_env.currentTexture:getWidth()
+	texV = _v / L5_env.currentTexture:getHeight()
+      end
+      table.insert(L5_env.vertices, {_x, _y, texU, texV})
     else
       table.insert(L5_env.vertices, _x)
       table.insert(L5_env.vertices, _y)
@@ -1572,6 +1607,10 @@ function endShape()
 	-- Use mesh for textured polygon
 	local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
 	mesh:setTexture(L5_env.currentTexture)
+
+        -- Apply texture wrap mode
+            L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
+
 	love.graphics.draw(mesh)
       else
         -- Use regular polygon for non-textured shapes

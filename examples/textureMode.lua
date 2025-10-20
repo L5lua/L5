@@ -1,0 +1,17 @@
+require("L5")
+
+function setup()
+  size(400, 400)
+  windowTitle("Example of textureMode")
+  noStroke()
+  img = loadImage("assets/flower.jpg")
+  --textureMode(NORMAL)
+  beginShape()
+  texture(img)
+  vertex(40, 80, 0, 0)
+  vertex(320, 20, img:getWidth(), 0)
+  vertex(380, 360, img:getWidth(), img:getHeight())
+  vertex(160, 380, 0, img:getHeight())
+  endShape()
+  describe("wrapping a flower texture around a polygon and specified u,v mapping")
+end
