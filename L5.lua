@@ -1257,9 +1257,13 @@ function line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
 
-function background(_r,_g,_b,_a)
-  love.graphics.clear(unpack(toColor(_r,_g,_b,_a)))
-  L5_env.clearscreen = true 
+function background(_r,_g,_b,_a) -- can take color or image file
+  if type(_r) == "userdata" and _r:type() == "Image" then --it's a background image file
+    image(_r,0,0,width,height) -- draw img in background
+  else --it's a color
+    love.graphics.clear(unpack(toColor(_r,_g,_b,_a)))
+    L5_env.clearscreen = true 
+  end
 end
 
 function colorMode(_mode, _max)
@@ -2009,6 +2013,47 @@ function noCursor()
 end
 
 ---------------------- Pixels ----------------------
+
+function copy(source, sx, sy, sw, sh, dx, dy, dw, dh)
+    -- If source is nil, try to use the current canvas
+    if source == nil then
+        source = love.graphics.getCanvas()
+        
+        -- If still nil, we can't copy from the screen
+        if source == nil then
+            error("copy() requires a source image or an active canvas")
+        end
+    end
+    
+    local quad = love.graphics.newQuad(sx, sy, sw, sh, 
+                                       source:getDimensions())
+    
+    local scaleX = dw / sw
+    local scaleY = dh / sh
+    love.graphics.draw(source, quad, dx, dy, 0, scaleX, scaleY)
+end
+
+function blend(source, sx, sy, sw, sh, dx, dy, dw, dh, blendMode)
+    if source == nil then
+        source = love.graphics.getCanvas()
+        
+        if source == nil then
+            error("blend() requires a source image or an active canvas")
+        end
+    end
+    
+    local quad = love.graphics.newQuad(sx, sy, sw, sh, 
+                                       source:getDimensions())
+    
+    local previousBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode(blendMode)
+    
+    local scaleX = dw / sw
+    local scaleY = dh / sh
+    love.graphics.draw(source, quad, dx, dy, 0, scaleX, scaleY)
+    
+    love.graphics.setBlendMode(previousBlendMode)
+end
 
 function filter(_name, _param)
   if _name == GRAY then
