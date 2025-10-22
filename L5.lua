@@ -584,6 +584,20 @@ function defaults()
   LIGHTEST = "lightest"
   DARKEST = "darkest"
   REPLACE = "replace"
+  -- system cursors
+  ARROW = "arrow"
+  IBEAM = "ibeam"
+  WAIT = "wait"
+  WAITARROW = "waitarrow"
+  CROSSHAIR = "crosshair"
+  SIZENWSE = "sizenwse"
+  SIZENESW = "sizenesw"
+  SIZEWE = "sizewe"
+  SIZENS = "sizens"
+  SIZEALL = "sizeall"
+  NO = "no"
+  HAND = "hand"
+
 
   -- global user vars - can be read by user but shouldn't be altered by user
   width = 800 --default, overridden with size() or fullscreen()
@@ -2009,11 +2023,41 @@ function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
 
-function cursor(_cursor_icon)
+function cursor(_cursor_icon, hotX, hotY)
   love.mouse.setVisible(true)
   local _cursor_icon = _cursor_icon or "arrow"
-  local _cursor = love.mouse.getSystemCursor(_cursor_icon)
-  love.mouse.setCursor(_cursor)
+  local hotX = hotX or 0
+  local hotY = hotY or 0
+  
+  -- Check if it's a system cursor type
+  local systemCursors = {
+    "arrow", "ibeam", "wait", "crosshair", "waitarrow", 
+    "sizenwse", "sizenesw", "sizewe", "sizens", "sizeall", 
+    "no", "hand"
+  }
+  
+  local isSystemCursor = false
+  for _, cursorType in ipairs(systemCursors) do
+    if _cursor_icon == cursorType then
+      isSystemCursor = true
+      break
+    end
+  end
+  
+  if isSystemCursor then
+    -- Use system cursor
+    local _cursor = love.mouse.getSystemCursor(_cursor_icon)
+    love.mouse.setCursor(_cursor)
+  elseif type(_cursor_icon) == "userdata" and _cursor_icon:type() == "ImageData" then
+    -- Use ImageData directly
+    local _cursor = love.mouse.newCursor(_cursor_icon, hotX, hotY)
+    love.mouse.setCursor(_cursor)
+  elseif type(_cursor_icon) == "string" then
+    -- Treat as file path to custom cursor image
+    local cursorImage = love.image.newImageData(_cursor_icon)
+    local _cursor = love.mouse.newCursor(cursorImage, hotX, hotY)
+    love.mouse.setCursor(_cursor)
+  end
 end
 
 function noCursor()

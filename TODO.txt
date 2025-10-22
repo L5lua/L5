@@ -26,6 +26,7 @@
 * [X] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
 * [ ] save() function ignores specified filename argument to save the file under
 * [X] add createGraphics() drawing to offscreen buffer
+* [ ] Enhancement: figure out some way to allow passing in image vars instead of only image filepath for custom cursors 
 
 ## Color
 
