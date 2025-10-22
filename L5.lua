@@ -576,6 +576,14 @@ function defaults()
   IMAGE = "IMAGE"
   CLAMP = "clamp"
   REPEAT = "repeat"
+  -- blend modes
+  BLEND = "blend"
+  ADD = "add"
+  MULTIPLY = "multiply"
+  SCREEN = "screen"
+  LIGHTEST = "lightest"
+  DARKEST = "darkest"
+  REPLACE = "replace"
 
   -- global user vars - can be read by user but shouldn't be altered by user
   width = 800 --default, overridden with size() or fullscreen()
@@ -2034,6 +2042,8 @@ function copy(source, sx, sy, sw, sh, dx, dy, dw, dh)
 end
 
 function blend(source, sx, sy, sw, sh, dx, dy, dw, dh, blendMode)
+  -- allows blend, normal, add, multiply, screen, lightest, darkest, replace
+  -- would need to be implemented with shaders: DIFFERENCE, EXCLUSION, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN
     if source == nil then
         source = love.graphics.getCanvas()
         
@@ -2045,14 +2055,37 @@ function blend(source, sx, sy, sw, sh, dx, dy, dw, dh, blendMode)
     local quad = love.graphics.newQuad(sx, sy, sw, sh, 
                                        source:getDimensions())
     
-    local previousBlendMode = love.graphics.getBlendMode()
-    love.graphics.setBlendMode(blendMode)
+    -- Save previous blend mode
+    local previousMode, previousAlphaMode = love.graphics.getBlendMode()
+    
+    -- Map p5.js blend modes to LÖVE2D
+    local mode, alphaMode = "alpha", "alphamultiply"
+    
+    if blendMode == BLEND or blendMode == NORMAL then
+        mode, alphaMode = "alpha", "alphamultiply"
+    elseif blendMode == ADD then
+        mode, alphaMode = "add", "alphamultiply"
+    elseif blendMode == MULTIPLY then
+        mode, alphaMode = "multiply", "premultiplied"
+    elseif blendMode == SCREEN then
+        mode, alphaMode = "screen", "premultiplied"
+    elseif blendMode == LIGHTEST then
+        mode, alphaMode = "lighten", "premultiplied"
+    elseif blendMode == DARKEST then
+        mode, alphaMode = "darken", "premultiplied"
+    elseif blendMode == REPLACE then
+        mode, alphaMode = "replace", "alphamultiply"
+      else
+	error("Unknown blend mode "..tostring(blendMode)..". Must be of type: BLEND, NORMAL, ADD, MULTIPLY, SCREEN, LIGHTEST, DARKEST, REPLACE.")
+    end
+    
+    love.graphics.setBlendMode(mode, alphaMode)
     
     local scaleX = dw / sw
     local scaleY = dh / sh
     love.graphics.draw(source, quad, dx, dy, 0, scaleX, scaleY)
     
-    love.graphics.setBlendMode(previousBlendMode)
+    love.graphics.setBlendMode(previousMode, previousAlphaMode)
 end
 
 function filter(_name, _param)

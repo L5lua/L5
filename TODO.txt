@@ -64,6 +64,7 @@
 ## Pixels
 
 * [X] add pixel array and functions for working with pixels
+* [ ] fix blend modes, currently not differentiated much, likely requires implementing shaders
 
 ## Events
 

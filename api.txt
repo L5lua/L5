@@ -247,6 +247,8 @@
 
 ### Pixels
 
+* [X] blend() -- copies a region of pixels from one image to another
+* [X] copy() -- copies pixels from a source image to a region of the canvas
 * [X] filter() --implemented basic implementation with shaders
 * [X] PixelDensity() - get or set pixel density for normal or high pixel density displays. Default is 1.
 * [X] loadPixels() - loads current canvas into pixel array
