@@ -1952,6 +1952,10 @@ function loadImage(_filename)
   return love.graphics.newImage(_filename)
 end
 
+function loadVideo(_filename)
+  return love.graphics.newVideo(_filename)
+end
+
 function image(_img,_x,_y,_w,_h)
   local originalWidth = _img:getWidth()
   local originalHeight = _img:getHeight()
