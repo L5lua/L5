@@ -1935,7 +1935,7 @@ end
 
 --------------------- TYPOGRAPHY ---------------------
 
-function text(_msg,_x,_y)
+function text(_msg,_x,_y,_w)
   local x_offset=0
   local y_offset=0
   
@@ -1958,7 +1958,11 @@ function text(_msg,_x,_y)
     y_offset = love.graphics.getFont():getHeight(_msg)
   end
 
+  if _w ~= nil then
+    love.graphics.printf(_msg, _x - x_offset, _y - y_offset, _w, L5_env.textAlignX)
+  else --no specified max width/wrap
     love.graphics.print(_msg, _x - x_offset, _y - y_offset)
+  end
 end
 
 function textAlign(x_alignment,y_alignment)
