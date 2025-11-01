@@ -1702,7 +1702,7 @@ function random(_a,_b)
       for k in pairs(_a) do
 	  table.insert(keyset, k)
       end
-      return _a[keyset[math.random(#keyset)]]
+      return _a[keyset[math.floor(love.math.random() * #keyset) + 1]]
     elseif type(_a) == 'number' then
       return love.math.random()*_a
     end
