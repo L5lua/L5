@@ -27,6 +27,7 @@
 * [ ] save() function ignores specified filename argument to save the file under
 * [X] add createGraphics() drawing to offscreen buffer
 * [ ] Enhancement: figure out some way to allow passing in image vars instead of only image filepath for custom cursors 
+* [ ] not registering backspace/delete key pressed
 
 ## Color
 
@@ -61,6 +62,7 @@
 ## Typography
 
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
+* [ ] specifying optional width to text() function doesn't work correctly if textAlign() is set to CENTER or RIGHT currently. text doesn't draw to screen correctly.
 
 ## Pixels
 
