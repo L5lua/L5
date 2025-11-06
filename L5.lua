@@ -971,6 +971,11 @@ function scale(_sx,_sy)
   end
 end
 
+function applyMatrix(a, b, c, d, e, f)
+    local transform = love.math.newTransform(a, b, c, d, e, f)
+    love.graphics.applyTransform(transform)
+end
+
 -------------------- TIME and DATE -------------------
 
 function millis()
