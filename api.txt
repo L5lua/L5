@@ -193,6 +193,7 @@
 * [X] translate()
 * [X] rotate()
 * [X] scale()
+* [X] applyMatrix()
 
 ## Constants
 * [X] HALF_PI (1.57079...)
@@ -205,17 +206,17 @@
 * [X] random() --takes 1 or 2 arguments. if a table name is given, returns a random value from the table
 * [X] randomSeed()
 * [X] noise() --1, 2 or 3 dimensional Simplex noise generation
-* [ ] lerp()
-* [X] abs()
-* [X] ceil()
-* [X] floor()
-* [X] round()
-* [X] int()
-* [X] constrain()
-* [X] map()
-* [X] dist()
-* [X] max()
-* [X] min()
+* [ ] lerp()  
+* [X] abs()  --absolute value
+* [X] ceil()  --round up
+* [X] floor() --round down
+* [X] round() --round up or down
+* [X] int() --convert to integer
+* [X] constrain() --limit range of variable
+* [X] map()  --remap variable from one range to another
+* [X] dist()  -- return distance in pixels between 2 sets of x,y coordinates
+* [X] max()  --return max of 2 values
+* [X] min()  --return min of 2 values
 
 ### Trigonometry
 * [X] angleMode()
@@ -227,7 +228,7 @@
 
 ## Typography
 * [X] loadFont() --create new font
-* [X] text() --display text, at x,y
+* [X] text() --display text, at x,y, optional max width for wrapping
 * [X] textFont() --change to loaded font
 * [X] textWidth() --returns width of text
 * [X] textHeight() -- returns height of text

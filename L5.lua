@@ -59,10 +59,7 @@ function love.run()
       -- Draw current frame
       -- Run setup() once in the drawing context
       if not setupComplete and setup then
-        local originalSize = size
-        size = function() end
         setup()
-        size = originalSize
         setupComplete = true
       else
         if love.draw then love.draw() end
@@ -116,9 +113,12 @@ function love.load()
   love.window.setVSync(1)
   love.math.setRandomSeed(os.time())
 
-  -- Create double buffers
+  displayWidth, displayHeight = love.window.getDesktopDimensions()
+
+  -- create default-size buffers. will be recreated again if size() or fullscreen(true) called
   local w, h = love.graphics.getDimensions()
-displayWidth, displayHeight = love.window.getDesktopDimensions()
+
+  -- Create double buffers
   L5_env.backBuffer = love.graphics.newCanvas(w, h) 
   L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
 
@@ -129,9 +129,8 @@ displayWidth, displayHeight = love.window.getDesktopDimensions()
   love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
   love.graphics.setCanvas()
 
-initShaderDefaults()
+  initShaderDefaults()
 
-  if setup ~= nil then setup() end
   fill(255)
 end
 
@@ -277,6 +276,9 @@ end
 ------------------- CUSTOM FUNCTIONS -----------------
 
 function size(_w, _h)
+  -- must clear canvas before setMode
+  love.graphics.setCanvas()
+
   love.window.setMode(_w, _h)
 
   -- Recreate buffers for new size
@@ -291,19 +293,45 @@ function size(_w, _h)
   love.graphics.clear(0.5, 0.5, 0.5, 1)
   love.graphics.setCanvas(L5_env.frontBuffer) 
   love.graphics.clear(0.5, 0.5, 0.5, 1)
-  love.graphics.setCanvas()
+
+  -- Set back to back buffer for continued drawing
+  love.graphics.setCanvas(L5_env.backBuffer)
 
   width, height = love.graphics.getDimensions()
 end
 
-function fullscreen(_bool)
-  --only switch to fullscreen if true and not already fullscreen
-  if _bool and not love.window.getFullscreen() then
-    love.window.setFullscreen(_bool)
-    width, height = love.graphics.getDimensions()
-  else
-    return love.window.getFullscreen()
+function fullscreen(display)
+  display = display or 1
+  
+  love.graphics.setCanvas()
+  
+  local displays = love.window.getDisplayCount()
+  if display > displays then
+    display = 1
   end
+
+  love.window.setFullscreen(true, "desktop")
+  
+  local w, h = love.graphics.getDimensions(display)
+
+  -- Set the mode first with fullscreen dimensions
+  -- required in order to draw in setup function
+  love.window.setMode(w, h, {fullscreen = true, fullscreentype = "desktop"})
+  
+  if L5_env.backBuffer then L5_env.backBuffer:release() end 
+  if L5_env.frontBuffer then L5_env.frontBuffer:release() end 
+  
+  L5_env.backBuffer = love.graphics.newCanvas(w, h) 
+  L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
+  
+  love.graphics.setCanvas(L5_env.backBuffer) 
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  love.graphics.setCanvas(L5_env.frontBuffer) 
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  
+  love.graphics.setCanvas(L5_env.backBuffer)
+
+  width, height = love.graphics.getDimensions()  
 end
 
 function toColor(_a, _b, _c, _d)
