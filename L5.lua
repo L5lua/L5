@@ -1861,6 +1861,286 @@ function tan(_angle)
   end
 end
 
+---------------------- DATA ------------------------
+
+function boolean(n)
+  -- Handle nil
+  if n == nil then
+    return false
+  end
+  
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = boolean(v)  -- Recursively convert each element
+    end
+    return result
+  end
+  
+  -- Handle strings
+  if type(n) == "string" then
+    return n == "true"
+  end
+  
+  -- Handle numbers
+  if type(n) == "number" then
+    return n ~= 0
+  end
+  
+  -- Handle booleans (just pass booleans through)
+  if type(n) == "boolean" then
+    return n
+  end
+  
+  -- Default case
+  return false
+end
+
+function byte(n)
+  -- Handle nil
+  if n == nil then
+    return 0
+  end
+  
+  -- Handle ordered table arrays
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = byte(v)  -- Recursively convert each element
+    end
+    return result
+  end
+  
+  -- Handle booleans
+  if type(n) == "boolean" then
+    return n and 1 or 0
+  end
+  
+  -- Handle strings (convert to number first, or get first character's byte value)
+  if type(n) == "string" then
+    -- Try to convert to number
+    local num = tonumber(n)
+    if num then
+      n = num
+    else
+      -- Get first character's byte value using string library
+      n = string.byte(n, 1) or 0
+    end
+  end
+  
+  -- Handle numbers
+  if type(n) == "number" then
+    -- Convert to integer
+    local int_val = math.floor(n)
+    
+    -- Wrap to byte range (-128 to 127)
+    local wrapped = int_val % 256
+    
+    -- Convert to signed byte range
+    if wrapped > 127 then
+      wrapped = wrapped - 256
+    end
+    
+    return wrapped
+  end
+  
+  -- Default case
+  return 0
+end
+
+function char(n)
+  -- Handle nil
+  if n == nil then
+    return ""
+  end
+  
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = char(v)  -- Recursively convert each element
+    end
+    return result
+  end
+  
+  -- Handle strings (convert to number first)
+  if type(n) == "string" then
+    local num = tonumber(n)
+    if num then
+      n = math.floor(num)
+    else
+      -- If not a valid number, return first character or empty string
+      return n:sub(1, 1)
+    end
+  end
+  
+  -- Handle numbers
+  if type(n) == "number" then
+    local int_val = math.floor(n)
+    -- Convert to character using string.char
+    -- Handle out of range values gracefully
+    if int_val >= 0 and int_val <= 1114111 then  -- Valid Unicode range
+      local success, result = pcall(string.char, int_val)
+      if success then
+        return result
+      end
+    end
+    return ""
+  end
+  
+  -- Handle booleans (convert to string)
+  if type(n) == "boolean" then
+    return n and "1" or "0"
+  end
+  
+  -- Default case
+  return ""
+end
+
+function float(str)
+  -- Handle tables (arrays)
+  if type(str) == "table" then
+    local result = {}
+    for i, v in ipairs(str) do
+      result[i] = float(v)  -- Recursively convert each element
+    end
+    return result
+  end
+  
+  -- Handle numbers (pass through)
+  if type(str) == "number" then
+    return str
+  end
+  
+  -- Handle booleans
+  if type(str) == "boolean" then
+    return str and 1.0 or 0.0
+  end
+  
+  -- Handle strings
+  if type(str) == "string" then
+    -- Trim whitespace
+    str = str:match("^%s*(.-)%s*$")
+    
+    -- Try to convert to number (returns nil on failure)
+    return tonumber(str)
+  end
+  
+  -- Default case for anything else (including nil)
+  return nil
+end
+
+function hex(n, digits)
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = hex(v, digits)
+    end
+    return result
+  end
+  
+  -- Convert to integer
+  local int_val = math.floor(tonumber(n) or 0)
+  
+  -- Convert to hex string (uppercase)
+  local hex_str = string.format("%X", int_val)
+  
+  -- Pad with zeros if digits specified
+  if digits and #hex_str < digits then
+    hex_str = string.rep("0", digits - #hex_str) .. hex_str
+  end
+  
+  return hex_str
+end
+
+function str(n)
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = str(v)
+    end
+    return result
+  end
+  
+  -- Handle booleans
+  if type(n) == "boolean" then
+    return n and "true" or "false"
+  end
+  
+  -- Handle numbers
+  if type(n) == "number" then
+    return tostring(n)
+  end
+  
+  -- Handle strings (pass through)
+  if type(n) == "string" then
+    return n
+  end
+  
+  -- Default: convert to string
+  return tostring(n)
+end
+
+function unchar(n)
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = unchar(v)
+    end
+    return result
+  end
+  
+  -- Handle strings
+  if type(n) == "string" then
+    -- Get the byte value of the first character
+    if #n > 0 then
+      return string.byte(n, 1)
+    else
+      return nil
+    end
+  end
+  
+  -- Handle numbers (pass through)
+  if type(n) == "number" then
+    return n
+  end
+  
+  -- Default
+  return nil
+end
+
+function unhex(n)
+  -- Handle tables (arrays)
+  if type(n) == "table" then
+    local result = {}
+    for i, v in ipairs(n) do
+      result[i] = unhex(v)
+    end
+    return result
+  end
+  
+  -- Handle strings
+  if type(n) == "string" then
+    -- Trim whitespace
+    n = n:match("^%s*(.-)%s*$")
+    
+    -- Convert hex string to number
+    return tonumber(n, 16)  -- base 16
+  end
+  
+  -- Handle numbers (pass through)
+  if type(n) == "number" then
+    return n
+  end
+  
+  -- Default
+  return nil
+end
+
 ------------------- TYPOGRAPHY ---------------------
 
 function loadFont(fontPath)

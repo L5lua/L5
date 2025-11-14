@@ -218,6 +218,18 @@
 * [X] max()  --return max of 2 values
 * [X] min()  --return min of 2 values
 
+## DATA
+
+### Conversion
+
+* [X] boolean() --convert to boolean
+* [X] byte() --convert to signed byte
+* [X] char() --convert number to letter char
+* [X] float() --convert to number
+* [X] hex() --convert to hexadecimal, with optional padding
+* [X] str() --convert number to string
+* [X] unchar() --convert char to number
+
 ### Trigonometry
 * [X] angleMode()
 * [X] degrees()
