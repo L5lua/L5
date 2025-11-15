@@ -1725,6 +1725,35 @@ function curve(x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
 --------------------- MATH --------------------------
+function fract(_n)
+  return _n - int(_n)
+end
+
+function log(_n)
+  return math.log(_n)
+end
+
+function pow(n, e)
+  return n ^ e
+end
+
+function norm(val, start, stop)
+  -- normalize the value to 0-1 range
+  return (val - start) / (stop - start)
+end
+
+function lerp(start, stop, amt)
+  return start + (stop - start) * amt
+end
+
+function sq(n)
+  return n * n
+end
+
+function sqrt(n)
+  return math.sqrt(n)
+end
+
 function random(_a,_b)
   if _b then
     return love.math.random()*(_b-_a)+_a
@@ -1845,11 +1874,27 @@ function sin(_angle)
   end
 end
 
+function asin(_angle)
+  if L5_env.degree_mode == RADIANS then 
+    return math.asin(_angle)
+  else
+    return math.asin(radians(_angle))
+  end
+end
+
 function cos(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.cos(_angle)
   else
     return math.cos(radians(_angle))
+  end
+end
+
+function acos(_angle)
+  if L5_env.degree_mode == RADIANS then 
+    return math.acos(_angle)
+  else
+    return math.acos(radians(_angle))
   end
 end
 
@@ -1861,15 +1906,27 @@ function tan(_angle)
   end
 end
 
+function atan(_angle)
+  if L5_env.degree_mode == RADIANS then 
+    return math.atan(_angle)
+  else
+    return math.atan(radians(_angle))
+  end
+end
+
+function atan2(y, x)
+  local angle = math.atan2(y, x)  -- This returns radians
+  
+  if L5_env.degree_mode == DEGREES then
+    return math.deg(angle)  -- convert to degrees 
+  else
+    return angle  -- or keep in default radians 
+  end
+end
+
 ---------------------- DATA ------------------------
 
 function boolean(n)
-  -- Handle nil
-  if n == nil then
-    return false
-  end
-  
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
@@ -1878,46 +1935,35 @@ function boolean(n)
     return result
   end
   
-  -- Handle strings
   if type(n) == "string" then
     return n == "true"
   end
   
-  -- Handle numbers
   if type(n) == "number" then
     return n ~= 0
   end
   
-  -- Handle booleans (just pass booleans through)
   if type(n) == "boolean" then
     return n
   end
   
-  -- Default case
   return false
 end
 
 function byte(n)
-  -- Handle nil
-  if n == nil then
-    return 0
-  end
-  
-  -- Handle ordered table arrays
-  if type(n) == "table" then
+    if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
-      result[i] = byte(v)  -- Recursively convert each element
+      result[i] = byte(v)  
     end
     return result
   end
   
-  -- Handle booleans
   if type(n) == "boolean" then
     return n and 1 or 0
   end
   
-  -- Handle strings (convert to number first, or get first character's byte value)
+  -- Handle strings by converting to number first, or get first character's byte value
   if type(n) == "string" then
     -- Try to convert to number
     local num = tonumber(n)
@@ -1929,7 +1975,6 @@ function byte(n)
     end
   end
   
-  -- Handle numbers
   if type(n) == "number" then
     -- Convert to integer
     local int_val = math.floor(n)
@@ -1950,36 +1995,29 @@ function byte(n)
 end
 
 function char(n)
-  -- Handle nil
-  if n == nil then
-    return ""
-  end
-  
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
-      result[i] = char(v)  -- Recursively convert each element
+      result[i] = char(v)  
     end
     return result
   end
   
-  -- Handle strings (convert to number first)
+  -- handle strings by converting to number first
   if type(n) == "string" then
     local num = tonumber(n)
     if num then
       n = math.floor(num)
     else
-      -- If not a valid number, return first character or empty string
+      -- if not a valid number, return first character or empty string
       return n:sub(1, 1)
     end
   end
   
-  -- Handle numbers
   if type(n) == "number" then
     local int_val = math.floor(n)
     -- Convert to character using string.char
-    -- Handle out of range values gracefully
+    -- handle out of range values gracefully
     if int_val >= 0 and int_val <= 1114111 then  -- Valid Unicode range
       local success, result = pcall(string.char, int_val)
       if success then
@@ -1989,41 +2027,38 @@ function char(n)
     return ""
   end
   
-  -- Handle booleans (convert to string)
+  -- handle booleans via converting to string
   if type(n) == "boolean" then
     return n and "1" or "0"
   end
   
-  -- Default case
+  -- default case
   return ""
 end
 
 function float(str)
-  -- Handle tables (arrays)
   if type(str) == "table" then
     local result = {}
     for i, v in ipairs(str) do
-      result[i] = float(v)  -- Recursively convert each element
+      result[i] = float(v)  
     end
     return result
   end
   
-  -- Handle numbers (pass through)
+  -- pass through numbers
   if type(str) == "number" then
     return str
   end
   
-  -- Handle booleans
   if type(str) == "boolean" then
     return str and 1.0 or 0.0
   end
   
-  -- Handle strings
   if type(str) == "string" then
     -- Trim whitespace
     str = str:match("^%s*(.-)%s*$")
     
-    -- Try to convert to number (returns nil on failure)
+    -- try to convert to number (returns nil on failure)
     return tonumber(str)
   end
   
@@ -2032,7 +2067,6 @@ function float(str)
 end
 
 function hex(n, digits)
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
@@ -2041,13 +2075,13 @@ function hex(n, digits)
     return result
   end
   
-  -- Convert to integer
+  -- convert to int
   local int_val = math.floor(tonumber(n) or 0)
   
-  -- Convert to hex string (uppercase)
+  -- convert to hex string uppercase
   local hex_str = string.format("%X", int_val)
   
-  -- Pad with zeros if digits specified
+  -- pad with zeros if digits specified
   if digits and #hex_str < digits then
     hex_str = string.rep("0", digits - #hex_str) .. hex_str
   end
@@ -2056,7 +2090,6 @@ function hex(n, digits)
 end
 
 function str(n)
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
@@ -2065,27 +2098,23 @@ function str(n)
     return result
   end
   
-  -- Handle booleans
   if type(n) == "boolean" then
     return n and "true" or "false"
   end
   
-  -- Handle numbers
   if type(n) == "number" then
     return tostring(n)
   end
   
-  -- Handle strings (pass through)
+  -- pass through strings
   if type(n) == "string" then
     return n
   end
   
-  -- Default: convert to string
   return tostring(n)
 end
 
 function unchar(n)
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
@@ -2094,9 +2123,8 @@ function unchar(n)
     return result
   end
   
-  -- Handle strings
   if type(n) == "string" then
-    -- Get the byte value of the first character
+    -- get byte value of the first character
     if #n > 0 then
       return string.byte(n, 1)
     else
@@ -2104,17 +2132,16 @@ function unchar(n)
     end
   end
   
-  -- Handle numbers (pass through)
+  -- pass through numbers
   if type(n) == "number" then
     return n
   end
   
-  -- Default
+  -- default
   return nil
 end
 
 function unhex(n)
-  -- Handle tables (arrays)
   if type(n) == "table" then
     local result = {}
     for i, v in ipairs(n) do
@@ -2123,21 +2150,20 @@ function unhex(n)
     return result
   end
   
-  -- Handle strings
   if type(n) == "string" then
-    -- Trim whitespace
+    -- trim whitespace
     n = n:match("^%s*(.-)%s*$")
     
-    -- Convert hex string to number
+    -- convert hex string to number
     return tonumber(n, 16)  -- base 16
   end
   
-  -- Handle numbers (pass through)
+  -- pass through any numbers
   if type(n) == "number" then
     return n
   end
   
-  -- Default
+  -- default
   return nil
 end
 

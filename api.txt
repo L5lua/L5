@@ -210,6 +210,13 @@
 * [X] abs()  --absolute value
 * [X] ceil()  --round up
 * [X] floor() --round down
+* [X] fract() 
+* [X] lerp()
+* [X] log()
+* [X] norm()
+* [X] pow()
+* [X] sq()
+* [X] sqrt()
 * [X] round() --round up or down
 * [X] int() --convert to integer
 * [X] constrain() --limit range of variable
@@ -237,6 +244,10 @@
 * [X] sin()
 * [X] cos()
 * [X] tan()
+* [X] asin()
+* [X] acos()
+* [X] atan()
+* [X] atan2()
 
 ## Typography
 * [X] loadFont() --create new font
