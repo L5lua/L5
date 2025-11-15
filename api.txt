@@ -205,8 +205,9 @@
 ### Math
 * [X] random() --takes 1 or 2 arguments. if a table name is given, returns a random value from the table
 * [X] randomSeed()
+* [X] randomGaussian()
 * [X] noise() --1, 2 or 3 dimensional Simplex noise generation
-* [ ] lerp()  
+* [X] lerp()  
 * [X] abs()  --absolute value
 * [X] ceil()  --round up
 * [X] floor() --round down

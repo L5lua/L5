@@ -1773,9 +1773,45 @@ function random(_a,_b)
   end
 end
 
+function randomSeed(seed)
+  love.math.setRandomSeed(seed)
+end
+
 function noise(_x,_y,_z)
   return love.math.noise(_x,_y,_z)
 end
+
+--self-contained, optional params
+randomGaussian = (function()
+  local hasSpare = false
+  local spare = 0
+  
+  return function(mean, sd)
+    mean = mean or 0
+    sd = sd or 1
+    
+    local val
+    
+    if hasSpare then
+      val = spare
+      hasSpare = false
+    else
+      local u, v, s
+      repeat
+        u = math.random() * 2 - 1
+        v = math.random() * 2 - 1
+        s = u * u + v * v
+      until s > 0 and s < 1
+      
+      s = math.sqrt(-2 * math.log(s) / s)
+      val = u * s
+      spare = v * s
+      hasSpare = true
+    end
+    
+    return val * sd + mean
+  end
+end)()
 
 function abs(_a)
   return math.abs(_a)

@@ -58,6 +58,7 @@
 * [X] Improve blur algorithm - exponential blur, not Gaussian blur
 * [ ] review optional params for consistency with processing/p5
 * [ ] filter doesn't currently apply to setup, only in draw
+* [ ] filter doesn't work correctly in draw if noLoop() is used
 
 ## Typography
 
