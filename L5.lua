@@ -1364,26 +1364,49 @@ function colorMode(_mode, _max1, _max2, _max3, _maxA)
   end
 end
 
---function fill(_r,_g,_b,_a)
 function fill(...)
-  L5_env.fill_mode="fill" 
-  love.graphics.setColor(unpack(toColor(...)))
+  L5_env.fill_mode = "fill"
+  local args = {...}
+  
+  -- If single argument is a table with 4 elements (already a color), use it directly
+  if #args == 1 and type(args[1]) == "table" and #args[1] == 4 then
+    love.graphics.setColor(unpack(args[1]))
+  -- If single argument is a table with fewer elements, convert it
+  elseif #args == 1 and type(args[1]) == "table" then
+    love.graphics.setColor(unpack(toColor(unpack(args[1]))))
+  else
+    love.graphics.setColor(unpack(toColor(...)))
+  end
 end
 
 --------------- CREATING and READING ----------------
 
 function color(...)
     local args = {...}
+    
+    -- Check if first argument is a table
+    if #args == 1 and type(args[1]) == "table" then
+        local t = args[1]
+        if #t == 3 then
+            return toColor(t[1], t[2], t[3], L5_env.color_max[4])
+        elseif #t == 4 then
+            return toColor(t[1], t[2], t[3], t[4])
+        else
+            error("color() table argument requires 3 or 4 values")
+        end
+    end
+    
+    -- Regular argument handling
     if #args == 3 then
         return toColor(args[1], args[2], args[3], L5_env.color_max[4])
     elseif #args == 4 then
         return toColor(args[1], args[2], args[3], args[4])
     elseif #args == 2 then
-        return toColor(args[1], args[1], args[1], args[2])  -- This is fine for grayscale+alpha
+        return toColor(args[1], args[1], args[1], args[2])
     elseif #args == 1 then
         return toColor(args[1])  
     else
-        error("color() requires 1-4 arguments")
+        error("color() requires 1-4 arguments or a table with 3-4 values")
     end
 end
 
