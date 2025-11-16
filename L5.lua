@@ -1368,12 +1368,17 @@ function fill(...)
   L5_env.fill_mode = "fill"
   local args = {...}
   
-  -- If single argument is a table with 4 elements (already a color), use it directly
-  if #args == 1 and type(args[1]) == "table" and #args[1] == 4 then
-    love.graphics.setColor(unpack(args[1]))
-  -- If single argument is a table with fewer elements, convert it
-  elseif #args == 1 and type(args[1]) == "table" then
-    love.graphics.setColor(unpack(toColor(unpack(args[1]))))
+  -- If single argument is a table
+  if #args == 1 and type(args[1]) == "table" then
+    local t = args[1]
+    -- Check if it's normalized (all values <= 1.0) or raw array
+    if t[1] <= 1.0 and t[2] <= 1.0 and t[3] <= 1.0 and (not t[4] or t[4] <= 1.0) then
+      -- Already normalized, use directly
+      love.graphics.setColor(unpack(t))
+    else
+      -- Raw array, needs conversion
+      love.graphics.setColor(unpack(toColor(unpack(t))))
+    end
   else
     love.graphics.setColor(unpack(toColor(...)))
   end
@@ -1410,20 +1415,80 @@ function color(...)
     end
 end
 
-function alpha(_color)
-  return _color[4]*L5_env.color_max[4]
-end
-
 function red(_color)
-  return _color[1]*L5_env.color_max[1]
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("red() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) from color() function
+  -- versus a raw array with values in the current color mode range
+  if _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0 then
+    -- It's normalized - scale to current color mode range
+    return _color[1] * L5_env.color_max[1]
+  else
+    -- It's a raw array - already in color mode range, return as-is
+    return _color[1]
+  end
 end
 
 function green(_color)
-  return _color[2]*L5_env.color_max[2]
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("green() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) from color() function
+  -- versus a raw array with values in the current color mode range
+  if _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0 then
+    -- It's normalized - scale to current color mode range
+    return _color[2] * L5_env.color_max[2]
+  else
+    -- It's a raw array - already in color mode range, return as-is
+    return _color[2]
+  end
 end
 
 function blue(_color)
-  return _color[3]*L5_env.color_max[3]
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("blue() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) from color() function
+  -- versus a raw array with values in the current color mode range
+  if _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0 then
+    -- It's normalized - scale to current color mode range
+    return _color[3] * L5_env.color_max[3]
+  else
+    -- It's a raw array - already in color mode range, return as-is
+    return _color[3]
+  end
+end
+
+function alpha(_color)
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("alpha() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) from color() function
+  -- versus a raw array with values in the current color mode range
+  if _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0 then
+    -- It's normalized - scale to current color mode range
+    return _color[4] * L5_env.color_max[4]
+  else
+    -- It's a raw array - already in color mode range, return as-is
+    return _color[4]
+  end
 end
 
 ----------------------- COLOR ------------------------
