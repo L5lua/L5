@@ -355,17 +355,17 @@ function toColor(_a, _b, _c, _d)
         a = L5_env.color_max[4]
       elseif L5_env.color_mode == HSL then
         -- Grayscale in HSL: hue=0, saturation=0, lightness=value
-        r, g, b = HSLtoRGB(0, 0, _a / L5_env.color_max[3], 1)
+        r, g, b = HSLtoRGB(0, 0, _a / L5_env.color_max[3])
         r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
         a = L5_env.color_max[4]
       end
     elseif type(_a) == "string" then
       if _a:sub(1, 1) == "#" then -- Hex color
-	r, g, b = hexToRGB(_a)
-	a = L5_env.color_max[4]
+        r, g, b = hexToRGB(_a)
+        a = L5_env.color_max[4]
       else -- HTML color name
         if htmlColors[_a] then
-	  r, g, b = unpack(htmlColors[_a])
+          r, g, b = unpack(htmlColors[_a])
           a = L5_env.color_max[4]
         else
           error("Color '" .. _a .. "' not found in htmlColors table")
@@ -383,7 +383,7 @@ function toColor(_a, _b, _c, _d)
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = _b
     elseif L5_env.color_mode == HSL then
-      r, g, b = HSLtoRGB(0, 0, _a / L5_env.color_max[3], 1)
+      r, g, b = HSLtoRGB(0, 0, _a / L5_env.color_max[3])
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = _b
     end
@@ -396,7 +396,7 @@ function toColor(_a, _b, _c, _d)
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = L5_env.color_max[4]
     elseif L5_env.color_mode == HSL then
-      r, g, b = HSLtoRGB(_a / L5_env.color_max[1], _b / L5_env.color_max[2], _c / L5_env.color_max[3], 1)
+      r, g, b = HSLtoRGB(_a / L5_env.color_max[1], _b / L5_env.color_max[2], _c / L5_env.color_max[3])
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = L5_env.color_max[4]
     end
@@ -409,7 +409,7 @@ function toColor(_a, _b, _c, _d)
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = _d
     elseif L5_env.color_mode == HSL then
-      r, g, b = HSLtoRGB(_a / L5_env.color_max[1], _b / L5_env.color_max[2], _c / L5_env.color_max[3], 1)
+      r, g, b = HSLtoRGB(_a / L5_env.color_max[1], _b / L5_env.color_max[2], _c / L5_env.color_max[3])
       r, g, b = r * L5_env.color_max[1], g * L5_env.color_max[2], b * L5_env.color_max[3]
       a = _d
     end
@@ -442,14 +442,15 @@ function hexToRGB(hex)
     return r, g, b
 end
 
-function HSVtoRGB(h, s, v, a) 
+function HSVtoRGB(h, s, v) 
     if s <= 0 then 
-        return v, v, v, a or L5_env.color_max[4]
+        return v, v, v
     end
-    h = h*6
-    local c = v*s
-    local x = (1-math.abs((h%2)-1))*c
-    local m,r,g,b = (v-c), 0, 0, 0
+    h = h * 6
+    local c = v * s
+    local x = c * (1 - math.abs((h % 2) - 1))
+    local m = v - c
+    local r, g, b = 0, 0, 0
     if h < 1 then
         r, g, b = c, x, 0
     elseif h < 2 then
@@ -463,25 +464,32 @@ function HSVtoRGB(h, s, v, a)
     else
         r, g, b = c, 0, x
     end
-    return r+m, g+m, b+m, a or L5_env.color_max[4]
+    return r + m, g + m, b + m
 end
 
-function HSLtoRGB(h, s, l, a)
-    if s<=0 then 
-        return l, l, l, a or L5_env.color_max[4]
+function HSLtoRGB(h, s, l)
+    if s <= 0 then 
+        return l, l, l
     end
-    h, s, l = h*6, s, l
-    local c = (1-math.abs(2*l-1))*s
-    local x = (1-math.abs(h%2-1))*c
-    local m,r,g,b = (l-.5*c), 0,0,0
-    if h < 1     then r,g,b = c,x,0
-    elseif h < 2 then r,g,b = x,c,0
-    elseif h < 3 then r,g,b = 0,c,x
-    elseif h < 4 then r,g,b = 0,x,c
-    elseif h < 5 then r,g,b = x,0,c
-    else              r,g,b = c,0,x
-    end 
-    return r+m, g+m, b+m, a or L5_env.color_max[4]
+    h = h * 6
+    local c = (1 - math.abs(2 * l - 1)) * s
+    local x = c * (1 - math.abs((h % 2) - 1))
+    local m = l - c / 2
+    local r, g, b = 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r + m, g + m, b + m
 end
 
 function RGBtoHSL(r, g, b)
@@ -1321,15 +1329,38 @@ function background(_r,_g,_b,_a) -- can take color or image file
   end
 end
 
-function colorMode(_mode, _max)
+function colorMode(_mode, _max1, _max2, _max3, _maxA)
+  --handles 4 colorMode variations 
+  -- Set the color mode
   if _mode == RGB or _mode == HSB or _mode == HSL then
     L5_env.color_mode = _mode
-  end
-  if _max then
-    L5_env.color_max = {_max,_max,_max,_max}
   else
-    if _mode == RGB then L5_env.color_max = {255,255,255,255} end
-    if _mode == HSB or _mode == HSL then L5_env.color_max = {360,100,100,100} end
+    error("Invalid color mode. Use RGB, HSB, or HSL")
+  end
+  
+  -- Handle different argument patterns
+  if _max1 == nil then
+    -- No max specified - use defaults
+    if _mode == RGB then 
+      L5_env.color_max = {255, 255, 255, 255}
+    elseif _mode == HSB or _mode == HSL then 
+      L5_env.color_max = {360, 100, 100, 100}
+    end
+  elseif _max2 == nil then
+    -- One max specified - apply to all channels
+    L5_env.color_max = {_max1, _max1, _max1, _max1}
+  elseif _max3 == nil then
+    error("colorMode requires either 1, 3, or 4 max values")
+  elseif _maxA == nil then
+    -- Three max values specified (no alpha)
+    if _mode == RGB then
+      L5_env.color_max = {_max1, _max2, _max3, 255}  -- Default alpha
+    elseif _mode == HSB or _mode == HSL then
+      L5_env.color_max = {_max1, _max2, _max3, 100}  -- Default alpha
+    end
+  else
+    -- Four max values specified (including alpha)
+    L5_env.color_max = {_max1, _max2, _max3, _maxA}
   end
 end
 
@@ -1817,8 +1848,10 @@ function abs(_a)
   return math.abs(_a)
 end
 
-function round(_a)
-  return math.floor(_a + 0.5 * (_a >= 0 and 1 or -1))
+function round(n, decimals)
+  decimals = decimals or 0
+  local mult = 10 ^ decimals
+  return math.floor(n * mult + 0.5 * (n >= 0 and 1 or -1)) / mult
 end
 
 function int(_a)
