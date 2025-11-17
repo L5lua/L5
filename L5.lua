@@ -1491,6 +1491,188 @@ function alpha(_color)
   end
 end
 
+function brightness(_color)
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("brightness() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) or raw array
+  local isNormalized = _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0
+  
+  local r, g, b
+  if isNormalized then
+    -- Already normalized (0-1)
+    r, g, b = _color[1], _color[2], _color[3]
+  else
+    -- Raw array - normalize it
+    r = _color[1] / L5_env.color_max[1]
+    g = _color[2] / L5_env.color_max[2]
+    b = _color[3] / L5_env.color_max[3]
+  end
+  
+  -- Convert RGB to HSB and extract brightness (which is the V in HSV)
+  local max = math.max(r, g, b)
+  local min = math.min(r, g, b)
+  local brightness = max  -- Brightness is the max of RGB values
+  
+  -- Return brightness in the current color mode range
+  if L5_env.color_mode == HSB then
+    return brightness * L5_env.color_max[3]
+  else
+    -- Default: return in 0-100 range
+    return brightness * 100
+  end
+end
+
+function lightness(_color)
+  if type(_color) == "string" then
+    -- Convert CSS color string to color object first
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("lightness() requires a color table or CSS string")
+  end
+  
+  -- Check if it's a normalized color object (values 0-1) or raw array
+  local isNormalized = _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0
+  
+  local r, g, b
+  if isNormalized then
+    -- Already normalized (0-1) from toColor()
+    r, g, b = _color[1], _color[2], _color[3]
+  else
+    -- Raw array - normalize based on current color mode
+    if L5_env.color_mode == RGB then
+      r = _color[1] / L5_env.color_max[1]
+      g = _color[2] / L5_env.color_max[2]
+      b = _color[3] / L5_env.color_max[3]
+    elseif L5_env.color_mode == HSL then
+      -- Raw HSL array - convert to RGB first
+      r, g, b = HSLtoRGB(_color[1] / L5_env.color_max[1], _color[2] / L5_env.color_max[2], _color[3] / L5_env.color_max[3])
+    elseif L5_env.color_mode == HSB then
+      -- Raw HSB array - convert to RGB first
+      r, g, b = HSVtoRGB(_color[1] / L5_env.color_max[1], _color[2] / L5_env.color_max[2], _color[3] / L5_env.color_max[3])
+    end
+  end
+  
+  -- Convert RGB to HSL lightness
+  local max = math.max(r, g, b)
+  local min = math.min(r, g, b)
+  local lightness = (max + min) / 2
+  
+  -- Return lightness in the current color mode range
+  if L5_env.color_mode == HSL then
+    return lightness * L5_env.color_max[3]
+  else
+    -- Default: return in 0-100 range
+    return lightness * 100
+  end
+end
+
+function hue(_color)
+  if type(_color) == "string" then
+    _color = toColor(_color)
+  elseif type(_color) ~= "table" then
+    error("hue() requires a color table or CSS string")
+  end
+  
+  -- toColor() always returns normalized 0-1 values
+  -- Raw arrays have values in the color_max range
+  -- If all values are <= 1, it's normalized; otherwise it's raw
+  local isNormalized = _color[1] <= 1.0 and _color[2] <= 1.0 and _color[3] <= 1.0
+  
+  local r, g, b
+  if isNormalized then
+    -- Already normalized (0-1) from toColor()
+    r, g, b = _color[1], _color[2], _color[3]
+  else
+    -- Raw array - normalize based on current color mode
+    if L5_env.color_mode == RGB then
+      r = _color[1] / L5_env.color_max[1]
+      g = _color[2] / L5_env.color_max[2]
+      b = _color[3] / L5_env.color_max[3]
+    elseif L5_env.color_mode == HSL then
+      -- Raw HSL array - convert to RGB first
+      r, g, b = HSLtoRGB(_color[1] / L5_env.color_max[1], _color[2] / L5_env.color_max[2], _color[3] / L5_env.color_max[3])
+    elseif L5_env.color_mode == HSB then
+      -- Raw HSB array - convert to RGB first
+      r, g, b = HSVtoRGB(_color[1] / L5_env.color_max[1], _color[2] / L5_env.color_max[2], _color[3] / L5_env.color_max[3])
+    end
+  end
+  
+  -- Convert RGB to hue
+  local max = math.max(r, g, b)
+  local min = math.min(r, g, b)
+  local delta = max - min
+  
+  local h = 0
+  if delta ~= 0 then
+    if max == r then
+      h = ((g - b) / delta) % 6
+    elseif max == g then
+      h = (b - r) / delta + 2
+    else
+      h = (r - g) / delta + 4
+    end
+    h = h * 60
+    if h < 0 then h = h + 360 end
+  end
+  
+  -- Return hue in the current color mode range
+  if L5_env.color_mode == HSB or L5_env.color_mode == HSL then
+    return (h / 360) * L5_env.color_max[1]
+  else
+    return h
+  end
+end
+
+function lerpColor(_c1, _c2, _amt)
+  -- Clamp amt to [0, 1]
+  _amt = math.max(0, math.min(1, _amt))
+  
+  -- Convert string colors if needed
+  if type(_c1) == "string" then
+    _c1 = toColor(_c1)
+  end
+  if type(_c2) == "string" then
+    _c2 = toColor(_c2)
+  end
+  
+  -- Check if colors are normalized or raw arrays
+  local c1_normalized = _c1[1] <= 1.0 and _c1[2] <= 1.0 and _c1[3] <= 1.0
+  local c2_normalized = _c2[1] <= 1.0 and _c2[2] <= 1.0 and _c2[3] <= 1.0
+  
+  -- Normalize colors if needed
+  local c1, c2
+  if c1_normalized then
+    c1 = {_c1[1] * L5_env.color_max[1], _c1[2] * L5_env.color_max[2], _c1[3] * L5_env.color_max[3], _c1[4] * L5_env.color_max[4]}
+  else
+    c1 = {_c1[1], _c1[2], _c1[3], _c1[4] or L5_env.color_max[4]}
+  end
+  
+  if c2_normalized then
+    c2 = {_c2[1] * L5_env.color_max[1], _c2[2] * L5_env.color_max[2], _c2[3] * L5_env.color_max[3], _c2[4] * L5_env.color_max[4]}
+  else
+    c2 = {_c2[1], _c2[2], _c2[3], _c2[4] or L5_env.color_max[4]}
+  end
+  
+  -- Interpolate in the current color mode
+  local result = {}
+  for i = 1, 4 do
+    result[i] = c1[i] + (c2[i] - c1[i]) * _amt
+  end
+  
+  -- Convert back to normalized format (what toColor returns)
+  return {
+    result[1] / L5_env.color_max[1],
+    result[2] / L5_env.color_max[2],
+    result[3] / L5_env.color_max[3],
+    result[4] / L5_env.color_max[4]
+  }
+end
+
 ----------------------- COLOR ------------------------
 htmlColors = {
     ["aliceblue"] = {240, 248, 255},
