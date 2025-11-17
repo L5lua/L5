@@ -131,7 +131,7 @@ function love.load()
 
   initShaderDefaults()
 
-  fill(255)
+  fill(0)
 end
 
 function love.update(dt)
@@ -2616,24 +2616,26 @@ end
 function text(_msg,_x,_y,_w)
   local x_offset=0
   local y_offset=0
+  local font = love.graphics.getFont()
   
   -- set x-offset
   if L5_env.textAlignX==LEFT then
     x_offset = 0
   elseif L5_env.textAlignX == RIGHT then
-    x_offset = love.graphics.getFont():getWidth(_msg)
+    x_offset = font:getWidth(_msg)
   elseif L5_env.textAlignX == CENTER then
-    x_offset = (love.graphics.getFont():getWidth(_msg))/2
+    x_offset = font:getWidth(_msg)/2
   end
+
   -- set y-offset
   if L5_env.textAlignY == BASELINE then
-    y_offset=0
+    y_offset = font:getAscent()
   elseif L5_env.textAlignY == TOP then
-    y_offset=0
+    y_offset = 0
   elseif L5_env.textAlignY == CENTER then
-    y_offset = (love.graphics.getFont():getHeight(_msg))/2
+    y_offset = font:getHeight(_msg)/2
   elseif L5_env.textAlignY == BOTTOM then
-    y_offset = love.graphics.getFont():getHeight(_msg)
+    y_offset = font:getHeight(_msg)
   end
 
   if _w ~= nil then
