@@ -1,7 +1,7 @@
 # TODO
 
 ## Style
-* [ ] Need to run a linter on L5
+* [ ] Add linter 
 
 ## Debugging
 
@@ -11,18 +11,18 @@
 
 ## Environment
 
-* [X] fullscreen seems currently broken. called inside L5 at wrong time or related to setup events drawing call rewrite?
 * [ ] error detection with useful error messages
+* [X] fullscreen seems currently broken. called inside L5 at wrong time or related to setup events drawing call rewrite?
 * [X] fix flickering on event handling - graphics in mousePressed(), keyTyped(), keyReleased() double draw call and cause flickering i think
 * [X] debug mouseClicked - probably needs to be added to draw after mousePressed
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
 * [X] check transforms reset at correct time? see the rotating square example.
 * [X] only call setup code once
-  * [ ] in fact - fix so that you don't need a setup. the environment L5_env should be setup before
+  * [ ] in fact - fix so that you don't need a setup. the environment L5_env should be setup before - update: would be difficult to implement this to match Processing parity, requiring capturing and playing back commands.
   * [X] i think don't run it in love.load, only need to grab screensize from size() function out of it?
 * [x] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
   * [X] width not set if fullscreen in use or no size()
-* [ ] review noise() - how important is it that L5 does not implement Value Noise, which both Processing and p5.js use? (they may move to Simplex or Perlin so maybe this is not an issue!)
+* [X] review noise() - how important is it that L5 does not implement Value Noise, which both Processing and p5.js use? (they may move to Simplex or Perlin so maybe this is not an issue!) - update: staying with Simplex currently
 * [X] loop() doesn't seem to turn on looping again if currently stopped due to noLoop()
 * [ ] save() function ignores specified filename argument to save the file under
 * [X] add createGraphics() drawing to offscreen buffer
@@ -31,19 +31,20 @@
 
 ## Color
 
+* [X] color_max isn't correctly taken into account
 * [X] set default fill color (black?)
 * [X] line should be stroke color
 * [X] html color names
 * [X] Hex code colors
-* [ ] add [HSB](https://www.love2d.org/wiki/HSV_color) and [HSL](https://www.love2d.org/wiki/HSL_color)
+* [X] add [HSB](https://www.love2d.org/wiki/HSV_color) and [HSL](https://www.love2d.org/wiki/HSL_color)
   * [X] add ability to set max value per val in table (RGBA, HSLA, HSBA)
 * [ ] using html color name should assume RGB mode despite actual global L5_env.color_mode (or other way to handle this since stored as RGB value tables, values max 255)
 * [X] colorMode should also allow setting individual max values for RGBA (or HSL/HSB) etc
 * [X] fix: noFill seems to turn off all fill going forward, overriding fill()
 * [X] tint should work when specified as 2-values: grayness,alpha
-* [ ] flickering happens in specific circumstances that need to be debugged such as transparency-related 
+* [X] flickering happens in specific circumstances that need to be debugged such as transparency-related 
+* [X] fix toColor() for individual args and table 
 * [ ] test / fix ability to switch between filters
-  * [ ] needs to use a fixed toColor() function
 * [ ] noSmooth() does not appear to work well? test more and improve
 
 ## Shapes
@@ -52,6 +53,7 @@
 * [X] ellipseMode doesn't seem to work? 
 * [ ] imageMode(): add CORNERS mode
 * [X] add custom shape creation via createShape() (processing) / beginShape() (p5.js), vertex() and endShape() (using love2d polygon - pass vertices as table?)
+* [ ] improve beginShape to get feature parity with p5-processing with `kind`? at the very least, basic shape drawing should match basic examples on reference page.
 
 ## Filter
 
@@ -83,14 +85,13 @@
   * [ ] VSCode setup instructions/starter
 * [ ] Exporter
   * [ ] Wrapper to simplify export to Mac Application, PC executable or Linux appImage (compare to Processing's Export Application, basic GUI) - examples: [love-export](https://github.com/dmoa/love-export) (CLI, older), [love-build](https://github.com/ellraiser/love-build) (GUI built in Love, current)
-  * [ ] web export using love.js?
 
 ## Documentation
 
 * [ ] Build website and reference
   * [X] landing page
   * [x] download
-  * [ ] reference index and pages
+  * [X] reference index and pages
   * [ ] tutorials
   * [ ] examples pages
   * [X] about
@@ -98,5 +99,5 @@
 ## Libraries
 
 * [ ] camera
+  * [X] create test with working webcam first
 * [ ] sound
-
