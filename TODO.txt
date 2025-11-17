@@ -65,7 +65,8 @@
 ## Typography
 
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
-* [ ] specifying optional width to text() function doesn't work correctly if textAlign() is set to CENTER or RIGHT currently. text doesn't draw to screen correctly.
+* [X] specifying optional width to text() function doesn't work correctly if textAlign() is set to CENTER or RIGHT currently. text doesn't draw to screen correctly.
+* [ ] add utf-8 support to handle multi-byte UTF-8 characters (Chinese, emoji, etc.) correctly in CHAR wrap mode in text()
 
 ## Pixels
 

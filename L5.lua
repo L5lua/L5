@@ -570,6 +570,7 @@ end
 
 function defaults()
   -- constants
+  -- shapes
   CORNER = "CORNER"
   RADIUS = "RADIUS"
   CORNERS = "CORNERS"
@@ -582,15 +583,20 @@ function defaults()
   MITER = "miter"
   BEVEL = "bevel"
   NONE = "none"
+  -- typography
   LEFT = "left"
   RIGHT = "right"
   CENTER = "center"
   TOP = "top"
   BOTTOM = "bottom"
   BASELINE = "baseline"
+  WORD = "word"
+  CHAR = "char"
+  -- color
   RGB = "rgb"
   HSB = "hsb"
   HSL = "hsl"
+  -- math
   PI = math.pi
   HALF_PI = math.pi/2
   QUARTER_PI=math.pi/4
@@ -633,7 +639,6 @@ function defaults()
   SIZEALL = "sizeall"
   NO = "no"
   HAND = "hand"
-
 
   -- global user vars - can be read by user but shouldn't be altered by user
   width = 800 --default, overridden with size() or fullscreen()
@@ -689,6 +694,7 @@ function define_env_globals()
   L5_env.currentFontSize = 12
   L5_env.textAlignX = LEFT
   L5_env.textAlignY = BASELINE
+  L5_env.textWrap = WORD
   -- filters (shaders)
   L5_env.filterOn = false
   L5_env.filter = nil
@@ -2626,21 +2632,55 @@ function text(_msg,_x,_y,_w)
   elseif L5_env.textAlignX == CENTER then
     x_offset = font:getWidth(_msg)/2
   end
-
+  
   -- set y-offset
-  if L5_env.textAlignY == BASELINE then
-    y_offset = font:getAscent()
-  elseif L5_env.textAlignY == TOP then
-    y_offset = 0
-  elseif L5_env.textAlignY == CENTER then
-    y_offset = font:getHeight(_msg)/2
-  elseif L5_env.textAlignY == BOTTOM then
-    y_offset = font:getHeight(_msg)
+  -- For wrapped text (when _w is specified), treat BASELINE as TOP
+  local effectiveAlignY = L5_env.textAlignY
+  if _w ~= nil and effectiveAlignY == BASELINE then
+    effectiveAlignY = TOP
   end
-
+  
+  if effectiveAlignY == BASELINE then
+    y_offset = font:getAscent()
+  elseif effectiveAlignY == TOP then
+    y_offset = 0
+  elseif effectiveAlignY == CENTER then
+    y_offset = font:getHeight()/2
+  elseif effectiveAlignY == BOTTOM then
+    y_offset = font:getHeight()
+  end
+  
   if _w ~= nil then
-    love.graphics.printf(_msg, _x - x_offset, _y - y_offset, _w, L5_env.textAlignX)
-  else --no specified max width/wrap
+    local wrapStyle = L5_env.textWrap
+    
+    if wrapStyle == CHAR then
+      -- Manual character wrapping (ASCII only)
+      local wrappedText = ""
+      local currentLine = ""
+      local lineWidth = 0
+      
+      for i = 1, #_msg do
+        local char = _msg:sub(i, i)
+        local charWidth = font:getWidth(char)
+        
+        if lineWidth + charWidth > _w then
+          wrappedText = wrappedText .. currentLine .. "\n"
+          currentLine = char
+          lineWidth = charWidth
+        else
+          currentLine = currentLine .. char
+          lineWidth = lineWidth + charWidth
+        end
+      end
+      wrappedText = wrappedText .. currentLine
+      
+      love.graphics.printf(wrappedText, _x - x_offset, _y - y_offset, _w, L5_env.textAlignX)
+    else
+      -- Default WORD wrapping (LÖVE's default behavior)
+      love.graphics.printf(_msg, _x - x_offset, _y - y_offset, _w, L5_env.textAlignX)
+    end
+  else
+    -- No specified max width/wrap
     love.graphics.print(_msg, _x - x_offset, _y - y_offset)
   end
 end
@@ -2653,6 +2693,20 @@ function textAlign(x_alignment,y_alignment)
     L5_env.textAlignY=y_alignment
   else
     L5_env.textAlignY=BASELINE
+  end
+end
+
+function textWrap(_style)
+  -- If no argument, return current style
+  if _style == nil then
+    return L5_env.textWrap
+  end
+  
+  -- Set the wrap style
+  if _style == WORD or _style == CHAR then
+    L5_env.textWrap = _style
+  else
+    error("textWrap() style must be WORD or CHAR")
   end
 end
 

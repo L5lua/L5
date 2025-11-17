@@ -212,7 +212,6 @@
 * [X] ceil()  --round up
 * [X] floor() --round down
 * [X] fract() 
-* [X] lerp()
 * [X] log()
 * [X] norm()
 * [X] pow()
@@ -258,6 +257,7 @@
 * [X] textHeight() -- returns height of text
 * [ ] textMode() --not currently planning on implementing this 
 * [X] textAlign() --first parameter sets horizontal alignment LEFT (default), CENTER, or RIGHT. Optional second parameter sets TOP, CENTER or BOTTOM vertical alignment.
+* [X] textWrap()
 * [X] textSize()
 
 ### Loading and Displaying
