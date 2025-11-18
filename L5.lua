@@ -131,7 +131,8 @@ function love.load()
 
   initShaderDefaults()
 
-  fill(0)
+  stroke(0)
+  fill(255)
 end
 
 function love.update(dt)
@@ -1990,7 +1991,28 @@ function endShape()
 end
 
 function bezier(x1,y1,x2,y2,x3,y3,x4,y4)
-  love.graphics.line(love.math.newBezierCurve({x1,y1,x2,y2,x3,y3,x4,y4}):render())
+  local curve = love.math.newBezierCurve({x1,y1,x2,y2,x3,y3,x4,y4})
+  local points = curve:render()
+  
+  -- Draw fill if fill mode is set
+  if L5_env.fill_mode == "fill" then
+    -- Close the shape by connecting end point back to start
+    local closedPoints = {}
+    for i, v in ipairs(points) do
+      table.insert(closedPoints, v)
+    end
+    -- Add line back to start to close the shape
+    table.insert(closedPoints, x1)
+    table.insert(closedPoints, y1)
+    
+    love.graphics.polygon("fill", closedPoints)
+  end
+  
+  -- Draw stroke
+  local r, g, b, a = love.graphics.getColor()
+  love.graphics.setColor(unpack(L5_env.stroke_color))
+  love.graphics.line(points)
+  love.graphics.setColor(r, g, b, a)
 end
 
 --catmull-rom spline - generated
