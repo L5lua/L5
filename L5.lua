@@ -662,9 +662,9 @@ function define_env_globals()
   L5_env.drawing = true
   -- drawing mode state
   L5_env.degree_mode = RADIANS --also: DEGREES
-  L5_env.rect_mode = CORNER --also: CORNERS, CENTER
-  L5_env.ellipse_mode = CENTER
-  L5_env.image_mode = CORNER
+  L5_env.rect_mode = CORNER --also: CORNERS, CENTER, RADIUS
+  L5_env.ellipse_mode = CENTER --also: CORNER, CORNERS, RADIUS
+  L5_env.image_mode = CORNER --also: CENTER, CORNERS
   -- global color state 
   L5_env.fill_mode="fill"   --also: "line"
   L5_env.stroke_color = {0,0,0}
@@ -1833,15 +1833,27 @@ htmlColors = {
 }
 
 function rectMode(_mode)
-  L5_env.rect_mode=_mode 
+  if _mode == CORNER or _mode == CORNERS or _mode == CENTER or _mode == RADIUS then
+    L5_env.rect_mode = _mode
+  else
+    error("rectMode() must be CORNER, CORNERS, CENTER, or RADIUS")
+  end
 end
 
 function ellipseMode(_mode)
-  L5_env.ellipse_mode=_mode 
+  if _mode == CENTER or _mode == CORNER or _mode == CORNERS or _mode == RADIUS then
+    L5_env.ellipse_mode = _mode
+  else
+    error("ellipseMode() must be CENTER, CORNER, CORNERS, or RADIUS")
+  end
 end
 
 function imageMode(_mode)
-  L5_env.image_mode=_mode 
+  if _mode == CORNER or _mode == CENTER or _mode == CORNERS then
+    L5_env.image_mode = _mode
+  else
+    error("imageMode() must be CORNER, CENTER, or CORNERS")
+  end
 end
 
 function noFill()
@@ -2218,11 +2230,13 @@ end
 -------------------- TRIGONOMETRY --------------------
 
 function angleMode(_mode)
-    if not _mode then
-        return L5_env.degree_mode 
-    elseif _mode == RADIANS or _mode == DEGREES then
-        L5_env.degree_mode = _mode 
-    end
+  if not _mode then
+    return L5_env.degree_mode
+  elseif _mode == RADIANS or _mode == DEGREES then
+    L5_env.degree_mode = _mode
+  else
+    error("angleMode() must be RADIANS or DEGREES")
+  end
 end
 
 function degrees(_angle)
@@ -2735,27 +2749,50 @@ end
 ---------------- LOADING & DISPLAYING ----------------
 
 function loadImage(_filename)
-  return love.graphics.newImage(_filename)
+  local success, result = pcall(love.graphics.newImage, _filename)
+  
+  if success then
+    return result
+  else
+    error("Failed to load image '" .. _filename .. "': " .. tostring(result))
+  end
 end
 
 function loadVideo(_filename)
-  return love.graphics.newVideo(_filename)
+  local success, result = pcall(love.graphics.newVideo, _filename)
+  
+  if success then
+    return result
+  else
+    error("Failed to load video '" .. _filename .. "': " .. tostring(result))
+  end
 end
 
 function image(_img,_x,_y,_w,_h)
   local originalWidth = _img:getWidth()
   local originalHeight = _img:getHeight()
-
-  local xscale = _w and (_w/originalWidth) or 1
-  local yscale = _h and (_h/originalHeight) or xscale
-
-  if L5_env.image_mode==CENTER then 
-    ox=originalWidth/2
-    oy=originalHeight/2
-  else --TODO: add in CORNERS mode
-    ox,oy=0,0
+  local xscale, yscale, ox, oy
+  
+  if L5_env.image_mode == CENTER then 
+    -- CENTER mode: _x,_y is center, _w,_h are width and height
+    xscale = _w and (_w/originalWidth) or 1
+    yscale = _h and (_h/originalHeight) or xscale
+    ox = originalWidth/2
+    oy = originalHeight/2
+  elseif L5_env.image_mode == CORNERS then
+    -- CORNERS mode: (_x,_y) is top-left corner, (_w,_h) is bottom-right corner
+    local width = _w - _x
+    local height = _h - _y
+    xscale = width / originalWidth
+    yscale = height / originalHeight
+    ox, oy = 0, 0
+  else -- CORNER mode (default)
+    -- CORNER mode: _x,_y is top-left, _w,_h are width and height
+    xscale = _w and (_w/originalWidth) or 1
+    yscale = _h and (_h/originalHeight) or xscale
+    ox, oy = 0, 0
   end
-
+  
   love.graphics.draw(_img,_x,_y,0,xscale,yscale,ox,oy)
 end
 
