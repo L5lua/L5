@@ -2796,8 +2796,13 @@ function image(_img,_x,_y,_w,_h)
   love.graphics.draw(_img,_x,_y,0,xscale,yscale,ox,oy)
 end
 
-function tint(r, g, b, a)
-    L5_env.currentTint = toColor(r,g,b,a)
+function tint(...)
+  local args = {...}
+  if #args == 1 and type(args[1]) == "table" then
+    L5_env.currentTint = toColor(unpack(args[1]))
+  else
+    L5_env.currentTint = toColor(...)
+  end
 end
 
 function noTint()
@@ -2810,8 +2815,10 @@ function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     -- Store current color
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
 
-    -- Apply tint
-    love.graphics.setColor(L5_env.currentTint[1], L5_env.currentTint[2], L5_env.currentTint[3], L5_env.currentTint[4]) 
+    -- Only apply tint to Image objects
+    if L5_env.currentTint and type(drawable) == "userdata" and drawable:type() == "Image" then
+        love.graphics.setColor(unpack(L5_env.currentTint))
+    end 
 
     -- Call original draw function
     originalDraw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
