@@ -715,8 +715,8 @@ end
 -- initialize shader default values
 function initShaderDefaults()
     -- Set default values for threshold shader
-    L5_filter.threshold:send("soft", 0.3)
-    L5_filter.threshold:send("threshold", 0.3)
+    L5_filter.threshold:send("soft", 0.5)
+    L5_filter.threshold:send("threshold", 0.5)
     
     -- Set default value for posterize
     L5_filter.posterize:send("levels", 4.0)
@@ -2990,6 +2990,7 @@ function pixelDensity(density)
         return love.graphics.getDPIScale()
     end
 end
+
 -- Load pixels from the back buffer into the pixels array
 function loadPixels()
     if not L5_env.backBuffer then
@@ -3023,14 +3024,12 @@ function loadPixels()
         end
     end
     
-    pixelsLoaded = true
+    L5_env.pixelsLoaded = true  -- Changed from pixelsLoaded to L5_env.pixelsLoaded
 end
 
 -- Update the back buffer with modified pixel data
 function updatePixels()
     if not L5_env.pixelsLoaded then
-        -- If loadPixels() wasn't called, there's nothing to update, so no-op
-        -- pixels can still be drawn with set() w/o need for this function
         return
     end
     
@@ -3041,10 +3040,10 @@ function updatePixels()
     for y = 0, h - 1 do
         for x = 0, w - 1 do
             local idx = (x + y * w) * 4
-            local r = (L5_env.pixels[idx] or 0) / 255
-            local g = (L5_env.pixels[idx + 1] or 0) / 255
-            local b = (L5_env.pixels[idx + 2] or 0) / 255
-            local a = (L5_env.pixels[idx + 3] or 255) / 255
+            local r = (pixels[idx] or 0) / 255  -- Changed from L5_env.pixels to pixels
+            local g = (pixels[idx + 1] or 0) / 255
+            local b = (pixels[idx + 2] or 0) / 255
+            local a = (pixels[idx + 3] or 255) / 255
             L5_env.imageData:setPixel(x, y, r, g, b, a)
         end
     end
@@ -3222,7 +3221,8 @@ L5_filter.blur = love.graphics.newShader([[
         int samples = 5;
         for(int x = -samples; x <= samples; x++) {
             for(int y = -samples; y <= samples; y++) {
-                vec2 offset = vec2(float(x), float(y)) * blurSize * pixelSize;
+	        //multiplying blurSize * 2 to aproximate p5's algorithm! not precisely set!
+                vec2 offset = vec2(float(x), float(y)) * blurSize * 2 * pixelSize;
                 float distance = length(vec2(float(x), float(y)));
                 float weight = exp(-k * distance);
                 
