@@ -310,18 +310,43 @@ function fullscreen(display)
   if display > displays then
     display = 1
   end
-
-  love.window.setFullscreen(true, "desktop")
   
-  local w, h = love.graphics.getDimensions(display)
-
-  -- Set the mode first with fullscreen dimensions
-  -- required in order to draw in setup function
-  love.window.setMode(w, h, {fullscreen = true, fullscreentype = "desktop"})
+  -- Get dimensions for the specified display
+  local w, h = love.window.getDesktopDimensions(display)
   
-  if L5_env.backBuffer then L5_env.backBuffer:release() end 
-  if L5_env.frontBuffer then L5_env.frontBuffer:release() end 
+  -- First, create a windowed mode on that display
+  love.window.setMode(w, h, {fullscreen = false})
   
+  -- Position the window on the target display
+  local xPos = 0
+  for i = 1, display - 1 do
+    local dw, _ = love.window.getDesktopDimensions(i)
+    xPos = xPos + dw
+  end
+  love.window.setPosition(xPos, 0)
+  
+  -- Small delay for Windows to process window positioning
+  if love.timer then love.timer.sleep(0.1) end
+  
+  -- Now go fullscreen
+  local success, err = pcall(function()
+    love.window.setFullscreen(true, "desktop")
+  end)
+  
+  if not success then
+    print("Fullscreen error:", err)
+    return
+  end
+  
+  -- Release old canvases
+  if L5_env.backBuffer then 
+    pcall(function() L5_env.backBuffer:release() end)
+  end 
+  if L5_env.frontBuffer then 
+    pcall(function() L5_env.frontBuffer:release() end)
+  end 
+  
+  -- Create new canvases
   L5_env.backBuffer = love.graphics.newCanvas(w, h) 
   L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
   
@@ -331,7 +356,6 @@ function fullscreen(display)
   love.graphics.clear(0.5, 0.5, 0.5, 1)
   
   love.graphics.setCanvas(L5_env.backBuffer)
-
   width, height = love.graphics.getDimensions()  
 end
 
