@@ -3113,7 +3113,7 @@ function get(x, y, w, h)
 end
 
 function set(x, y, c)
-    if type(c) == "table" and c.type and c:type() == "Image" then
+    if type(c) == "userdata" and c.type and c:type() == "Image" then
         -- c is an image, draw it at x,y
         local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
         love.graphics.setCanvas(L5_env.backBuffer)
