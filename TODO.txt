@@ -18,7 +18,7 @@
 * [X] move all non-user-editable globals and constants to be keys in a single global env table (to prevent collisions with user-defined variables)
 * [X] check transforms reset at correct time? see the rotating square example.
 * [X] only call setup code once
-  * [ ] in fact - fix so that you don't need a setup. the environment L5_env should be setup before - update: would be difficult to implement this to match Processing parity, requiring capturing and playing back commands.
+  * [ ] in fact - fix so that you don't need a setup. the environment L5_env should be setup before - update: would be difficult to implement this to match Processing parity, requiring capturing and playing back commands, or use of modified Love and separate main.lua that calls user code inside a sketch.lua?
   * [X] i think don't run it in love.load, only need to grab screensize from size() function out of it?
 * [x] make setup() optional so that defaults/constants are set even without a setup (L5_env, size, etc)
   * [X] width not set if fullscreen in use or no size()
@@ -44,23 +44,26 @@
 * [X] tint should work when specified as 2-values: grayness,alpha
 * [X] flickering happens in specific circumstances that need to be debugged such as transparency-related 
 * [X] fix toColor() for individual args and table 
-* [ ] test / fix ability to switch between filters
 * [ ] noSmooth() does not appear to work well? test more and improve
 
 ## Shapes
 
 * [X] test and fix arc to be consistent with p5 arc
 * [X] ellipseMode doesn't seem to work? 
-* [ ] imageMode(): add CORNERS mode
+* [X] imageMode(): add CORNERS mode
 * [X] add custom shape creation via createShape() (processing) / beginShape() (p5.js), vertex() and endShape() (using love2d polygon - pass vertices as table?)
 * [ ] improve beginShape to get feature parity with p5-processing with `kind`? at the very least, basic shape drawing should match basic examples on reference page.
 
 ## Filter
 
 * [X] Improve blur algorithm - exponential blur, not Gaussian blur
-* [ ] review optional params for consistency with processing/p5
 * [ ] filter doesn't currently apply to setup, only in draw
 * [ ] filter doesn't work correctly in draw if noLoop() is used
+* [ ] test / fix ability to switch between filters
+* [ ] review optional params for consistency with processing/p5
+  * [ ] dial in blur filter better to match p5/processing
+  * [ ] add OPAQUE filter to blur
+
 
 ## Typography
 
@@ -71,7 +74,7 @@
 ## Pixels
 
 * [X] add pixel array and functions for working with pixels
-* [ ] fix blend modes, currently not differentiated much, likely requires implementing shaders
+* [X] fix blend modes, currently not differentiated much, likely requires implementing shaders
 
 ## Events
 
@@ -102,3 +105,4 @@
 * [ ] camera
   * [X] create test with working webcam first
 * [ ] sound
+  * [X] create tests with working sound sample playback
