@@ -82,21 +82,29 @@ function love.run()
 	
 	-- Reset to screen and draw the back buffer
 	love.graphics.setCanvas()
-	if L5_env.backBuffer then
+if L5_env.backBuffer then
+  -- Save current color
+  local r, g, b, a = love.graphics.getColor()
+  
+  -- Set to white (no tint) when drawing the canvas to screen
+  love.graphics.setColor(1, 1, 1, 1)
+  
+  if L5_env.filterOn then
+    love.graphics.setShader(L5_env.filter)
+  end
 
-	  if L5_env.filterOn then
-	    love.graphics.setShader(L5_env.filter)
-	  end
+  love.graphics.draw(L5_env.backBuffer, 0, 0)
+  
+  if L5_env.filterOn then
+    love.graphics.setShader()
+    L5_env.filterOn = false
+  end
+  
+  -- Restore color (after drawing the canvas)
+  love.graphics.setColor(r, g, b, a)
 
-	  love.graphics.draw(L5_env.backBuffer, 0, 0)
-
-	  if L5_env.filterOn then
-	    love.graphics.setShader()
-	    L5_env.filterOn = false
-	  end
-
-	love.graphics.present()
-      end
+  love.graphics.present()
+end
     
       if love.timer then
 	if L5_env.framerate then --user-specified framerate
@@ -1351,11 +1359,14 @@ function line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
 
-function background(_r,_g,_b,_a) -- can take color or image file
-  if type(_r) == "userdata" and _r:type() == "Image" then --it's a background image file
-    image(_r,0,0,width,height) -- draw img in background
-  else --it's a color
-    love.graphics.clear(unpack(toColor(_r,_g,_b,_a)))
+function background(_r,_g,_b,_a)
+  if type(_r) == "userdata" and _r:type() == "Image" then
+    image(_r,0,0,width,height)
+  else
+    local prevR, prevG, prevB, prevA = love.graphics.getColor()
+    love.graphics.setColor(unpack(toColor(_r,_g,_b,_a)))
+    love.graphics.rectangle("fill", 0, 0, width, height)
+    love.graphics.setColor(prevR, prevG, prevB, prevA)
     L5_env.clearscreen = true 
   end
 end
