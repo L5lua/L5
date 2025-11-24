@@ -1046,9 +1046,63 @@ function scale(_sx,_sy)
   end
 end
 
-function applyMatrix(a, b, c, d, e, f)
-    local transform = love.math.newTransform(a, b, c, d, e, f)
+function applyMatrix(...)
+  local args = {...}
+  local a, b, c, d, e, f
+  
+  -- Check if first argument is a table
+  if #args == 1 and type(args[1]) == "table" then
+    local t = args[1]
+    if #t ~= 6 then
+        error("applyMatrix() table must contain exactly 6 values")
+    end
+    a, b, c, d, e, f = t[1], t[2], t[3], t[4], t[5], t[6]
+  elseif #args == 6 then
+    a, b, c, d, e, f = args[1], args[2], args[3], args[4], args[5], args[6]
+  else
+    error("applyMatrix() requires either 6 arguments or a table with 6 values")
+  end
+  
+  -- Validate that all values are numbers
+  if type(a) ~= "number" or type(b) ~= "number" or type(c) ~= "number" or 
+     type(d) ~= "number" or type(e) ~= "number" or type(f) ~= "number" then
+      error("applyMatrix() requires all values to be numbers")
+  end
+  
+  -- p5.js matrix format:
+  -- | a  c  e |
+  -- | b  d  f |
+  -- | 0  0  1 |
+  
+  -- Extract translation
+  local tx, ty = e, f
+  
+  -- Check if it's a pure shear matrix (no rotation/scale, just shear)
+  -- Pure x-shear: a=1, b=0, d=1, c=shear
+  if a == 1 and b == 0 and d == 1 then
+    local transform = love.math.newTransform(tx, ty, 0, 1, 1, 0, 0, c, 0)
     love.graphics.applyTransform(transform)
+    return
+  end
+  
+  -- Pure y-shear: a=1, c=0, d=1, b=shear
+  if a == 1 and c == 0 and d == 1 then
+    local transform = love.math.newTransform(tx, ty, 0, 1, 1, 0, 0, 0, b)
+    love.graphics.applyTransform(transform)
+    return
+  end
+  
+  -- General case: decompose into scale, rotation, and shear
+  local sx = math.sqrt(a * a + b * b)
+  local sy = math.sqrt(c * c + d * d)
+  local angle = math.atan2(b, a)
+  
+  -- Calculate shear
+  local kx = (a * c + b * d) / (sx * sx)
+  local ky = 0
+  
+  local transform = love.math.newTransform(tx, ty, angle, sx, sy, 0, 0, kx, ky)
+  love.graphics.applyTransform(transform)
 end
 
 -------------------- TIME and DATE -------------------
