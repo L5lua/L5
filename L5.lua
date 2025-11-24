@@ -1105,6 +1105,10 @@ function applyMatrix(...)
   love.graphics.applyTransform(transform)
 end
 
+function resetMatrix()
+  love.graphics.origin()
+end
+
 -------------------- TIME and DATE -------------------
 
 function millis()
