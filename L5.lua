@@ -147,7 +147,7 @@ function love.update(dt)
   mouseX, mouseY = love.mouse.getPosition()
   movedX=mouseX-pmouseX
   movedY=mouseY-pmouseY
-  deltaTime = dt
+  deltaTime = dt * 1000
   key = updateLastKeyPressed()
 
   -- Optional update (not typically Processing-like but available)
