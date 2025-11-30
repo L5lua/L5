@@ -2305,13 +2305,23 @@ function floor(_a)
 end
 
 function max(...)
-  local args={...}
-  return math.max(unpack(args))
+  local args = {...}
+  -- If single table argument, unpack it
+  if #args == 1 and type(args[1]) == "table" then
+    return math.max(unpack(args[1]))
+  else
+    return math.max(unpack(args))
+  end
 end
 
 function min(...)
-  local args={...}
-  return math.min(unpack(args))
+  local args = {...}
+  -- If single table argument, unpack it
+  if #args == 1 and type(args[1]) == "table" then
+    return math.min(unpack(args[1]))
+  else
+    return math.min(unpack(args))
+  end
 end
 
 function constrain(_val,_min,_max)
