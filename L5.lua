@@ -2183,6 +2183,10 @@ function pow(n, e)
   return n ^ e
 end
 
+function exp(n)
+  return math.exp(n)
+end
+
 function norm(val, start, stop)
   -- normalize the value to 0-1 range
   return (val - start) / (stop - start)
