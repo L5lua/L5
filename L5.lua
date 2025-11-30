@@ -261,21 +261,29 @@ function love.textinput(_text)
 end
 
 function love.resize(w, h)
-  -- Recreate buffers when window is resized
+  -- Recreate buffers when window is resized at density-scaled resolution
   if L5_env.backBuffer then L5_env.backBuffer:release() end 
   if L5_env.frontBuffer then L5_env.frontBuffer:release() end 
-
+  
   L5_env.backBuffer = love.graphics.newCanvas(w, h) 
-  L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
-
-  -- Clear new buffers
+  L5_env.frontBuffer = love.graphics.newCanvas(w, h ) 
+  
+  -- Clear new buffers and apply scaling
   love.graphics.setCanvas(L5_env.backBuffer) 
-  love.graphics.clear(1, 1, 1, 1)
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  
   love.graphics.setCanvas(L5_env.frontBuffer) 
-  love.graphics.clear(1, 1, 1, 1)
-  love.graphics.setCanvas()
-
+  love.graphics.clear(0.5, 0.5, 0.5, 1)
+  
+  love.graphics.setCanvas(L5_env.backBuffer)
+  
+  -- Update global width/height to logical size
   width, height = w, h
+  
+  -- Call user's windowResized function if it exists
+  if windowResized then
+    windowResized()
+  end
 end
 
 function love.focus(_focused)
@@ -365,6 +373,10 @@ function fullscreen(display)
   
   love.graphics.setCanvas(L5_env.backBuffer)
   width, height = love.graphics.getDimensions()  
+
+  if windowResized then
+    windowResized()
+  end
 end
 
 function toColor(_a, _b, _c, _d)
@@ -2703,8 +2715,24 @@ function windowTitle(_title)
   love.window.setTitle(_title)
 end
 
-function resizeWindow(_w,_h)
-  love.resize(_w,_h)
+function resizeWindow(_w, _h)
+  if _w == nil or _h == nil then --check for 2 args
+    error("resizeWindow() requires two arguments: width and height")
+  end
+  if type(_w) ~= "number" or type(_h) ~= "number" then -- Check if args are numbers
+    error("resizeWindow() requires width and height to be numbers")
+  end
+  if _w <= 0 or _h <= 0 then -- Check for reasonable values 
+    error("resizeWindow() requires positive width and height values")
+  end
+
+  -- clear active canvas first
+  love.graphics.setCanvas()  
+  -- then resize
+  love.window.setMode(_w, _h)
+
+  -- manually resize window
+  love.resize(_w, _h)
 end
 
 function clear()
@@ -3069,19 +3097,6 @@ function filter(_name, _param)
   else
     error("Error: not a filter name.")
   end
-end
-
--- Get or set pixel density (for high DPI displays)
-function pixelDensity(density)
-    if density then
-        -- Set pixel density (not commonly changed in LÖVE2D)
-        -- This would require recreating canvases, which L5 handles
-        -- For now, just return the current density
-        return love.graphics.getDPIScale()
-    else
-        -- Get current pixel density
-        return love.graphics.getDPIScale()
-    end
 end
 
 -- Load pixels from the back buffer into the pixels array
