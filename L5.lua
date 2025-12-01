@@ -789,11 +789,9 @@ function loadStrings(_file)
 end
 
 function loadTable(_file, _header)
-  -- Extract file extension
   local extension = _file:match("%.([^%.]+)$")
   
   if extension == "csv" or extension == "tsv" then
-    -- Determine separator based on file type
     local separator = (extension == "csv") and "," or "\t"
     local pattern = (extension == "csv") and "[^,]+" or "[^\t]+"
     
@@ -836,6 +834,15 @@ function loadTable(_file, _header)
           end
         end
       end
+      
+      -- If no headers were loaded, create numbered column identifiers
+      if #headers == 0 and #data > 0 then
+        for i = 1, #data[1] do
+          table.insert(headers, i)
+        end
+      end
+      
+      data.columns = headers
       return data
     end
     
@@ -848,7 +855,6 @@ function loadTable(_file, _header)
     else
       error("Could not load Lua file: " .. _file)
     end
-    
   else
     error("Unsupported file type: " .. (extension or "no extension") .. " for file: " .. _file)
   end
