@@ -199,7 +199,7 @@ end
   end
   if L5_env.wheelWasMoved then
     if mouseWheel ~= nil then 
-      mouseWheel(L5_env.wheelX or 0,L5_env.wheelY or 0) 
+      mouseWheel(L5_env.wheelY or 0) 
     end
     L5_env.wheelWasMoved = false
     L5_env.wheelX = nil
