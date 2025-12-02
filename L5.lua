@@ -698,6 +698,7 @@ function defaults()
   HAND = "hand"
 
   -- global user vars - can be read by user but shouldn't be altered by user
+  key = "" --default, overriden with key presses detected in love.update(dt)
   width = 800 --default, overridden with size() or fullscreen()
   height = 600 --ditto
   frameCount = 0
@@ -2823,6 +2824,11 @@ end
 --------------------- TYPOGRAPHY ---------------------
 
 function text(_msg,_x,_y,_w)
+  if _msg == nil then
+    return  -- Don't draw anything if message is nil
+  end
+  _msg = tostring(_msg)  -- Convert to string in case it's a number, boolean, etc.
+  
   local x_offset=0
   local y_offset=0
   local font = love.graphics.getFont()
