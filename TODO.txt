@@ -11,7 +11,11 @@
 
 ## Environment
 
+* [ ] add noWindow() for headless mode 
+* [X] should fullscreen() toggle between fullscreen and previous screen size? or take an argument to reset? or... (investigate p5/processing ways to do this)
+* [X] resizeCanvas() - debug. doesn't seem to correctly work.
 * [ ] error detection with useful error messages
+* [ ] cursor() has only been tested on Linux. Test that the same cursor constants are present on Mac and Windows.
 * [X] fullscreen seems currently broken. called inside L5 at wrong time or related to setup events drawing call rewrite?
 * [X] fix flickering on event handling - graphics in mousePressed(), keyTyped(), keyReleased() double draw call and cause flickering i think
 * [X] debug mouseClicked - probably needs to be added to draw after mousePressed
@@ -27,7 +31,7 @@
 * [ ] save() function ignores specified filename argument to save the file under
 * [X] add createGraphics() drawing to offscreen buffer
 * [ ] Enhancement: figure out some way to allow passing in image vars instead of only image filepath for custom cursors 
-* [ ] not registering backspace/delete key pressed
+* [X] not registering backspace/delete key pressed
 
 ## Color
 
@@ -73,6 +77,7 @@
 
 ## Pixels
 
+* [ ] add pixelDensity()
 * [X] add pixel array and functions for working with pixels
 * [X] fix blend modes, currently not differentiated much, likely requires implementing shaders
 

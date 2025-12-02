@@ -58,15 +58,17 @@
 * [X] deltaTime
 * [X] describe() --implementing as text to console, takes string input, should be in setup
 * [X] displayDensity()
+* [ ] ~pixelDensity()~ 
 * [X] displayHeight 
 * [X] displayWidth 
 * [X] focused --boolean var
 * [X] frameCount
 * [X] frameRate()
 * [X] fullscreen() --returns true if in fullscreen, false otherwise. if passed true, turns on fullscreen, or turns off if passed false. equivalent to p5.js implementation
-* [X] width (width of canvas in pixels)
-* [X] height (height of canvas in pixels)
-* [X] resizeWindow() (function that runs when window is resized)
+* [X] width -- width of canvas in pixels
+* [X] height -- height of canvas in pixels
+* [X] resizeWindow() -- changes width and height of window
+* [X] windowResized() -- function that runs when window is resized
 
 ## I/O
 
@@ -215,6 +217,7 @@
 * [X] log()
 * [X] norm()
 * [X] pow()
+* [X] exp()
 * [X] sq()
 * [X] sqrt()
 * [X] round() --round up or down

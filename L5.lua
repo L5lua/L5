@@ -1034,26 +1034,43 @@ end
 
 ---------------------- KEYBOARD ---------------------
 
--- helper function referenced in love.update()
 function updateLastKeyPressed()
-  local commonKeys = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-                     "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-                     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-                     "space", "return", "escape", "up", "down", "left", "right",
-                     "lshift", "rshift", "lctrl", "rctrl", "lalt", "ralt"}
-
-    -- reset keyIsPressed to false initially
-    keyIsPressed = false
-
-    -- Check each key and update vars
-    for _, k in ipairs(commonKeys) do
-      if love.keyboard.isDown(k) then
-        key = k
-    keyIsPressed = true
-        break -- Take the first key found
-      end
+  local commonKeys = {
+    -- Letters
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    -- Numbers
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+    -- Function keys
+    "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
+    -- Special keys
+    "space", "return", "escape", "backspace", "delete", "tab",
+    -- Arrow keys
+    "up", "down", "left", "right",
+    -- Navigation
+    "home", "end", "pageup", "pagedown", "insert",
+    -- Modifiers
+    "lshift", "rshift", "lctrl", "rctrl", "lalt", "ralt",
+    "capslock", "numlock", "scrolllock",
+    -- Punctuation
+    ".", ",", ";", "'", "/", "\\", "[", "]", "-", "=", "`",
+    -- Numpad
+    "kp0", "kp1", "kp2", "kp3", "kp4", "kp5", "kp6", "kp7", "kp8", "kp9",
+    "kp.", "kp/", "kp*", "kp-", "kp+", "kpenter",
+    -- Other
+    "pause", "printscreen"
+  }
+  
+  -- reset keyIsPressed to false initially
+  keyIsPressed = false
+  -- Check each key and update vars
+  for _, k in ipairs(commonKeys) do
+    if love.keyboard.isDown(k) then
+      key = k
+      keyIsPressed = true
+      break -- Take the first key found
     end
-
+  end
   return key
 end
 
