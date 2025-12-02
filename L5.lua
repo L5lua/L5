@@ -951,14 +951,28 @@ function saveTable(data, filename, format)
     end
     
   elseif format == "csv" or format == "tsv" then
-    -- Save as CSV or TSV
     local separator = (format == "csv") and "," or "\t"
     local lines = {}
     
+    -- Check if data is a single record (has named keys but no array elements)
+    local isSingleRecord = (#data == 0)
+    for k, v in pairs(data) do
+      if type(k) == "string" then
+        isSingleRecord = true
+        break
+      end
+    end
+    
+    -- Convert single record to array of one record
+    local records = data
+    if isSingleRecord and #data == 0 then
+      records = {data}
+    end
+
     -- Get headers from first row if it's a table with named keys
     local headers = {}
-    if #data > 0 and type(data[1]) == "table" then
-      for key, _ in pairs(data[1]) do
+    if #records > 0 and type(records[1]) == "table" then  -- Fixed: use records
+      for key, _ in pairs(records[1]) do                   -- Fixed: use records
         if type(key) == "string" then
           table.insert(headers, key)
         end
@@ -969,7 +983,7 @@ function saveTable(data, filename, format)
         table.insert(lines, table.concat(headers, separator))
         
         -- Add data rows using headers
-        for i, row in ipairs(data) do
+        for i, row in ipairs(records) do  -- Fixed: use records
           local values = {}
           for _, header in ipairs(headers) do
             table.insert(values, tostring(row[header] or ""))
@@ -978,7 +992,7 @@ function saveTable(data, filename, format)
         end
       else
         -- Array-style table, just use indices
-        for i, row in ipairs(data) do
+        for i, row in ipairs(records) do  -- Fixed: use records
           if type(row) == "table" then
             local values = {}
             for _, value in ipairs(row) do
@@ -992,7 +1006,7 @@ function saveTable(data, filename, format)
       end
     else
       -- Simple array
-      for i, value in ipairs(data) do
+      for i, value in ipairs(records) do  -- Fixed: use records
         table.insert(lines, tostring(value))
       end
     end
