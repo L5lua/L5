@@ -184,9 +184,13 @@ function love.draw()
   end
 
   if L5_env.keyWasTyped then
-    if keyTyped ~= nil then keyTyped() end
-    L5_env.keyWasTyped = false 
-  end
+  local savedKey = key
+  key = L5_env.typedKey  -- Temporarily use the typed character
+  if keyTyped ~= nil then keyTyped() end
+  key = savedKey  -- Restore
+  L5_env.keyWasTyped = false
+  L5_env.typedKey = nil
+end
 
   -- Check for mouse events in draw cycle
   if L5_env.mouseWasMoved then
@@ -257,6 +261,7 @@ end
 
 function love.textinput(_text)
   key = _text
+  L5_env.typedKey = _text
   L5_env.keyWasTyped = true 
 end
 
@@ -706,7 +711,6 @@ function defaults()
   mouseX=0
   mouseY=0
   keyIsPressed = false
-  key = nil
   pmouseX,pmouseY,movedX,movedY=0,0
   mouseButton = nil
   focused = true
@@ -732,6 +736,7 @@ function define_env_globals()
   L5_env.keyWasPressed = false
   L5_env.keyWasReleased = false
   L5_env.keyWasTyped = false
+  L5_env.typedKey = nil
   -- mouse state
   L5_env.mouseWasMoved = false
   L5_env.wasPressed = false
