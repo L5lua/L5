@@ -580,19 +580,31 @@ function RGBtoHSL(r, g, b)
   return h * L5_env.color_max[1], s * L5_env.color_max[2], l * L5_env.color_max[3]
 end
 
-
-function save()
-  print("running save")
+function save(filename)
     love.graphics.captureScreenshot(function(imageData)
-        local timestamp = os.date("%Y%m%d_%H%M%S")
-        local filename = "screenshot_" .. timestamp .. ".png"
+        -- Generate filename
+        local finalFilename
+        
+        if filename then
+            -- Check if filename ends with .png
+            if filename:match("%.png$") then
+                finalFilename = filename
+            else
+                -- Add .png extension
+                finalFilename = filename .. ".png"
+            end
+        else
+            -- Use default timestamp-based name
+            local timestamp = os.date("%Y%m%d_%H%M%S")
+            finalFilename = "screenshot_" .. timestamp .. ".png"
+        end
         
         -- Encode to memory (no file yet)
         local pngData = imageData:encode("png")
         
         -- Write directly to current directory
         local programDir = love.filesystem.getSource()
-        local targetPath = programDir .. "/" .. filename
+        local targetPath = programDir .. "/" .. finalFilename
         
         local file = io.open(targetPath, "wb")
         if file then
