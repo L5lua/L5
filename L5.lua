@@ -65,21 +65,6 @@ function love.run()
         if love.draw then love.draw() end
       end
       
-	-- Handle pending mouse events in drawing context
-	if L5_env.pendingMouseClicked then
-	  if mouseClicked then
-	    mouseClicked(L5_env.pendingMouseClicked.x, L5_env.pendingMouseClicked.y, L5_env.pendingMouseClicked.button)
-	  end
-	  L5_env.pendingMouseClicked = nil
-	end
-      
-	if L5_env.pendingMouseReleased then
-	  if mouseReleased then
-	    mouseReleased(L5_env.pendingMouseReleased.x, L5_env.pendingMouseReleased.y, L5_env.pendingMouseReleased.button)
-	  end
-	  L5_env.pendingMouseReleased = nil
-	end
-	
 	-- Reset to screen and draw the back buffer
 	love.graphics.setCanvas()
 if L5_env.backBuffer then
@@ -159,11 +144,16 @@ function love.draw()
   local isPressed = love.mouse.isDown(1) or love.mouse.isDown(2) or love.mouse.isDown(3)
 
   if isPressed and not L5_env.wasPressed then 
-  -- Mouse was just pressed this frame
-
-  if mousePressed ~= nil then mousePressed() end
+    -- Mouse was just pressed this frame
+    if mousePressed ~= nil then mousePressed() end
     mouseIsPressed = true
-  elseif isPressed then -- Still pressed (dragging)
+  elseif not isPressed and L5_env.wasPressed then
+    -- Mouse was just released this frame
+    if mouseReleased ~= nil then mouseReleased() end
+    if mouseClicked ~= nil then mouseClicked() end  -- Run immediately after mouseReleased
+    mouseIsPressed = false
+  elseif isPressed then
+    -- Still pressed (dragging)
     if mouseDragged ~= nil then mouseDragged() end
     mouseIsPressed = true
   else
