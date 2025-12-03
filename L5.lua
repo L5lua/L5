@@ -2620,14 +2620,17 @@ function hex(n, digits)
     return result
   end
   
+  -- Default to 8 digits if not specified (matches p5.js)
+  digits = digits or 8
+  
   -- convert to int
   local int_val = math.floor(tonumber(n) or 0)
   
   -- convert to hex string uppercase
   local hex_str = string.format("%X", int_val)
   
-  -- pad with zeros if digits specified
-  if digits and #hex_str < digits then
+  -- pad with zeros if needed
+  if #hex_str < digits then
     hex_str = string.rep("0", digits - #hex_str) .. hex_str
   end
   
