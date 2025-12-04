@@ -1334,10 +1334,40 @@ end
 --p5 calls arctype parameter "mode"
 function arc(_x, _y, _w, _h, _start, _stop, _arctype)
   local arctype = _arctype or PIE
+
+  -- Convert angles to radians if in DEGREES mode
+  local start_angle = _start
+  local stop_angle = _stop
+  
+  if L5_env.degree_mode == DEGREES then
+    start_angle = math.rad(_start)
+    stop_angle = math.rad(_stop)
+  end
+
   local radius_x = _w / 2
   local radius_y = _h / 2
+
+  -- Calculate center based on ellipseMode
   local center_x = _x
   local center_y = _y
+
+  if L5_env.ellipse_mode == CENTER then
+    center_x = _x
+    center_y = _y
+  elseif L5_env.ellipse_mode == RADIUS then
+    center_x = _x
+    center_y = _y
+    radius_x = _w  -- In RADIUS mode, w and h are the radii directly
+    radius_y = _h
+  elseif L5_env.ellipse_mode == CORNER then
+    center_x = _x + radius_x
+    center_y = _y + radius_y
+  elseif L5_env.ellipse_mode == CORNERS then
+    center_x = (_x + _w) / 2
+    center_y = (_y + _h) / 2
+    radius_x = (_w - _x) / 2
+    radius_y = (_h - _y) / 2
+  end
   
   -- Normalize angles to [0, 2π) range
   local function normalize_angle(angle)
@@ -1349,8 +1379,8 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
     return angle
   end
   
-  local start_norm = normalize_angle(_start)
-  local stop_norm = normalize_angle(_stop)
+  local start_norm = normalize_angle(start_angle)
+  local stop_norm = normalize_angle(stop_angle)
   
   -- Processing always draws clockwise from start to stop
   local arc_span
