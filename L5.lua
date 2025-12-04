@@ -2823,12 +2823,10 @@ function frameRate(_inp)
 end
 
 function noLoop()
-  --love.draw = function() end
   L5_env.drawing = false 
 end
 
 function loop()
-  --love.draw = draw()
   L5_env.drawing = true 
 end
 
