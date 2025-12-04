@@ -2319,6 +2319,15 @@ function round(n, decimals)
 end
 
 function int(_a)
+    -- Handle table input
+    if type(_a) == "table" then
+        local result = {}
+        for i, v in ipairs(_a) do
+            result[i] = int(v)  -- Recursively convert each element
+        end
+        return result
+    end
+    
     local num
     
     if type(_a) == "string" then
