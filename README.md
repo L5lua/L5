@@ -1,6 +1,6 @@
 # Welcome to L5
 
-![L5 logo](assets/L5-logo-blob.png)
+![L5 logo](L5-logo-blob.png)
 
 L5 is a fun, fast, cross-platform, and lightweight implementation of the Processing API in Lua. It is a free and open source coding library to make interactive artwork on the computer, aimed at artists, students, and anyone that wants a flexible way to prototype art, games, toys, and other software experiments in code.
 
