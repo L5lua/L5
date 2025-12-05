@@ -1,3 +1,6 @@
+-- L5 0.1.0 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.0'
+
 -- Override love.run() - adds double buffering and custom events
 function love.run()
   defaults()
