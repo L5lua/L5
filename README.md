@@ -64,7 +64,7 @@ L5 brings the familiar Processing creative coding environment to Lua, offering s
 3. **Create or edit main.lua** in the same directory as L5.lua
 4. **Require L5** at the top of your main.lua file with `require ("L5")`
 5. **Write** your program code in main.lua
-6. **Run** your program by dragging main.lua onto Love2D icon or running `love .` in terminal
+6. **Run** your program by dragging your project folder onto Love2D icon or running `love .` in terminal
 
 ### Basic Example
 
@@ -117,12 +117,9 @@ We welcome contributions! Before submitting pull requests, please open an issue 
 
 ## Reference Documentation
 
-Coming soon - comprehensive API reference and examples.
+[L5 Reference](https://l5lua.org/reference)
 
 ---
 
 *L5 aims to make creative coding accessible, fast, and fun while leveraging the power and simplicity of Lua.*
 
-## Credits
-
-Rockies image cc0 by volvob12b on Flickr.
