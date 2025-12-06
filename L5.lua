@@ -1,5 +1,5 @@
--- L5 0.1.1 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.1'
+-- L5 0.1.2 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.2'
 
 -- Override love.run() - adds double buffering and custom events
 function love.run()
@@ -143,7 +143,7 @@ function love.update(dt)
 -- This is a LÖVE limitation with video/audio stream synchronization
    if L5_env.videos then
     for _, v in ipairs(L5_env.videos) do
-      if v._shouldLoop and not v._video:isPlaying() then
+      if v._shouldLoop and not v._manuallyPaused and not v._video:isPlaying() then
         v._video:rewind()
         v._video:play()
       end
@@ -3012,18 +3012,31 @@ function loadVideo(_filename)
     _video = result,
     _shouldLoop = false,  -- Add loop flag
     
-    -- Add loop() method
+    -- pause override
+    pause = function(self)
+      self._manuallyPaused = true
+      self._video:pause()
+    end,
+
+    -- play override  
+    play = function(self)
+      self._manuallyPaused = false
+      self._video:play()
+    end,
+
+    -- loop() method
     loop = function(self)
       self._shouldLoop = true
+      self._manuallyPaused = false
       self._video:play()
     end,
     
-    -- Add noLoop() method
+    -- noLoop() method
     noLoop = function(self)
       self._shouldLoop = false
     end,
     
-    -- Add time() method
+    -- time() method
     time = function(self, t)
       if t == nil then
         return self._video:tell()
@@ -3032,7 +3045,7 @@ function loadVideo(_filename)
       end
     end,
     
-    -- Add volume() method
+    -- volume() method
     volume = function(self, val)
       if val == nil then
         local source = self._video:getSource()
