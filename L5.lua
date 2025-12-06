@@ -1,5 +1,5 @@
--- L5 0.1.0 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.0'
+-- L5 0.1.1 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.1'
 
 -- Override love.run() - adds double buffering and custom events
 function love.run()
@@ -1448,11 +1448,11 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
     table.insert(vertices, y)
   end
   
-  if arctype == "pie" then
+  if arctype == PIE then
     -- Add center point for pie
     table.insert(vertices, 1, cy) -- Insert at position 2 (after first vertex)
     table.insert(vertices, 1, cx) -- Insert at position 1
-  elseif arctype == "chord" then
+  elseif arctype == CHORD then
     -- Close the arc by connecting endpoints
     -- vertices already has the right points
   end
@@ -1462,7 +1462,7 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
   if L5_env.fill_mode and L5_env.fill_mode ~= "line" and #vertices >= 6 then
     if arctype == "pie" then
       love.graphics.polygon("fill", vertices)
-    elseif arctype == "chord" then
+    elseif arctype == CHORD then
       love.graphics.polygon("fill", vertices)
     end
     -- "open" type doesn't get filled
@@ -1473,15 +1473,15 @@ function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color))
     
-    if arctype == "open" then
+    if arctype == OPEN then
       -- Just draw the arc line
       for i = 1, #vertices - 2, 2 do
         love.graphics.line(vertices[i], vertices[i+1], vertices[i+2], vertices[i+3])
       end
-    elseif arctype == "chord" then
+    elseif arctype == CHORD then
       -- Draw the arc and the closing line
       love.graphics.polygon("line", vertices)
-    elseif arctype == "pie" then
+    elseif arctype == PIE then
       -- Draw the arc and lines to center
       love.graphics.polygon("line", vertices)
     end
