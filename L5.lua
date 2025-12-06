@@ -138,6 +138,18 @@ function love.update(dt)
   deltaTime = dt * 1000
   key = updateLastKeyPressed()
 
+  -- Update looping videos
+  -- Note: Videos with audio tracks may experience sync issues when looping
+-- This is a LÖVE limitation with video/audio stream synchronization
+   if L5_env.videos then
+    for _, v in ipairs(L5_env.videos) do
+      if v._shouldLoop and not v._video:isPlaying() then
+        v._video:rewind()
+        v._video:play()
+      end
+    end
+  end
+
   -- Optional update (not typically Processing-like but available)
   if update ~= nil then update() end
 end
@@ -744,6 +756,8 @@ function define_env_globals()
   L5_env.frontBuffer = nil
   L5_env.clearscreen = false
   L5_env.described = false
+  -- global video tracking for looping
+  L5_env.videos = {}
   -- global font state
   L5_env.fontPaths = {}
   L5_env.currentFontPath = nil
@@ -2989,11 +3003,68 @@ end
 function loadVideo(_filename)
   local success, result = pcall(love.graphics.newVideo, _filename)
   
-  if success then
-    return result
-  else
+  if not success then
     error("Failed to load video '" .. _filename .. "': " .. tostring(result))
   end
+  
+  -- Create a wrapper with additional methods
+  local videoWrapper = {
+    _video = result,
+    _shouldLoop = false,  -- Add loop flag
+    
+    -- Add loop() method
+    loop = function(self)
+      self._shouldLoop = true
+      self._video:play()
+    end,
+    
+    -- Add noLoop() method
+    noLoop = function(self)
+      self._shouldLoop = false
+    end,
+    
+    -- Add time() method
+    time = function(self, t)
+      if t == nil then
+        return self._video:tell()
+      else
+        self._video:seek(t)
+      end
+    end,
+    
+    -- Add volume() method
+    volume = function(self, val)
+      if val == nil then
+        local source = self._video:getSource()
+        return source and source:getVolume() or 1
+      else
+        local source = self._video:getSource()
+        if source then
+          source:setVolume(val)
+        end
+      end
+    end
+  }
+  
+  -- Create metatable
+  setmetatable(videoWrapper, {
+    __index = function(t, key)
+      if rawget(t, key) then
+        return rawget(t, key)
+      end
+      local value = t._video[key]
+      if type(value) == "function" then
+        return function(_, ...) return value(t._video, ...) end
+      end
+      return value
+    end
+  })
+  
+  -- Register video for loop tracking
+  L5_env.videos = L5_env.videos or {}
+  table.insert(L5_env.videos, videoWrapper)
+  
+  return videoWrapper
 end
 
 function image(_img,_x,_y,_w,_h)
@@ -3042,17 +3113,23 @@ local originalDraw = love.graphics.draw
 function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
     
+    -- Check if it's a video wrapper (our custom table)
+    local actualDrawable = drawable
+    if type(drawable) == "table" and drawable._video then
+        actualDrawable = drawable._video  -- Unwrap to get the real video
+    end
+    
     -- Handle Image and Video objects
-    if type(drawable) == "userdata" and 
-       (drawable:type() == "Image" or drawable:type() == "Video") then
+    if type(actualDrawable) == "userdata" and 
+       (actualDrawable:type() == "Image" or actualDrawable:type() == "Video") then
         if L5_env.currentTint then
             love.graphics.setColor(unpack(L5_env.currentTint))
         else
-            love.graphics.setColor(1, 1, 1, 1)  -- No tint = white (draw normally)
+            love.graphics.setColor(1, 1, 1, 1)  -- No tint = white
         end
     end
     
-    originalDraw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
+    originalDraw(actualDrawable, x, y, r, sx, sy, ox, oy, kx, ky)
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
 
