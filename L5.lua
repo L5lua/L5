@@ -3040,18 +3040,19 @@ end
 -- Override love.graphics.draw to automatically apply tint
 local originalDraw = love.graphics.draw
 function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
-    -- Store current color
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
-
-    -- Only apply tint to Image objects
-    if L5_env.currentTint and type(drawable) == "userdata" and drawable:type() == "Image" then
-        love.graphics.setColor(unpack(L5_env.currentTint))
-    end 
-
-    -- Call original draw function
+    
+    -- Handle Image and Video objects
+    if type(drawable) == "userdata" and 
+       (drawable:type() == "Image" or drawable:type() == "Video") then
+        if L5_env.currentTint then
+            love.graphics.setColor(unpack(L5_env.currentTint))
+        else
+            love.graphics.setColor(1, 1, 1, 1)  -- No tint = white (draw normally)
+        end
+    end
+    
     originalDraw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
-
-    -- Restore previous color
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
 
