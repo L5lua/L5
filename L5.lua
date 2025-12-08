@@ -2830,7 +2830,11 @@ function exit()
 end
 
 function windowTitle(_title)
-  love.window.setTitle(_title)
+  if _title ~= nil then
+    love.window.setTitle(_title)
+  else 
+    return love.window.getTitle()
+  end
 end
 
 function resizeWindow(_w, _h)
