@@ -3022,6 +3022,13 @@ function loadVideo(_filename)
       self._video:pause()
     end,
 
+    -- stop method - pause and rewind
+    stop = function(self)
+      self._manuallyPaused = true
+      self._video:pause()
+      self._video:rewind()
+    end,
+
     -- play override  
     play = function(self)
       self._manuallyPaused = false
