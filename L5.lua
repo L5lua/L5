@@ -265,12 +265,31 @@ function love.mousemoved(x,y,dx,dy,istouch)
   L5_env.mouseWasMoved = true
 end
 
-function love.keypressed(key, scancode, isrepeat)
-  L5_env.keyWasPressed = true 
+function love.keypressed(k, scancode, isrepeat)
+  -- Add key to pressed keys table
+  L5_env.pressedKeys[k] = true
+  
+  key = k
+  keyCode = love.keyboard.getScancodeFromKey(k)
+  L5_env.keyWasPressed = true
+  keyIsPressed = true
 end
 
-function love.keyreleased(key)
-  L5_env.keyWasReleased = true 
+function love.keyreleased(k)
+  -- Remove key from pressed keys table
+  L5_env.pressedKeys[k] = nil
+  
+  key = k
+  keyCode = love.keyboard.getScancodeFromKey(k)
+  L5_env.keyWasReleased = true
+  
+  -- Only set keyIsPressed to false if no keys are pressed
+  local anyKeyPressed = false
+  for _ in pairs(L5_env.pressedKeys) do
+    anyKeyPressed = true
+    break
+  end
+  keyIsPressed = anyKeyPressed
 end
 
 function love.textinput(_text)
@@ -747,6 +766,7 @@ function define_env_globals()
   L5_env.color_max = {255,255,255,255}
   L5_env.color_mode = RGB --also: HSB, HSL
   -- global key state
+  L5_env.pressedKeys = {}
   L5_env.keyWasPressed = false
   L5_env.keyWasReleased = false
   L5_env.keyWasTyped = false
@@ -1095,8 +1115,8 @@ function updateLastKeyPressed()
   return key
 end
 
-function keyIsDown(_key)
-  return love.keyboard.isDown(_key)
+function keyIsDown(k)
+  return L5_env.pressedKeys[k] == true
 end
 
 ---------------------- TRANSFORM ---------------------
