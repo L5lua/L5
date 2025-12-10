@@ -168,9 +168,12 @@ function love.draw()
     if mouseClicked ~= nil then mouseClicked() end  -- Run immediately after mouseReleased
     mouseIsPressed = false
   elseif isPressed then
-    -- Still pressed (dragging)
-    if mouseDragged ~= nil then mouseDragged() end
-    mouseIsPressed = true
+    -- Still pressed - only call mouseDragged if mouse actually moved
+    if L5_env.mouseWasMoved then
+      if mouseDragged ~= nil then mouseDragged() end
+      L5_env.mouseWasMoved = false  -- Clear the flag
+    end
+    mouseIsPressed = true  
   else
     mouseIsPressed = false
   end
