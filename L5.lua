@@ -189,19 +189,25 @@ function love.draw()
   end
 
   if L5_env.keyWasTyped then
-  local savedKey = key
-  key = L5_env.typedKey  -- Temporarily use the typed character
-  if keyTyped ~= nil then keyTyped() end
-  key = savedKey  -- Restore
-  L5_env.keyWasTyped = false
-  L5_env.typedKey = nil
-end
+    local savedKey = key
+    key = L5_env.typedKey  -- Temporarily use the typed character
+    if keyTyped ~= nil then keyTyped() end
+    key = savedKey  -- Restore
+    L5_env.keyWasTyped = false
+    L5_env.typedKey = nil
+  end
 
   -- Check for mouse events in draw cycle
-  if L5_env.mouseWasMoved then
+  -- Only call mouseMoved if mouse button is NOT pressed
+  if L5_env.mouseWasMoved and not isPressed then  
     if mouseMoved ~= nil then mouseMoved() end
     L5_env.mouseWasMoved = false    
+  elseif L5_env.mouseWasMoved and isPressed then
+    -- Clear the flag even if we don't call mouseMoved
+    -- (mouseDragged already handled above)
+    L5_env.mouseWasMoved = false
   end
+  
   if L5_env.wheelWasMoved then
     if mouseWheel ~= nil then 
       mouseWheel(L5_env.wheelY or 0) 
@@ -215,7 +221,7 @@ end
   if L5_env.drawing then
     frameCount = frameCount + 1
 
-  -- Reset transformation matrix to identity at start of each frame
+    -- Reset transformation matrix to identity at start of each frame
     love.graphics.origin()
     love.graphics.push()
 
