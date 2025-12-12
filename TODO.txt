@@ -35,6 +35,7 @@
 
 ## Color
 
+* [ ] background color doesn't stay persistent when switching to fullscreen() on older tested Macintosh. tested with the example/drawing-lines in fullscreen. possible solution is to save background color, then redraw after fullscreen. would require fullscreen() be used at beginning of setup() before drawing items to canvas to avoid overdrawing them when switching to fullscreen. size(displayWidth,displayHeight) doesn't have this issue.
 * [X] color_max isn't correctly taken into account
 * [X] set default fill color (black?)
 * [X] line should be stroke color
@@ -67,6 +68,7 @@
 * [ ] review optional params for consistency with processing/p5
   * [ ] dial in blur filter better to match p5/processing
   * [ ] add OPAQUE filter to blur
+* [ ] received report of shader failure for BLUR, ERODE, DILATE
 
 
 ## Typography
@@ -97,12 +99,12 @@
 
 ## Documentation
 
-* [ ] Build website and reference
+* [X] Build website and reference
   * [X] landing page
   * [x] download
   * [X] reference index and pages
-  * [ ] tutorials
-  * [ ] examples pages
+  * [X] tutorials
+  * [X] examples pages
   * [X] about
 
 ## Libraries
