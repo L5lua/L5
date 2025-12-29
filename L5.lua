@@ -637,20 +637,29 @@ function save(filename)
             finalFilename = "screenshot_" .. timestamp .. ".png"
         end
         
-        -- Encode to memory (no file yet)
+        -- Encode to PNG
         local pngData = imageData:encode("png")
         
-        -- Write directly to current directory
+        -- Try to write to current directory first
         local programDir = love.filesystem.getSource()
         local targetPath = programDir .. "/" .. finalFilename
         
         local file = io.open(targetPath, "wb")
         if file then
-            file:write(pngData:getString())  -- Get the raw data string
+            file:write(pngData:getString())
             file:close()
             print("Screenshot saved to: " .. targetPath)
         else
-            print("Could not write to current directory")
+            -- Fallback: use Love2d's save directory
+            print("Warning: Could not write to current directory, using save directory instead")
+            local success = love.filesystem.write(finalFilename, pngData)
+            
+            if success then
+                local saveDir = love.filesystem.getSaveDirectory()
+                print("Screenshot saved to: " .. saveDir .. "/" .. finalFilename)
+            else
+                print("Error: Could not save screenshot")
+            end
         end
     end)
 end
