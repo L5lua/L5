@@ -86,6 +86,10 @@ Note: As L5 is new, documentation and examples are still growing compared to the
 
 ## Troubleshooting for Macs 
 
+### Dragging the L5-starter folder onto the Love App
+
+You have to drag the L5-starter folder onto the Love App *inside* of Finder (in the Applications folder), not onto the love window with the bird balloon.
+
 ### Apple could not verify "love" is free of malware that may harm your Mac or compromise your privacy
 
 When downloading love for the first time, and you get a message that says "Apple could not verify 'love' is free of malware that may harm your Mac or compromise your privacy." 
@@ -98,7 +102,7 @@ You can resolve it using the following steps:
 4. Click the button that says "Open Anyway." 
 5. The original message will appear again, and when it does, select "Open Anyway"
 6. You may need to authenticate by entering your password or using your fingerprint
-7. Confirm love is successfully installed. 
+7. Confirm love is successfully installed.
 
 ---
 
