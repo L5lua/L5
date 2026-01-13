@@ -2,10 +2,10 @@ require("L5")
 
 function setup()
   size(400,400)
-  windowTitle("My sketch")
+  windowTitle("Jess Garson!!")
   describe("A basic sketch that draws a window.")
 end
 
 function draw()
-  background(220)
+  background(2220)
 end
