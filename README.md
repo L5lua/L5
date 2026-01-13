@@ -84,6 +84,27 @@ While L5 is a new project with growing documentation, it benefits from:
 
 Note: As L5 is new, documentation and examples are still growing compared to the mature Processing ecosystem.
 
+## Troubleshooting for Macs 
+
+### Dragging the L5-starter folder onto the Love App
+
+You have to drag the L5-starter folder onto the Love App *inside* of Finder (in the Applications folder), not onto the love window with the bird balloon.
+
+### Apple could not verify "love" is free of malware that may harm your Mac or compromise your privacy
+
+When downloading love for the first time, and you get a message that says "Apple could not verify 'love' is free of malware that may harm your Mac or compromise your privacy." 
+
+You can resolve it using the following steps: 
+
+1. Open System Settings on your Mac 
+2. In the side panel, select where it says "Privacy & Security."
+3. Scroll down to the Security section, and you should see a message saying "love" was blocked to protect your Mac.
+4. Click the button that says "Open Anyway." 
+5. The original message will appear again, and when it does, select "Open Anyway"
+6. You may need to authenticate by entering your password or using your fingerprint
+7. Confirm love is successfully installed.
+
 ---
 
 *L5 aims to make creative coding accessible, fast, and fun while leveraging the power and simplicity of Lua and a commitment to making resilient, long-lasting tools.*
+
