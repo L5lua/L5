@@ -237,8 +237,8 @@ function love.draw()
     love.graphics.pop()
   end
 
--- Draw print buffer on top of window
-if #L5_env.printBuffer > 0 then
+  -- Draw print buffer on top of window, if on
+  if L5_env.showPrintBuffer and #L5_env.printBuffer > 0 then
     love.graphics.push()
     love.graphics.origin()
     
@@ -368,6 +368,9 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
+function showPrint()
+    L5_env.showPrintBuffer = true
+end
 
 function size(_w, _h)
   -- must clear canvas before setMode
@@ -857,6 +860,7 @@ function define_env_globals()
   L5_env.textureMode=IMAGE -- NORMAL or IMAGE
   L5_env.textureWrap=CLAMP -- wrap mode CLAMP or REPEAT
   -- custom print output on screen
+  L5_env.showPrintBuffer = false  
   L5_env.printY = 5
   L5_env.printBuffer = {}
   L5_env.printLineHeight = love.graphics.getFont():getHeight() + 2
