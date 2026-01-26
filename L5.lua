@@ -241,6 +241,10 @@ function love.draw()
   if L5_env.showPrintBuffer and #L5_env.printBuffer > 0 then
     love.graphics.push()
     love.graphics.origin()
+
+    -- Save user's current font and switch to default
+    local userFont = love.graphics.getFont()
+    love.graphics.setFont(L5_env.printFont or L5_env.defaultFont)
     
     -- Calculate max lines that fit on screen
     local maxLines = math.floor((height - 10) / L5_env.printLineHeight)
@@ -271,9 +275,12 @@ function love.draw()
         
         y = y + L5_env.printLineHeight
     end
+
+    -- Restore user's font
+    love.graphics.setFont(userFont)
     
     love.graphics.pop()
-end
+  end
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
@@ -368,8 +375,14 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
-function showPrint()
-    L5_env.showPrintBuffer = true
+function showPrint(textSize)
+  L5_env.showPrintBuffer = true
+
+  textSize = textSize or 16  
+    
+  L5_env.printFont = love.graphics.newFont(textSize)
+  L5_env.printLineHeight = L5_env.printFont:getHeight()
+
 end
 
 function size(_w, _h)
@@ -860,10 +873,12 @@ function define_env_globals()
   L5_env.textureMode=IMAGE -- NORMAL or IMAGE
   L5_env.textureWrap=CLAMP -- wrap mode CLAMP or REPEAT
   -- custom print output on screen
+  L5_env.printBuffer = {}
+  L5_env.defaultFont = love.graphics.getFont()
+  L5_env.printFont = L5_env.defaultFont
   L5_env.showPrintBuffer = false  
   L5_env.printY = 5
-  L5_env.printBuffer = {}
-  L5_env.printLineHeight = love.graphics.getFont():getHeight() + 2
+  L5_env.printLineHeight = L5_env.defaultFont:getHeight() + 2
     
     -- Override print to also draw to screen
   local originalPrint = print
