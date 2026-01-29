@@ -4,6 +4,7 @@ VERSION = '0.1.4'
 -- Override love.run() - adds double buffering and custom events
 function love.run()
   defaults()
+
   define_env_globals()
   if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
   if love.timer then love.timer.step() end
@@ -255,6 +256,51 @@ function love.draw()
 
     love.graphics.pop()
   end
+
+  -- Draw print buffer on top of window, if on
+  if L5_env.showPrintBuffer and #L5_env.printBuffer > 0 then
+    love.graphics.push()
+    love.graphics.origin()
+
+    -- Save user's current font and switch to default
+    local userFont = love.graphics.getFont()
+    love.graphics.setFont(L5_env.printFont or L5_env.defaultFont)
+    
+    -- Calculate max lines that fit on screen
+    local maxLines = math.floor((height - 10) / L5_env.printLineHeight)
+    
+    -- Trim buffer to only show lines that fit
+    local displayBuffer = {}
+    local startIdx = math.max(1, #L5_env.printBuffer - maxLines + 1)
+    for i = startIdx, #L5_env.printBuffer do
+        table.insert(displayBuffer, L5_env.printBuffer[i])
+    end
+    
+    -- Get the font to measure text width
+    local font = love.graphics.getFont()
+    
+    -- Draw each line with its own background
+    local y = 5
+    for _, line in ipairs(displayBuffer) do
+        -- Measure the actual width of this line of text
+        local textWidth = font:getWidth(line)
+        
+        -- Draw background rectangle just for this line
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle('fill', 3, y, textWidth + 6, L5_env.printLineHeight)
+        
+        -- Draw the text on top
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(line, 5, y)
+        
+        y = y + L5_env.printLineHeight
+    end
+
+    -- Restore user's font
+    love.graphics.setFont(userFont)
+    
+    love.graphics.pop()
+  end
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
@@ -349,6 +395,15 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
+function printToScreen(textSize)
+  L5_env.showPrintBuffer = true
+
+  textSize = textSize or 16  
+    
+  L5_env.printFont = love.graphics.newFont(textSize)
+  L5_env.printLineHeight = L5_env.printFont:getHeight()
+
+end
 
 function size(_w, _h)
   -- must clear canvas before setMode
@@ -686,7 +741,7 @@ end
 
 function describe(sceneDescription)
  if not L5_env.described then
-    print("CANVAS_DESCRIPTION: " .. sceneDescription)
+    L5_env.originalPrint("CANVAS_DESCRIPTION: " .. sceneDescription)
     io.flush() -- Ensure immediate output for screen readers
     L5_env.described = true
     end
@@ -837,7 +892,31 @@ function define_env_globals()
   L5_env.useTexture = false
   L5_env.textureMode=IMAGE -- NORMAL or IMAGE
   L5_env.textureWrap=CLAMP -- wrap mode CLAMP or REPEAT
+  -- custom print output on screen
+  L5_env.printBuffer = {}
+  L5_env.defaultFont = love.graphics.getFont()
+  L5_env.printFont = L5_env.defaultFont
+  L5_env.showPrintBuffer = false  
+  L5_env.printY = 5
+  L5_env.printLineHeight = L5_env.defaultFont:getHeight() + 2
+    
+    -- Override print to also draw to screen
+  local originalPrint = print
+  L5_env.originalPrint = originalPrint
+  function print(...)
+    originalPrint(...)  -- Still print to console
+    
+    local text = ""
+    local args = {...}
+    for i = 1, #args do
+        if i > 1 then text = text .. "\t" end
+        text = text .. tostring(args[i])
+    end
+    
+    table.insert(L5_env.printBuffer, text)
+  end
 end
+
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
 function initShaderDefaults()
