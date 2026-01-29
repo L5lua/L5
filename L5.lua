@@ -375,7 +375,7 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
-function showPrint(textSize)
+function printToScreen(textSize)
   L5_env.showPrintBuffer = true
 
   textSize = textSize or 16  
