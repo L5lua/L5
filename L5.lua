@@ -1,5 +1,5 @@
--- L5 0.1.3 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.3'
+-- L5 0.1.4 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.4'
 
 -- Override love.run() - adds double buffering and custom events
 function love.run()
@@ -68,38 +68,58 @@ function love.run()
         if love.draw then love.draw() end
       end
       
-	-- Reset to screen and draw the back buffer
-	love.graphics.setCanvas()
-if L5_env.backBuffer then
-  -- Save current color
-  local r, g, b, a = love.graphics.getColor()
-  
-  -- Set to white (no tint) when drawing the canvas to screen
-  love.graphics.setColor(1, 1, 1, 1)
-  
-  if L5_env.filterOn then
-    love.graphics.setShader(L5_env.filter)
-  end
-
-  love.graphics.draw(L5_env.backBuffer, 0, 0)
-  
-  if L5_env.filterOn then
-    love.graphics.setShader()
-    L5_env.filterOn = false
-  end
-  
-  -- Restore color (after drawing the canvas)
-  love.graphics.setColor(r, g, b, a)
-
-  love.graphics.present()
-end
+      -- Reset to screen and draw the back buffer
+      love.graphics.setCanvas()
+      if L5_env.backBuffer then
+        -- Save current color
+        local r, g, b, a = love.graphics.getColor()
+        
+        -- Set to white (no tint) when drawing the canvas to screen
+        love.graphics.setColor(1, 1, 1, 1)
+        
+        if L5_env.filterOn then
+          if L5_env.filter == "blur_twopass" then
+            -- Two-pass blur requires intermediate canvas
+            if not L5_env.blurTempCanvas or 
+               L5_env.blurTempCanvas:getWidth() ~= love.graphics.getWidth() or
+               L5_env.blurTempCanvas:getHeight() ~= love.graphics.getHeight() then
+              L5_env.blurTempCanvas = love.graphics.newCanvas()
+            end
+            
+            -- Pass 1: Horizontal blur to temp canvas
+            love.graphics.setCanvas(L5_env.blurTempCanvas)
+            love.graphics.clear()
+            love.graphics.setShader(L5_filter.blur_horizontal)
+            love.graphics.draw(L5_env.backBuffer, 0, 0)
+            
+            -- Pass 2: Vertical blur to screen
+            love.graphics.setCanvas()
+            love.graphics.setShader(L5_filter.blur_vertical)
+            love.graphics.draw(L5_env.blurTempCanvas, 0, 0)
+            love.graphics.setShader()
+          else
+            -- Single-pass filter
+            love.graphics.setShader(L5_env.filter)
+            love.graphics.draw(L5_env.backBuffer, 0, 0)
+            love.graphics.setShader()
+          end
+          L5_env.filterOn = false
+        else
+          -- No filter, just draw normally
+          love.graphics.draw(L5_env.backBuffer, 0, 0)
+        end
+        
+        -- Restore color (after drawing the canvas)
+        love.graphics.setColor(r, g, b, a)
+        love.graphics.present()
+      end
     
       if love.timer then
-	if L5_env.framerate then --user-specified framerate
-	  love.timer.sleep(1/L5_env.framerate)
-	else --default framerate
-	  love.timer.sleep(0.001)
-	end
+        if L5_env.framerate then --user-specified framerate
+          love.timer.sleep(1/L5_env.framerate)
+        else --default framerate
+          love.timer.sleep(0.001)
+        end
       end
     end
   end
@@ -828,9 +848,14 @@ function initShaderDefaults()
     -- Set default value for posterize
     L5_filter.posterize:send("levels", 4.0)
     -- Set default values for blur
-    L5_filter.blur:send("blurSize", 2.0)
+if L5_filter.blurSupportsParameter then
+    L5_filter.blur_horizontal:send("blurRadius", 4.0)
+    L5_filter.blur_horizontal:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    L5_filter.blur_vertical:send("blurRadius", 4.0)
+    L5_filter.blur_vertical:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+elseif L5_filter.blur then
     L5_filter.blur:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
-    
+end
     -- Set default values for erode
     L5_filter.erode:send("strength", 0.5)
     L5_filter.erode:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
@@ -3324,11 +3349,19 @@ function filter(_name, _param)
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.posterize
   elseif _name == BLUR then
-    if _param then
-      L5_filter.blur:send("blurSize", _param)
+    if L5_filter.blurSupportsParameter then
+        -- Scale to match p5.js: their radius 4 = our radius 15
+        local radius = (_param or 4.0) * 5.5
+        L5_filter.blur_horizontal:send("blurRadius", radius)
+        L5_filter.blur_vertical:send("blurRadius", radius)
+        L5_env.filterOn = true
+        L5_env.filter = "blur_twopass"
+    elseif L5_filter.blur then
+        L5_env.filterOn = true
+        L5_env.filter = L5_filter.blur
+    else
+        print("Blur filter not available on this system")
     end
-    L5_env.filterOn = true 
-    L5_env.filter = L5_filter.blur
   elseif _name == ERODE then
     if _param then
       L5_filter.erode:send("strength", _param)
@@ -3504,19 +3537,30 @@ function set(x, y, c)
 end
 
 --- shaders
+local function createShaderSafe(shaderCode, fallbackMessage)
+  local success, shader = pcall(love.graphics.newShader, shaderCode)
+  if success then
+    return shader
+  else
+    print("Warning: " .. fallbackMessage)
+    return nil
+  end
+end
+
 L5_filter = {}
 
-L5_filter.grayscale = love.graphics.newShader([[
+
+L5_filter.grayscale = createShaderSafe([[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
     {
         vec4 pixel = Texel(texture, texture_coords);
-        float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114)); // luminance formula
+        float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114));
         return vec4(gray, gray, gray, pixel.a) * color;
     }
-]])
+]], "Grayscale shader failed to compile - filter unavailable")
 
 --from https://www.love2d.org/forums/viewtopic.php?t=3733&start=300, modified to work on Mac
-L5_filter.threshold = love.graphics.newShader([[
+L5_filter.threshold = createShaderSafe([[
 extern float soft;
 extern float threshold;
 vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords )
@@ -3531,69 +3575,128 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 	
 	return vec4( col, 1.0 ) * color;
   }
-]])
+]], "Threshold shader failed to compile - filter unavailable")
 
 -- from https://www.reddit.com/r/love2d/comments/ee8n0j/how_to_make_inverted_colornegative_shader/fcaouw5/
-L5_filter.invert = love.graphics.newShader([[ 
+L5_filter.invert = createShaderSafe([[ 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords) 
   { 
 	vec4 col = Texel( texture, texture_coords ); 
 	return vec4(1.0-col.r, 1.0-col.g, 1.0-col.b, col.a) * color; 
   } 
-]])
+]], "Invert shader failed to compile - filter unavailable")
 
-L5_filter.posterize = love.graphics.newShader([[
-    uniform float levels; // number of color levels per channel
+L5_filter.posterize = createShaderSafe([[
+    uniform float levels;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec4 pixel = Texel(texture, texture_coords);
         
-        // Posterize each color channel
         pixel.r = floor(pixel.r * levels) / levels;
         pixel.g = floor(pixel.g * levels) / levels;
         pixel.b = floor(pixel.b * levels) / levels;
         
         return pixel * color;
     }
-]])
+]], "Posterize shader failed to compile - filter unavailable")
 
-L5_filter.blur = love.graphics.newShader([[
-  uniform float blurSize;
+-- Two-pass blur matching p5.js 2D implementation
+L5_filter.blur_horizontal = createShaderSafe([[
+    uniform float blurRadius;
     uniform vec2 textureSize;
     
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 pixelSize = 1.0 / textureSize;
+        
+        // Clamp to minimum radius to avoid divide by zero
+        float safeRadius = max(blurRadius, 0.01);
+
         vec4 sum = vec4(0.0);
         float totalWeight = 0.0;
         
-        // Exponential decay parameter
-	// 0.2 to 0.6. lower = more blur. higher = sharper
-        float k = 0.4;
+        const int maxSamples = 32;        
         
-        // Sample in a circular pattern
-	// between 3 - 7. 
-	// lower = faster, less smooth. higher=slower, smoother
-        int samples = 5;
-        for(int x = -samples; x <= samples; x++) {
-            for(int y = -samples; y <= samples; y++) {
-	        //multiplying blurSize * 2 to aproximate p5's algorithm! not precisely set!
-                vec2 offset = vec2(float(x), float(y)) * blurSize * 2 * pixelSize;
-                float distance = length(vec2(float(x), float(y)));
-                float weight = exp(-k * distance);
-                
-                sum += Texel(texture, texture_coords + offset) * weight;
-                totalWeight += weight;
-            }
+        // Horizontal pass only
+        for(int x = -maxSamples; x <= maxSamples; x++) {
+            float fx = float(x);
+            float distance = abs(fx);
+            
+	    if (distance > safeRadius) continue;            
+
+            float radiusi = safeRadius - distance;
+            float weight = radiusi * radiusi;
+            
+            vec2 offset = vec2(fx, 0.0) * pixelSize;
+            sum += Texel(texture, texture_coords + offset) * weight;
+            totalWeight += weight;
         }
         
-        // Normalize
-        sum /= totalWeight;
-        
-        return sum * color;
+        return (sum / totalWeight) * color;
     }
-]])
+]], "Horizontal blur pass failed to compile")
 
-L5_filter.erode = love.graphics.newShader([[
+L5_filter.blur_vertical = createShaderSafe([[
+    uniform float blurRadius;
+    uniform vec2 textureSize;
+    
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec2 pixelSize = 1.0 / textureSize;
+
+	// Clamp to minimum radius to avoid divide by zero
+        float safeRadius = max(blurRadius, 0.01);
+        
+        vec4 sum = vec4(0.0);
+        float totalWeight = 0.0;
+        
+        const int maxSamples = 32;        
+
+        // Vertical pass only
+        for(int y = -maxSamples; y <= maxSamples; y++) {
+            float fy = float(y);
+            float distance = abs(fy);
+            
+            if (distance > safeRadius) continue;            
+            float radiusi = safeRadius - distance;
+            float weight = radiusi * radiusi;
+            
+            vec2 offset = vec2(0.0, fy) * pixelSize;
+            sum += Texel(texture, texture_coords + offset) * weight;
+            totalWeight += weight;
+        }
+        
+        return (sum / totalWeight) * color;
+    }
+]], "Vertical blur pass failed to compile")
+
+-- Track if two-pass blur is available
+L5_filter.blurSupportsParameter = (L5_filter.blur_horizontal ~= nil and L5_filter.blur_vertical ~= nil)
+
+-- If two-pass failed, create simple 3x3 Gaussian fallback
+if not L5_filter.blurSupportsParameter then
+    L5_filter.blur = createShaderSafe([[
+        uniform vec2 textureSize;
+        
+        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+            vec2 pixelSize = 1.0 / textureSize;
+            vec4 sum = vec4(0.0);
+            
+            // 3x3 Gaussian kernel (radius 1)
+            sum += Texel(texture, texture_coords + vec2(-1.0, -1.0) * pixelSize) * 1.0;
+            sum += Texel(texture, texture_coords + vec2( 0.0, -1.0) * pixelSize) * 2.0;
+            sum += Texel(texture, texture_coords + vec2( 1.0, -1.0) * pixelSize) * 1.0;
+            sum += Texel(texture, texture_coords + vec2(-1.0,  0.0) * pixelSize) * 2.0;
+            sum += Texel(texture, texture_coords + vec2( 0.0,  0.0) * pixelSize) * 4.0;
+            sum += Texel(texture, texture_coords + vec2( 1.0,  0.0) * pixelSize) * 2.0;
+            sum += Texel(texture, texture_coords + vec2(-1.0,  1.0) * pixelSize) * 1.0;
+            sum += Texel(texture, texture_coords + vec2( 0.0,  1.0) * pixelSize) * 2.0;
+            sum += Texel(texture, texture_coords + vec2( 1.0,  1.0) * pixelSize) * 1.0;
+            
+            return (sum / 16.0) * color;
+        }
+    ]], "Blur shader completely unavailable")
+end
+
+L5_filter.erode = createShaderSafe([[
     uniform float strength;
     uniform vec2 textureSize;
     
@@ -3603,7 +3706,7 @@ L5_filter.erode = love.graphics.newShader([[
         vec4 centerColor = Texel(texture, texture_coords);
         vec4 result = centerColor;
         
-        // 3x3 erosion - unrolled for Mac compatibility
+        // 3x3 erosion - unrolled for compatibility
         vec2 offset;
         vec4 neighborColor;
         
@@ -3642,9 +3745,9 @@ L5_filter.erode = love.graphics.newShader([[
         
         return result * color;
     }
-]])
+]], "Erode shader failed to compile - filter unavailable")
 
-L5_filter.dilate = love.graphics.newShader([[
+L5_filter.dilate = createShaderSafe([[
     uniform float strength;
     uniform float threshold;
     uniform vec2 textureSize;
@@ -3659,7 +3762,7 @@ L5_filter.dilate = love.graphics.newShader([[
         
         // Only dilate if center pixel is bright enough
         if (centerBrightness > threshold) {
-            // Simplified 3x3 dilation instead of 5x5 for Mac compatibility
+            // Simplified 3x3 dilation
             vec2 offset;
             vec4 neighborColor;
             float neighborBrightness;
@@ -3670,7 +3773,7 @@ L5_filter.dilate = love.graphics.newShader([[
             neighborColor = Texel(texture, texture_coords + offset);
             neighborBrightness = dot(neighborColor.rgb, vec3(0.299, 0.587, 0.114));
             if (neighborBrightness > threshold) {
-                weight = 1.0 - 1.414 / (strength + 1.0); // diagonal distance ~1.414
+                weight = 1.0 - 1.414 / (strength + 1.0);
                 maxColor = max(maxColor, neighborColor * weight);
             }
             
@@ -3733,4 +3836,4 @@ L5_filter.dilate = love.graphics.newShader([[
         
         return maxColor * color;
     }
-]])
+]], "Dilate shader failed to compile - filter unavailable")
