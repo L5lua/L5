@@ -112,6 +112,9 @@ function love.run()
         
         -- Restore color (after drawing the canvas)
         love.graphics.setColor(r, g, b, a)
+
+        drawPrintBuffer()
+
         love.graphics.present()
       end
     
@@ -257,50 +260,7 @@ function love.draw()
     love.graphics.pop()
   end
 
-  -- Draw print buffer on top of window, if on
-  if L5_env.showPrintBuffer and #L5_env.printBuffer > 0 then
-    love.graphics.push()
-    love.graphics.origin()
-
-    -- Save user's current font and switch to default
-    local userFont = love.graphics.getFont()
-    love.graphics.setFont(L5_env.printFont or L5_env.defaultFont)
-    
-    -- Calculate max lines that fit on screen
-    local maxLines = math.floor((height - 10) / L5_env.printLineHeight)
-    
-    -- Trim buffer to only show lines that fit
-    local displayBuffer = {}
-    local startIdx = math.max(1, #L5_env.printBuffer - maxLines + 1)
-    for i = startIdx, #L5_env.printBuffer do
-        table.insert(displayBuffer, L5_env.printBuffer[i])
-    end
-    
-    -- Get the font to measure text width
-    local font = love.graphics.getFont()
-    
-    -- Draw each line with its own background
-    local y = 5
-    for _, line in ipairs(displayBuffer) do
-        -- Measure the actual width of this line of text
-        local textWidth = font:getWidth(line)
-        
-        -- Draw background rectangle just for this line
-        love.graphics.setColor(0, 0, 0, 0.7)
-        love.graphics.rectangle('fill', 3, y, textWidth + 6, L5_env.printLineHeight)
-        
-        -- Draw the text on top
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.print(line, 5, y)
-        
-        y = y + L5_env.printLineHeight
-    end
-
-    -- Restore user's font
-    love.graphics.setFont(userFont)
-    
-    love.graphics.pop()
-  end
+  
 end
 
 function love.mousepressed(_x, _y, button, istouch, presses)
@@ -395,6 +355,51 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
+function drawPrintBuffer()
+    if not L5_env.showPrintBuffer or #L5_env.printBuffer == 0 then
+        return
+    end
+    
+    love.graphics.push()
+    love.graphics.origin()
+    
+    -- Save user's current state
+    local userFont = love.graphics.getFont()
+    local pr, pg, pb, pa = love.graphics.getColor()
+    
+    love.graphics.setFont(L5_env.printFont or L5_env.defaultFont)
+    
+    -- Calculate max lines that fit on screen
+    local maxLines = math.floor((height - 10) / L5_env.printLineHeight)
+    
+    -- Trim buffer to only show lines that fit
+    local displayBuffer = {}
+    local startIdx = math.max(1, #L5_env.printBuffer - maxLines + 1)
+    for i = startIdx, #L5_env.printBuffer do
+        table.insert(displayBuffer, L5_env.printBuffer[i])
+    end
+    
+    -- Get the font to measure text width
+    local font = love.graphics.getFont()
+    
+    -- Draw each line with its own background
+    local y = 5
+    for _, line in ipairs(displayBuffer) do
+        local textWidth = font:getWidth(line)
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle('fill', 5, y, textWidth + 4, L5_env.printLineHeight)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(line, 5, y)
+        y = y + L5_env.printLineHeight
+    end
+    
+    -- Restore user's state
+    love.graphics.setFont(userFont)
+    love.graphics.setColor(pr, pg, pb, pa)
+    
+    love.graphics.pop()
+end
+
 function printToScreen(textSize)
   L5_env.showPrintBuffer = true
 
