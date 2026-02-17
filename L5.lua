@@ -167,25 +167,7 @@ function love.update(dt)
       if info and info.modtime ~= L5_env.lastModified then
         print("main.lua changed, auto-reloading...")
         L5_env.lastModified = info.modtime
-        
-        -- Reset callbacks
-        setup = function() end
-        draw = function() end
-        update = function() end
-        mousePressed = function() end
-        mouseReleased = function() end
-        mouseClicked = function() end
-        mouseDragged = function() end
-        mouseMoved = function() end
-        mouseWheel = function() end
-        keyPressed = function() end
-        keyReleased = function() end
-        keyTyped = function() end
-        
-        defaults()
-        resetUserDrawingState()
-        dofile('main.lua')
-        L5_env.rerunSetup = true
+        reloadUserCode()
       end
     end
   end
@@ -339,6 +321,12 @@ function love.keypressed(k, scancode, isrepeat)
       -- Toggle auto-reload
       L5_env.autoReloadEnabled = not L5_env.autoReloadEnabled
       print("Auto-reload " .. (L5_env.autoReloadEnabled and "enabled" or "disabled"))
+
+      -- Only reload if we just turned it ON
+      if L5_env.autoReloadEnabled then
+	print("reloading")
+	reloadUserCode()
+      end
     else
       -- manual reload
       print("reloading")
@@ -347,29 +335,7 @@ function love.keypressed(k, scancode, isrepeat)
 	print("Tip: Press Ctrl+Shift+R to enable auto-reload on save")
 	L5_env.manualReloadTipShown = true
       end
-      -- Reset to L5 defaults
-      setup = function() end
-      draw = function() end
-      update = function() end
-      mousePressed = function() end
-      mouseReleased = function() end
-      mouseClicked = function() end
-      mouseDragged = function() end
-      mouseMoved = function() end
-      mouseWheel = function() end
-      keyIsDown = function() end
-      keyIsPressed = function() end
-      keyPressed = function() end
-      keyReleased = function() end
-      keyTyped = function() end
-      defaults()
-      resetUserDrawingState()
-      
-      -- Reload user code
-      dofile('main.lua')
-      
-      -- Flag to re-run setup on next frame
-      L5_env.rerunSetup = true  
+      reloadUserCode()
     end
   end
 end
@@ -428,6 +394,27 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
+function reloadUserCode()
+  -- Reset callbacks
+  setup = function() end
+  draw = function() end
+  update = function() end
+  mousePressed = function() end
+  mouseReleased = function() end
+  mouseClicked = function() end
+  mouseDragged = function() end
+  mouseMoved = function() end
+  mouseWheel = function() end
+  keyPressed = function() end
+  keyReleased = function() end
+  keyTyped = function() end
+  
+  defaults()
+  resetUserDrawingState()
+  dofile('main.lua')
+  L5_env.rerunSetup = true
+end
+
 function drawPrintBuffer()
     if not L5_env.showPrintBuffer or #L5_env.printBuffer == 0 then
         return
