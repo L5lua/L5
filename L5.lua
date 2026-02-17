@@ -62,9 +62,10 @@ function love.run()
       
       -- Draw current frame
       -- Run setup() once in the drawing context
-      if not setupComplete and setup then
+      if (not setupComplete or L5_env.rerunSetup) and setup then
         setup()
         setupComplete = true
+	L5_env.rerunSetup = false
       else
         if love.draw then love.draw() end
       end
@@ -156,6 +157,39 @@ function love.load()
 end
 
 function love.update(dt)
+  -- Auto-reload file watching (check first, before other updates)
+  if L5_env.autoReloadEnabled then
+    L5_env.checkReloadTimer = L5_env.checkReloadTimer + dt
+    if L5_env.checkReloadTimer >= L5_env.checkReloadInterval then
+      L5_env.checkReloadTimer = 0
+      
+      local info = love.filesystem.getInfo("main.lua")
+      if info and info.modtime ~= L5_env.lastModified then
+        print("main.lua changed, auto-reloading...")
+        L5_env.lastModified = info.modtime
+        
+        -- Reset callbacks
+        setup = function() end
+        draw = function() end
+        update = function() end
+        mousePressed = function() end
+        mouseReleased = function() end
+        mouseClicked = function() end
+        mouseDragged = function() end
+        mouseMoved = function() end
+        mouseWheel = function() end
+        keyPressed = function() end
+        keyReleased = function() end
+        keyTyped = function() end
+        
+        defaults()
+        resetUserDrawingState()
+        dofile('main.lua')
+        L5_env.rerunSetup = true
+      end
+    end
+  end
+
   mouseX, mouseY = love.mouse.getPosition()
   movedX=mouseX-pmouseX
   movedY=mouseY-pmouseY
@@ -299,6 +333,45 @@ function love.keypressed(k, scancode, isrepeat)
   keyCode = love.keyboard.getScancodeFromKey(k)
   L5_env.keyWasPressed = true
   keyIsPressed = true
+
+  if key == 'r' and love.keyboard.isDown('lctrl', 'rctrl') then
+    if love.keyboard.isDown('lshift', 'rshift') then
+      -- Toggle auto-reload
+      L5_env.autoReloadEnabled = not L5_env.autoReloadEnabled
+      print("Auto-reload " .. (L5_env.autoReloadEnabled and "enabled" or "disabled"))
+    else
+      -- manual reload
+      print("reloading")
+      -- Show tip on first manual reload
+      if not L5_env.manualReloadTipShown then
+	print("Tip: Press Ctrl+Shift+R to enable auto-reload on save")
+	L5_env.manualReloadTipShown = true
+      end
+      -- Reset to L5 defaults
+      setup = function() end
+      draw = function() end
+      update = function() end
+      mousePressed = function() end
+      mouseReleased = function() end
+      mouseClicked = function() end
+      mouseDragged = function() end
+      mouseMoved = function() end
+      mouseWheel = function() end
+      keyIsDown = function() end
+      keyIsPressed = function() end
+      keyPressed = function() end
+      keyReleased = function() end
+      keyTyped = function() end
+      defaults()
+      resetUserDrawingState()
+      
+      -- Reload user code
+      dofile('main.lua')
+      
+      -- Flag to re-run setup on next frame
+      L5_env.rerunSetup = true  
+    end
+  end
 end
 
 function love.keyreleased(k)
@@ -873,6 +946,7 @@ function define_env_globals()
   L5_env.backBuffer = nil
   L5_env.frontBuffer = nil
   L5_env.clearscreen = false
+  L5_env.rerunSetup = false
   L5_env.described = false
   -- global video tracking for looping
   L5_env.videos = {}
@@ -904,6 +978,14 @@ function define_env_globals()
   L5_env.showPrintBuffer = false  
   L5_env.printY = 5
   L5_env.printLineHeight = L5_env.defaultFont:getHeight() + 2
+  -- auto-reload settings
+  L5_env.autoReloadEnabled = false
+  L5_env.manualReloadTipShown = false
+  L5_env.lastModified = love.filesystem.getInfo("main.lua") 
+    and love.filesystem.getInfo("main.lua").modtime 
+    or 0
+  L5_env.checkReloadTimer = 0
+  L5_env.checkReloadInterval = 0.5
     
     -- Override print to also draw to screen
   local originalPrint = print
@@ -920,6 +1002,32 @@ function define_env_globals()
     
     table.insert(L5_env.printBuffer, text)
   end
+end
+
+function resetUserDrawingState()
+  -- drawing modes
+  L5_env.degree_mode = RADIANS
+  L5_env.rect_mode = CORNER
+  L5_env.ellipse_mode = CENTER
+  L5_env.image_mode = CORNER
+  L5_env.fill_mode = "fill"
+  L5_env.stroke_color = {0,0,0}
+  L5_env.currentTint = {1, 1, 1, 1}
+  L5_env.color_max = {255,255,255,255}
+  L5_env.color_mode = RGB
+  L5_env.framerate = nil
+  L5_env.textAlignX = LEFT
+  L5_env.textAlignY = BASELINE
+  L5_env.textWrap = WORD
+  L5_env.textureMode = IMAGE
+  L5_env.textureWrap = CLAMP
+  
+  -- clear out old resources 
+  L5_env.videos = {} 
+  L5_env.fontPaths = {} 
+  L5_env.currentFontPath = nil
+  L5_env.currentFontSize = 12
+  L5_env.printFont = L5_env.defaultFont  
 end
 
 ------------------ INIT SHADERS ---------------------
