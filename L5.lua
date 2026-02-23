@@ -3088,20 +3088,20 @@ function text(_msg,_x,_y,_w)
       local currentLine = ""
       local lineWidth = 0
       
+      local buffer = {}
       for i = 1, #_msg do
-        local char = _msg:sub(i, i)
-        local charWidth = font:getWidth(char)
-        
-        if lineWidth + charWidth > _w then
-          wrappedText = wrappedText .. currentLine .. "\n"
-          currentLine = char
-          lineWidth = charWidth
-        else
-          currentLine = currentLine .. char
-          lineWidth = lineWidth + charWidth
-        end
+	local char = _msg:sub(i, i)
+	local charWidth = font:getWidth(char)
+	if lineWidth + charWidth > _w then
+	  table.insert(buffer, "\n")
+	  table.insert(buffer, char)
+	  lineWidth = charWidth
+	else
+	  table.insert(buffer, char)
+	  lineWidth = lineWidth + charWidth
+	end
       end
-      wrappedText = wrappedText .. currentLine
+      wrappedText = table.concat(buffer)
       
       love.graphics.printf(wrappedText, _x - x_offset, _y - y_offset, _w, L5_env.textAlignX)
     else
