@@ -767,6 +767,7 @@ function defaults()
   MITER = "miter"
   BEVEL = "bevel"
   NONE = "none"
+  CLOSE = "close"
   -- typography
   LEFT = "left"
   RIGHT = "right"
@@ -2323,27 +2324,48 @@ function vertex(_x, _y, _u, _v)
     end
 end
 
-function endShape()
-    -- draw the custom shape
-    if #L5_env.vertices > 0 then
-      if L5_env.useTexture and L5_env.currentTexture then
-	-- Use mesh for textured polygon
-	local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
-	mesh:setTexture(L5_env.currentTexture)
+function endShape(_close)
+  -- no vertices, early exit
+  if #L5_env.vertices == 0 then return end
 
-        -- Apply texture wrap mode
-            L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
-
-	love.graphics.draw(mesh)
+  -- if texture() triangulate fan mesh - convex assumed
+  if L5_env.useTexture and L5_env.currentTexture then
+    local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
+    mesh:setTexture(L5_env.currentTexture)
+    L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
+    love.graphics.draw(mesh)
+  else
+    -- triangulate handles concave shapes but errors on self-intersecting polygons
+    if L5_env.fill_mode == "fill" then
+      local ok, triangles = pcall(love.math.triangulate, L5_env.vertices)
+      if ok then
+        local meshVerts = {}
+        for _, tri in ipairs(triangles) do
+          for i = 1, 6, 2 do
+            meshVerts[#meshVerts+1] = {tri[i], tri[i+1]}
+          end
+        end
+        local mesh = love.graphics.newMesh(meshVerts, "triangles")
+        love.graphics.draw(mesh)
       else
-        -- Use regular polygon for non-textured shapes
         love.graphics.polygon("fill", L5_env.vertices)
-	local r, g, b, a = love.graphics.getColor()
-	love.graphics.setColor(unpack(L5_env.stroke_color))
-        love.graphics.polygon("line", L5_env.vertices)
-	love.graphics.setColor(r, g, b, a)
       end
     end
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(unpack(L5_env.stroke_color))
+    if _close == CLOSE then
+      local verts = L5_env.vertices
+      -- draw all segments
+      love.graphics.line(verts[1], verts[2], 
+	unpack(verts, 3, #verts))
+      -- close by drawing back to start
+      love.graphics.line(verts[#verts-1], verts[#verts], verts[1], verts[2])    
+    else
+      -- continuous lines, doesn't close the last two segments aka OPEN
+      love.graphics.line(L5_env.vertices)
+    end
+    love.graphics.setColor(r, g, b, a)
+  end
 end
 
 function bezier(x1,y1,x2,y2,x3,y3,x4,y4)
