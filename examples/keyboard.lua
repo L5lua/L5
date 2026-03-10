@@ -10,9 +10,6 @@
 ]] --
 require("L5")
 
--- Declare Variables
-local rectWidth = width / 4
-
 function setup()
     size(640, 360)
     windowTitle("Keyboard")
@@ -21,6 +18,9 @@ function setup()
     -- Draw Modes
     noStroke()
     background(0)
+
+    -- Declare Variables
+    rectWidth = width / 4
 end
 
 function draw()
