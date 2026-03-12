@@ -2353,198 +2353,165 @@ function vertex(_x, _y, _u, _v)
     end
 end
 
--- helper function to convert flat {x,y,x,y...} to {{x,y},{x,y}...}
-function toVertTable(verts)
-  if type(verts[1]) == "number" then
-    local converted = {}
-    for i = 1, #verts, 2 do
-      converted[#converted+1] = {verts[i], verts[i+1]}
-    end
-    return converted
-  end
-  return verts
-end
-
 function endShape(_close)
   -- no vertices, early exit
   if #L5_env.vertices == 0 then return end
+
+  -- helper function to convert flat {x,y,x,y...} to {{x,y},{x,y}...}
+  local function toVertTable(verts)
+    if type(verts[1]) == "number" then
+      local converted = {}
+      for i = 1, #verts, 2 do
+        converted[#converted+1] = {verts[i], verts[i+1]}
+      end
+      return converted
+    end
+    return verts
+  end
 
   -- draw points
   if L5_env.kind == POINTS then
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color))
-    for i = 1 , #L5_env.vertices , 2 do
-      love.graphics.points(L5_env.vertices[i] , L5_env.vertices[i+1])
+    for i = 1, #L5_env.vertices, 2 do
+      love.graphics.points(L5_env.vertices[i], L5_env.vertices[i+1])
     end
     love.graphics.setColor(r, g, b, a)
-    return
-  end
 
   -- draw unconnected lines
-  if L5_env.kind == LINES then
+  elseif L5_env.kind == LINES then
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color))
     for i = 1, #L5_env.vertices - 2, 4 do
       love.graphics.line(
-        L5_env.vertices[i], L5_env.vertices[i+1], L5_env.vertices[i+2], L5_env.vertices[i+3]
+        L5_env.vertices[i], L5_env.vertices[i+1],
+        L5_env.vertices[i+2], L5_env.vertices[i+3]
       )
     end
     love.graphics.setColor(r, g, b, a)
-    return
-  end
 
-  -- draw seperated triangles
-  if L5_env.kind == TRIANGLES then
-
-    
-    local verts = L5_env.vertices
-    if type(verts[1]) == "number" then
-      local converted = {}
-      for i = 1 , #verts , 2 do
-        converted[#converted+1] = {verts[i] , verts[i+1]}
-      end
-      verts = converted
-    end
-    
+  -- draw separated triangles
+  elseif L5_env.kind == TRIANGLES then
+    local verts = toVertTable(L5_env.vertices)
     if L5_env.useTexture and L5_env.currentTexture then
       local mesh = love.graphics.newMesh(verts, TRIANGLES)
       mesh:setTexture(L5_env.currentTexture)
       L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
       love.graphics.draw(mesh)
-      return
+    else
+      if L5_env.fill_mode == "fill" then
+        L5_env.mesh:setVertices(verts, 1, #verts)
+        L5_env.mesh:setDrawMode("triangles")
+        L5_env.mesh:setDrawRange(1, #verts)
+        love.graphics.draw(L5_env.mesh)
+      end
+      local r, g, b, a = love.graphics.getColor()
+      love.graphics.setColor(unpack(L5_env.stroke_color))
+      for i = 1, #verts, 3 do
+        local v1, v2, v3 = verts[i], verts[i+1], verts[i+2]
+        if v1 == nil or v2 == nil or v3 == nil then break end
+        love.graphics.line(v1[1],v1[2], v2[1],v2[2])
+        love.graphics.line(v2[1],v2[2], v3[1],v3[2])
+        love.graphics.line(v3[1],v3[2], v1[1],v1[2])
+      end
+      love.graphics.setColor(r, g, b, a)
     end
-    
-
-    if L5_env.fill_mode == "fill" then
-      local mesh = love.graphics.newMesh(verts, TRIANGLES)
-      love.graphics.draw(mesh)
-    end
-
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color))
-    for i = 1, #verts, 3 do
-      local v1, v2, v3 = verts[i], verts[i+1], verts[i+2]
-      if(v1 == nil or v2 == nil or v3 == nil) then break end
-      love.graphics.line(v1[1],v1[2], v2[1],v2[2])
-      love.graphics.line(v2[1],v2[2], v3[1],v3[2])
-      love.graphics.line(v3[1],v3[2], v1[1],v1[2])
-    end
-    love.graphics.setColor(r, g, b, a)
-    return
-  end
-
 
   -- draw triangle strip
-  if L5_env.kind == TRIANGLE_STRIP then
-    local verts = L5_env.vertices
-    if type(verts[1]) == "number" then
-      local converted = {}
-      for i = 1 , #verts , 2 do
-        converted[#converted+1] = {verts[i] , verts[i+1]}
-      end
-      verts = converted
-    end
-
+  elseif L5_env.kind == TRIANGLE_STRIP then
+    local verts = toVertTable(L5_env.vertices)
     if L5_env.useTexture and L5_env.currentTexture then
       local mesh = love.graphics.newMesh(verts, TRIANGLE_STRIP)
       mesh:setTexture(L5_env.currentTexture)
       L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
       love.graphics.draw(mesh)
-      return
+    else
+      if L5_env.fill_mode == "fill" then
+        L5_env.mesh:setVertices(verts, 1, #verts)
+        L5_env.mesh:setDrawMode("strip")
+        L5_env.mesh:setDrawRange(1, #verts)
+        love.graphics.draw(L5_env.mesh)
+      end
+      local r, g, b, a = love.graphics.getColor()
+      love.graphics.setColor(unpack(L5_env.stroke_color))
+      for i = 1, #verts-2 do
+        local v1, v2, v3 = verts[i], verts[i+1], verts[i+2]
+        if v1 == nil or v2 == nil or v3 == nil then break end
+        love.graphics.line(v1[1],v1[2], v2[1],v2[2])
+        love.graphics.line(v2[1],v2[2], v3[1],v3[2])
+        love.graphics.line(v3[1],v3[2], v1[1],v1[2])
+      end
+      love.graphics.setColor(r, g, b, a)
     end
-
-    if L5_env.fill_mode == "fill" then
-      local mesh = love.graphics.newMesh(verts, TRIANGLE_STRIP)
-      love.graphics.draw(mesh)
-    end
-
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color))
-    for i = 1, #verts-2, 1 do
-      local v1, v2, v3 = verts[i], verts[i+1], verts[i+2]
-      if(v1 == nil or v2 == nil or v3 == nil) then break end
-      love.graphics.line(v1[1],v1[2], v2[1],v2[2])
-      love.graphics.line(v2[1],v2[2], v3[1],v3[2])
-      love.graphics.line(v3[1],v3[2], v1[1],v1[2])
-    end
-    love.graphics.setColor(r, g, b, a)
-    return
-  end
 
   -- draw triangles centered around the first vertex
-  if L5_env.kind == TRIANGLE_FAN then
-    
-    local verts = L5_env.vertices
-    if type(verts[1]) == "number" then
-      local converted = {}
-      for i = 1 , #verts , 2 do
-        converted[#converted+1] = {verts[i] , verts[i+1]}
-      end
-      verts = converted
-    end
-    
+  elseif L5_env.kind == TRIANGLE_FAN then
+    local verts = toVertTable(L5_env.vertices)
     if L5_env.useTexture and L5_env.currentTexture then
       local mesh = love.graphics.newMesh(verts, TRIANGLE_FAN)
       mesh:setTexture(L5_env.currentTexture)
       L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
       love.graphics.draw(mesh)
-      return
-    end
-    if L5_env.fill_mode == "fill" then
-      local mesh = love.graphics.newMesh(verts, TRIANGLE_FAN)
-      love.graphics.draw(mesh)
-    end
-
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color))
-    for i = 2, #verts-1, 1 do
-      local v1, v2, v3 = verts[1], verts[i], verts[i+1]
-      if(v1 == nil or v2 == nil or v3 == nil) then break end
-      love.graphics.line(v1[1],v1[2], v2[1],v2[2])
-      love.graphics.line(v2[1],v2[2], v3[1],v3[2])
-      love.graphics.line(v3[1],v3[2], v1[1],v1[2])
-    end
-    love.graphics.setColor(r, g, b, a)
-    return
-  end
-
-  -- if texture() triangulate fan mesh - convex assumed
-  if L5_env.useTexture and L5_env.currentTexture then
-    local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
-    mesh:setTexture(L5_env.currentTexture)
-    L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
-    love.graphics.draw(mesh)
-  else
-    -- triangulate handles concave shapes but errors on self-intersecting polygons
-    if L5_env.fill_mode == "fill" then
-      local ok, triangles = pcall(love.math.triangulate, L5_env.vertices)
-      if ok then
-        local meshVerts = {}
-        for _, tri in ipairs(triangles) do
-          for i = 1, 6, 2 do
-            meshVerts[#meshVerts+1] = {tri[i], tri[i+1]}
-          end
-        end
-        local mesh = love.graphics.newMesh(meshVerts, "triangles")
-        love.graphics.draw(mesh)
-      else
-        love.graphics.polygon("fill", L5_env.vertices)
-      end
-    end
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color))
-    if _close == CLOSE then
-      local verts = L5_env.vertices
-      -- draw all segments
-      love.graphics.line(verts[1], verts[2], 
-	unpack(verts, 3, #verts))
-      -- close by drawing back to start
-      love.graphics.line(verts[#verts-1], verts[#verts], verts[1], verts[2])    
     else
-      -- continuous lines, doesn't close the last two segments aka OPEN
-      love.graphics.line(L5_env.vertices)
+      if L5_env.fill_mode == "fill" then
+        L5_env.mesh:setVertices(verts, 1, #verts)
+        L5_env.mesh:setDrawMode("fan")
+        L5_env.mesh:setDrawRange(1, #verts)
+        love.graphics.draw(L5_env.mesh)
+      end
+      local r, g, b, a = love.graphics.getColor()
+      love.graphics.setColor(unpack(L5_env.stroke_color))
+      for i = 2, #verts-1 do
+        local v1, v2, v3 = verts[1], verts[i], verts[i+1]
+        if v1 == nil or v2 == nil or v3 == nil then break end
+        love.graphics.line(v1[1],v1[2], v2[1],v2[2])
+        love.graphics.line(v2[1],v2[2], v3[1],v3[2])
+        love.graphics.line(v3[1],v3[2], v1[1],v1[2])
+      end
+      love.graphics.setColor(r, g, b, a)
     end
-    love.graphics.setColor(r, g, b, a)
+
+  -- polygon fallback (kind == nil) 
+  -- if texture() triangulate fan mesh - convex assumed
+  else
+    if L5_env.useTexture and L5_env.currentTexture then
+      local mesh = love.graphics.newMesh(L5_env.vertices, "fan")
+      mesh:setTexture(L5_env.currentTexture)
+      L5_env.currentTexture:setWrap(L5_env.textureWrap, L5_env.textureWrap)
+      love.graphics.draw(mesh)
+    else
+      -- triangulate handles concave shapes but errors on self-intersecting polygons
+      if L5_env.fill_mode == "fill" then
+        local ok, triangles = pcall(love.math.triangulate, L5_env.vertices)
+        if ok then
+          local meshVerts = {}
+          for _, tri in ipairs(triangles) do
+            for i = 1, 6, 2 do
+              meshVerts[#meshVerts+1] = {tri[i], tri[i+1]}
+            end
+          end
+          L5_env.mesh:setVertices(meshVerts, 1, #meshVerts)
+          L5_env.mesh:setDrawMode("triangles")
+          L5_env.mesh:setDrawRange(1, #meshVerts)
+          love.graphics.draw(L5_env.mesh)
+        else
+          love.graphics.polygon("fill", L5_env.vertices)
+        end
+      end
+      local r, g, b, a = love.graphics.getColor()
+      love.graphics.setColor(unpack(L5_env.stroke_color))
+      if _close == CLOSE then
+        local verts = L5_env.vertices
+        -- draw all segments
+        love.graphics.line(verts[1], verts[2], unpack(verts, 3, #verts))
+        -- close by drawing back to start
+        love.graphics.line(verts[#verts-1], verts[#verts], verts[1], verts[2])
+      else
+        -- continuous lines, doesn't close the last two segments aka OPEN
+        love.graphics.line(L5_env.vertices)
+      end
+      love.graphics.setColor(r, g, b, a)
+    end
   end
 end
 
