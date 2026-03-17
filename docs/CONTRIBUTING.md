@@ -76,14 +76,60 @@ git commit -m "[your_commit_message]"
 
 ## Codebase overview
 
+A little familiarity with Love2D goes a long way in understanding how L5 works. They have a great [wiki](www.love2d.org/wiki/Getting_Started) you can refer to for more details.
+L5, overrides some of Love2D's default functions like `love.run()` and `love.draw()` to take control of the rendering loop and state to provide a Processing-style api.
+
+Almost all internal state is stored inside a `L5_env` table that the library needs such as:
+
+- current color mode
+- whether looping is enabled
+- pressed keys
+- mouse movement flags
+- current font info
+
+L5 is does its drawing through a back buffer canvas which means:
+
+- draw onto an offscreen image first
+- then draw that image to the screen
+
+This is a common graphics technique called [**double buffering**](https://en.wikipedia.org/wiki/Double_buffering).
+
+This library is intentionally “global” and beginner-friendly. This is one of the most important things to understand when reading the codebase.
+
+In many Lua codebases, you’ll see a style like:
+
+- `local M = {}`
+- `function M.foo() ... end`
+- `return M`
+
+Then users do:
+
+- `local lib = require("lib")`
+- `lib.foo()`
+
+That is **not** the style here. L5 is more like Processing or p5 global mode:
+
+- define globals
+- provide simple function names
+- let the user write very short sketches
+
 Some of the key files and folders you will see in the L5 folder are as follows:
 
-- `L5.lua` - Where all the code for L5 lives
-- `main.lua` - This is the main entry point for the L5 library ran by Love2D
+- `L5.lua` - The main library that contains all the code for L5
+- `main.lua` - This is the main entry point / runnable sketch used by Love2D
 - `examples` - This is where you can find example L5 projects
-- `docs` - Where the documentation lives
+- `docs` - This is where the documentation lives
 
 The other files and folders are either assets or other kinds of support files; in most cases, you shouldn't need to make any modifications.
+
+How the code works is that, Love2D is essentially a game engine, it provides the window, input handling, and rendering engine. While `L5.lua` wraps that in a familiar Processing-style api.
+
+### Running examples
+
+1. Open one of the files in `L5/examples/`
+2. Copy its contents
+3. Paste it into the root `L5/main.lua`
+4. Run the project with LÖVE using `love .`
 
 ## AI Usage Policy
 This project does *not* accept fully AI-generated contributions. AI tools may be used assistively only. As a contributor, you should be able to understand and take responsibility for changes you make to the codebase.
