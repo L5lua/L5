@@ -852,7 +852,6 @@ function define_env_globals()
   -- global color state 
   L5_env.fill_mode="fill"   --also: "line"
   L5_env.stroke_color = {0,0,0}
-
   L5_env.currentTint = {1, 1, 1, 1} -- Default: no tint white
   L5_env.color_max = {255,255,255,255}
   L5_env.color_mode = RGB --also: HSB, HSL
