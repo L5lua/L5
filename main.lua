@@ -13,4 +13,3 @@ function draw()
   -- Fills the background with the color yellow
   background(255, 215, 0)
 end
-
