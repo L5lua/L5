@@ -3310,6 +3310,7 @@ function textWrap(_style)
   end
 end
 
+----------------------- IMAGE ------------------------
 ---------------- LOADING & DISPLAYING ----------------
 
 function loadImage(_filename)
@@ -3435,6 +3436,68 @@ function image(_img,_x,_y,_w,_h)
   end
   
   love.graphics.draw(_img,_x,_y,0,xscale,yscale,ox,oy)
+end
+
+function mask(img, maskImage)
+  -- save current graphics state
+  local prevCanvas = love.graphics.getCanvas()
+  local prevBlendMode = love.graphics.getBlendMode()
+  
+  -- get ImageData by rendering to temporary canvas
+  local w = img:getWidth()
+  local h = img:getHeight()
+  
+  -- create temporary canvas for img
+  local imgCanvas = love.graphics.newCanvas(w, h)
+  love.graphics.setCanvas(imgCanvas)
+  love.graphics.clear()
+  love.graphics.draw(img, 0, 0)
+  love.graphics.setCanvas()
+  local imgData = imgCanvas:newImageData()
+  imgCanvas:release()
+  
+  -- create temporary canvas for mask
+  local maskW = maskImage:getWidth()
+  local maskH = maskImage:getHeight()
+  local maskCanvas = love.graphics.newCanvas(maskW, maskH)
+  love.graphics.setCanvas(maskCanvas)
+  love.graphics.clear()
+  love.graphics.draw(maskImage, 0, 0)
+  love.graphics.setCanvas()
+  local maskData = maskCanvas:newImageData()
+  maskCanvas:release()
+  
+  -- scale mask if needed
+  if w ~= maskW or h ~= maskH then
+    local scaledMaskData = love.image.newImageData(w, h)
+    for y = 0, h - 1 do
+      for x = 0, w - 1 do
+        local mx = floor(x * maskW / w)
+        local my = floor(y * maskH / h)
+        local mr, mg, mb, ma = maskData:getPixel(mx, my)
+        scaledMaskData:setPixel(x, y, mr, mg, mb, ma)
+      end
+    end
+    maskData = scaledMaskData
+  end
+  
+  -- apply mask using mask's alpha channel
+  for y = 0, h - 1 do
+    for x = 0, w - 1 do
+      local r, g, b, a = imgData:getPixel(x, y)
+      local mr, mg, mb, ma = maskData:getPixel(x, y)
+      
+      -- multiply alpha (cumulative)
+      imgData:setPixel(x, y, r, g, b, a * ma)
+    end
+  end
+  
+  -- update the image
+  img:replacePixels(imgData)
+  
+  -- restore graphics state
+  love.graphics.setCanvas(prevCanvas)
+  love.graphics.setBlendMode(prevBlendMode)
 end
 
 function tint(...)
