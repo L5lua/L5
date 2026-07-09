@@ -1,5 +1,5 @@
--- L5 0.1.6 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.6'
+-- L5 0.1.7 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.7'
 
 -- Override love.run() - adds double buffering and custom events
 function love.run()
@@ -1254,14 +1254,52 @@ end
 
 ---------------------- TRANSFORM ---------------------
 
+-- style stack for push()/pop() — tracks L5_env fields not covered by love.graphics.push/pop
+local STYLE_KEYS = {
+  "fill_mode",
+  "stroke_color",
+  "currentTint",
+  "image_mode",
+  "rect_mode",
+  "ellipse_mode",
+  "color_mode",
+  "color_max",
+  "textAlignX",
+  "textAlignY",
+  "currentFontPath",
+  "currentFontSize",
+  "currentFont"
+}
+
+local function copyStyle(t)
+  local out = {}
+  for k, v in pairs(t) do
+    out[k] = v
+  end
+  return out
+end
+
+local styleStack = {}
+
 function push()
-  love.graphics.push()
+  love.graphics.push('all')
+  local snapshot = {}
+  for _, k in ipairs(STYLE_KEYS) do
+    local v = L5_env[k]
+    snapshot[k] = (type(v) == "table") and copyStyle(v) or v
+  end
+  table.insert(styleStack, snapshot)
 end
 
 function pop()
-  love.graphics.pop()
+  love.graphics.pop('all')
+  local snapshot = table.remove(styleStack)
+  if snapshot then
+    for k, v in pairs(snapshot) do
+      L5_env[k] = v
+    end
+  end
 end
-
 function translate(_x,_y)
   love.graphics.translate(_x,_y )
 end
