@@ -3564,7 +3564,7 @@ function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     
     -- Handle Image and Video objects
     if type(actualDrawable) == "userdata" and 
-       (actualDrawable:type() == "Image" or actualDrawable:type() == "Video") then
+       (actualDrawable:type() == "Image" or actualDrawable:type() == "Video" or actualDrawable:type() == "Canvas") then
         if L5_env.currentTint then
             love.graphics.setColor(unpack(L5_env.currentTint))
         else
