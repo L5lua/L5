@@ -1,11 +1,20 @@
--- L5 0.1.7 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.7'
+-- L5 0.1.8 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.1.8'
+
+-- Internal table for L5 helper functions
+local L5_internal = {} 
+-- Internal table for holding state
+local L5_env = {} 
+-- Internal table for holding filter shaders
+local L5_filter = {}
+-- Internal table for html color names
+local htmlColors = {}
 
 -- Override love.run() - adds double buffering and custom events
 function love.run()
-  defaults()
+  L5_internal.defaults()
 
-  define_env_globals()
+  L5_internal.define_env_globals()
   if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
   if love.timer then love.timer.step() end
   local dt = 0
@@ -113,7 +122,7 @@ function love.run()
         -- Restore color (after drawing the canvas)
         love.graphics.setColor(r, g, b, a)
 
-        drawPrintBuffer()
+        L5_internal.drawPrintBuffer()
 
         love.graphics.present()
       end
@@ -149,7 +158,7 @@ function love.load()
   love.graphics.clear(0.5, 0.5, 0.5, 1) -- gray background
   love.graphics.setCanvas()
 
-  initShaderDefaults()
+  L5_internal.initShaderDefaults()
 
   stroke(0)
   fill(255)
@@ -160,7 +169,7 @@ function love.update(dt)
   movedX=mouseX-pmouseX
   movedY=mouseY-pmouseY
   deltaTime = dt * 1000
-  key = updateLastKeyPressed()
+  key = L5_internal.updateLastKeyPressed()
 
   -- Update looping videos
   -- Note: Videos with audio tracks may experience sync issues when looping
@@ -355,7 +364,7 @@ function love.focus(_focused)
 end
 
 ------------------- CUSTOM FUNCTIONS -----------------
-function drawPrintBuffer()
+function L5_internal.drawPrintBuffer()
     if not L5_env.showPrintBuffer or #L5_env.printBuffer == 0 then
         return
     end
@@ -499,7 +508,128 @@ function fullscreen(display)
   end
 end
 
-function toColor(_a, _b, _c, _d)
+--internal helper function hex code to RGB value
+local function hexToRGB(hex)
+    hex = hex:gsub("#", "") -- Remove # if present
+
+    -- Check valid length
+    if #hex == 3 then
+        hex = hex:gsub("(.)", "%1%1") -- Convert 3 to 6-digit
+    elseif #hex ~= 6 then
+        return nil, "Invalid hex color format. Expected 3 or 6 characters."
+    end
+
+    -- Extract RGB components
+    local r = tonumber(hex:sub(1, 2), 16)
+    local g = tonumber(hex:sub(3, 4), 16)
+    local b = tonumber(hex:sub(5, 6), 16)
+
+    -- Check if conversion was successful
+    if not r or not g or not b then
+        return nil, "Invalid hex color format. Contains non-hex characters."
+    end
+
+    return r, g, b
+end
+
+--internal helper function HSV to RGB
+local function HSVtoRGB(h, s, v)  
+    if s <= 0 then 
+        return v, v, v
+    end
+    h = h * 6
+    local c = v * s
+    local x = c * (1 - math.abs((h % 2) - 1))
+    local m = v - c
+    local r, g, b = 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r + m, g + m, b + m
+end
+
+--internal helper function for HSL (hue, saturation, and lightness) to RGB value
+local function HSLtoRGB(h, s, l)
+    if s <= 0 then 
+        return l, l, l
+    end
+    h = h * 6
+    local c = (1 - math.abs(2 * l - 1)) * s
+    local x = c * (1 - math.abs((h % 2) - 1))
+    local m = l - c / 2
+    local r, g, b = 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r + m, g + m, b + m
+end
+
+--internal helper function for converting RGB to HSL 
+local function RGBtoHSL(r, g, b)
+  -- Normalize RGB values to 0-1 range
+  r = r / 255
+  g = g / 255
+  b = b / 255
+  
+  local max = math.max(r, g, b)
+  local min = math.min(r, g, b)
+  local h, s, l
+  
+  -- Calculate lightness
+  l = (max + min) / 2
+  
+  if max == min then
+    -- Achromatic (no color)
+    h = 0
+    s = 0
+  else
+    local d = max - min
+    
+    -- Calculate saturation
+    if l > 0.5 then
+      s = d / (2 - max - min)
+    else
+      s = d / (max + min)
+    end
+    
+    -- Calculate hue
+    if max == r then
+      h = (g - b) / d + (g < b and 6 or 0)
+    elseif max == g then
+      h = (b - r) / d + 2
+    elseif max == b then
+      h = (r - g) / d + 4
+    end
+    
+    h = h / 6
+  end
+  
+  -- Convert to 0-360 for hue, 0-100 for saturation and lightness
+  return h * L5_env.color_max[1], s * L5_env.color_max[2], l * L5_env.color_max[3]
+end
+
+--internal helper function for color handling
+local function toColor(_a, _b, _c, _d)
   -- If _a is a table, return it (assuming it's already in RGBA format)
   if type(_a) == "table" and _b == nil and #_a == 4 then
     return _a
@@ -584,122 +714,6 @@ function toColor(_a, _b, _c, _d)
   return {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], a/L5_env.color_max[4]}
 end
 
-function hexToRGB(hex)
-    hex = hex:gsub("#", "") -- Remove # if present
-
-    -- Check valid length
-    if #hex == 3 then
-        hex = hex:gsub("(.)", "%1%1") -- Convert 3 to 6-digit
-    elseif #hex ~= 6 then
-        return nil, "Invalid hex color format. Expected 3 or 6 characters."
-    end
-
-    -- Extract RGB components
-    local r = tonumber(hex:sub(1, 2), 16)
-    local g = tonumber(hex:sub(3, 4), 16)
-    local b = tonumber(hex:sub(5, 6), 16)
-
-    -- Check if conversion was successful
-    if not r or not g or not b then
-        return nil, "Invalid hex color format. Contains non-hex characters."
-    end
-
-    return r, g, b
-end
-
-function HSVtoRGB(h, s, v) 
-    if s <= 0 then 
-        return v, v, v
-    end
-    h = h * 6
-    local c = v * s
-    local x = c * (1 - math.abs((h % 2) - 1))
-    local m = v - c
-    local r, g, b = 0, 0, 0
-    if h < 1 then
-        r, g, b = c, x, 0
-    elseif h < 2 then
-        r, g, b = x, c, 0
-    elseif h < 3 then
-        r, g, b = 0, c, x
-    elseif h < 4 then
-        r, g, b = 0, x, c
-    elseif h < 5 then
-        r, g, b = x, 0, c
-    else
-        r, g, b = c, 0, x
-    end
-    return r + m, g + m, b + m
-end
-
-function HSLtoRGB(h, s, l)
-    if s <= 0 then 
-        return l, l, l
-    end
-    h = h * 6
-    local c = (1 - math.abs(2 * l - 1)) * s
-    local x = c * (1 - math.abs((h % 2) - 1))
-    local m = l - c / 2
-    local r, g, b = 0, 0, 0
-    if h < 1 then
-        r, g, b = c, x, 0
-    elseif h < 2 then
-        r, g, b = x, c, 0
-    elseif h < 3 then
-        r, g, b = 0, c, x
-    elseif h < 4 then
-        r, g, b = 0, x, c
-    elseif h < 5 then
-        r, g, b = x, 0, c
-    else
-        r, g, b = c, 0, x
-    end
-    return r + m, g + m, b + m
-end
-
-function RGBtoHSL(r, g, b)
-  -- Normalize RGB values to 0-1 range
-  r = r / 255
-  g = g / 255
-  b = b / 255
-  
-  local max = math.max(r, g, b)
-  local min = math.min(r, g, b)
-  local h, s, l
-  
-  -- Calculate lightness
-  l = (max + min) / 2
-  
-  if max == min then
-    -- Achromatic (no color)
-    h = 0
-    s = 0
-  else
-    local d = max - min
-    
-    -- Calculate saturation
-    if l > 0.5 then
-      s = d / (2 - max - min)
-    else
-      s = d / (max + min)
-    end
-    
-    -- Calculate hue
-    if max == r then
-      h = (g - b) / d + (g < b and 6 or 0)
-    elseif max == g then
-      h = (b - r) / d + 2
-    elseif max == b then
-      h = (r - g) / d + 4
-    end
-    
-    h = h / 6
-  end
-  
-  -- Convert to 0-360 for hue, 0-100 for saturation and lightness
-  return h * L5_env.color_max[1], s * L5_env.color_max[2], l * L5_env.color_max[3]
-end
-
 function save(filename)
     love.graphics.captureScreenshot(function(imageData)
         -- Generate filename
@@ -754,7 +768,8 @@ function describe(sceneDescription)
     end
 end
 
-function defaults()
+--declares global variables that are user-accessible
+function L5_internal.defaults()
   -- constants
   -- shapes
   CORNER = "CORNER"
@@ -849,8 +864,7 @@ function defaults()
 end
 
 -- environment global variables not user-facing
-function define_env_globals()
-  L5_env = L5_env or {} -- Initialize L5_env if it doesn't exist
+function L5_internal.define_env_globals()
   L5_env.drawing = true
   -- drawing mode state
   L5_env.degree_mode = RADIANS --also: DEGREES
@@ -919,6 +933,8 @@ function define_env_globals()
   L5_env.showPrintBuffer = false  
   L5_env.printY = 5
   L5_env.printLineHeight = L5_env.defaultFont:getHeight() + 2
+  -- style stack for push()/pop() — tracks L5_env fields not covered by LOVE's built-in love.graphics.push/pop
+  L5_env.styleStack = {}
     
     -- Override print to also draw to screen
   local originalPrint = print
@@ -939,7 +955,7 @@ end
 
 ------------------ INIT SHADERS ---------------------
 -- initialize shader default values
-function initShaderDefaults()
+function L5_internal.initShaderDefaults()
     -- Set default values for threshold shader
     L5_filter.threshold:send("soft", 0.5)
     L5_filter.threshold:send("threshold", 0.5)
@@ -1208,7 +1224,7 @@ end
 
 ---------------------- KEYBOARD ---------------------
 
-function updateLastKeyPressed()
+function L5_internal.updateLastKeyPressed()
   local commonKeys = {
     -- Letters
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
@@ -1254,24 +1270,7 @@ end
 
 ---------------------- TRANSFORM ---------------------
 
--- style stack for push()/pop() — tracks L5_env fields not covered by love.graphics.push/pop
-local STYLE_KEYS = {
-  "fill_mode",
-  "stroke_color",
-  "currentTint",
-  "image_mode",
-  "rect_mode",
-  "ellipse_mode",
-  "color_mode",
-  "color_max",
-  "textAlignX",
-  "textAlignY",
-  "currentFontPath",
-  "currentFontSize",
-  "currentFont"
-}
-
-local function copyStyle(t)
+function L5_internal.copyStyle(t)
   local out = {}
   for k, v in pairs(t) do
     out[k] = v
@@ -1279,21 +1278,35 @@ local function copyStyle(t)
   return out
 end
 
-local styleStack = {}
-
 function push()
-  love.graphics.push('all')
+  local STYLE_KEYS = {
+    "fill_mode",
+    "stroke_color",
+    "currentTint",
+    "image_mode",
+    "rect_mode",
+    "ellipse_mode",
+    "color_mode",
+    "color_max",
+    "textAlignX",
+    "textAlignY",
+    "currentFontPath",
+    "currentFontSize",
+    "currentFont"
+  }
+
+    love.graphics.push('all')
   local snapshot = {}
   for _, k in ipairs(STYLE_KEYS) do
     local v = L5_env[k]
-    snapshot[k] = (type(v) == "table") and copyStyle(v) or v
+    snapshot[k] = (type(v) == "table") and L5_internal.copyStyle(v) or v
   end
-  table.insert(styleStack, snapshot)
+  table.insert(L5_env.styleStack, snapshot)
 end
 
 function pop()
   love.graphics.pop('all')
-  local snapshot = table.remove(styleStack)
+  local snapshot = table.remove(L5_env.styleStack)
   if snapshot then
     for k, v in pairs(snapshot) do
       L5_env[k] = v
@@ -1548,6 +1561,63 @@ function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
     love.graphics.setColor(r, g, b, a)
 end
 
+-- Helper function to draw elliptical arcs
+local function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
+  local segments = math.max(8, math.floor(math.abs(arc_span) * 12)) -- Adaptive segments
+  local vertices = {}
+  
+  -- Generate arc vertices
+  for i = 0, segments do
+    local angle = start_angle + (arc_span * i / segments)
+    local x = cx + rx * math.cos(angle)
+    local y = cy + ry * math.sin(angle)
+    table.insert(vertices, x)
+    table.insert(vertices, y)
+  end
+  
+  if arctype == PIE then
+    -- Add center point for pie
+    table.insert(vertices, 1, cy) -- Insert at position 2 (after first vertex)
+    table.insert(vertices, 1, cx) -- Insert at position 1
+  elseif arctype == CHORD then
+    -- Close the arc by connecting endpoints
+    -- vertices already has the right points
+  end
+  -- "open" type doesn't need modification
+  
+  -- Draw filled arc
+  if L5_env.fill_mode and L5_env.fill_mode ~= "line" and #vertices >= 6 then
+    if arctype == "pie" then
+      love.graphics.polygon("fill", vertices)
+    elseif arctype == CHORD then
+      love.graphics.polygon("fill", vertices)
+    end
+    -- "open" type doesn't get filled
+  end
+  
+  -- Draw stroke
+  if L5_env.stroke_color then
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(unpack(L5_env.stroke_color))
+    
+    if arctype == OPEN then
+      -- Just draw the arc line
+      for i = 1, #vertices - 2, 2 do
+        love.graphics.line(vertices[i], vertices[i+1], vertices[i+2], vertices[i+3])
+      end
+    elseif arctype == CHORD then
+      -- Draw the arc and the closing line
+      love.graphics.polygon("line", vertices)
+    elseif arctype == PIE then
+      -- Draw the arc and lines to center
+      love.graphics.polygon("line", vertices)
+    end
+    
+    love.graphics.setColor(r, g, b, a)
+  end
+end
+
+
 --p5 calls arctype parameter "mode"
 function arc(_x, _y, _w, _h, _start, _stop, _arctype)
   local arctype = _arctype or PIE
@@ -1645,62 +1715,6 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
       -- Elliptical arc - need to draw manually with vertices
       draw_elliptical_arc(center_x, center_y, radius_x, radius_y, start_norm, arc_span, arctype)
     end
-  end
-end
-
--- Helper function to draw elliptical arcs
-function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctype)
-  local segments = math.max(8, math.floor(math.abs(arc_span) * 12)) -- Adaptive segments
-  local vertices = {}
-  
-  -- Generate arc vertices
-  for i = 0, segments do
-    local angle = start_angle + (arc_span * i / segments)
-    local x = cx + rx * math.cos(angle)
-    local y = cy + ry * math.sin(angle)
-    table.insert(vertices, x)
-    table.insert(vertices, y)
-  end
-  
-  if arctype == PIE then
-    -- Add center point for pie
-    table.insert(vertices, 1, cy) -- Insert at position 2 (after first vertex)
-    table.insert(vertices, 1, cx) -- Insert at position 1
-  elseif arctype == CHORD then
-    -- Close the arc by connecting endpoints
-    -- vertices already has the right points
-  end
-  -- "open" type doesn't need modification
-  
-  -- Draw filled arc
-  if L5_env.fill_mode and L5_env.fill_mode ~= "line" and #vertices >= 6 then
-    if arctype == "pie" then
-      love.graphics.polygon("fill", vertices)
-    elseif arctype == CHORD then
-      love.graphics.polygon("fill", vertices)
-    end
-    -- "open" type doesn't get filled
-  end
-  
-  -- Draw stroke
-  if L5_env.stroke_color then
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color))
-    
-    if arctype == OPEN then
-      -- Just draw the arc line
-      for i = 1, #vertices - 2, 2 do
-        love.graphics.line(vertices[i], vertices[i+1], vertices[i+2], vertices[i+3])
-      end
-    elseif arctype == CHORD then
-      -- Draw the arc and the closing line
-      love.graphics.polygon("line", vertices)
-    elseif arctype == PIE then
-      -- Draw the arc and lines to center
-      love.graphics.polygon("line", vertices)
-    end
-    
-    love.graphics.setColor(r, g, b, a)
   end
 end
 
@@ -3805,7 +3819,7 @@ function updatePixels()
 end
 
 -- Helper function to get pixel index
-function getPixelIndex(x, y)
+local function getPixelIndex(x, y)
     local w = L5_env.imageData:getWidth()
     return (x + y * w) * 4
 end
@@ -3902,9 +3916,6 @@ local function createShaderSafe(shaderCode, fallbackMessage)
     return nil
   end
 end
-
-L5_filter = {}
-
 
 L5_filter.grayscale = createShaderSafe([[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
