@@ -51,9 +51,9 @@ function love.run()
     -- Update dt
     if love.timer then dt = love.timer.step() end
     
-    -- Update
-    if love.update then love.update(dt) end
-    
+    -- Refresh per-frame framework state (mouse position, deltaTime, key, video looping)
+    L5_internal.updateFrameState(dt)
+
     -- Draw with double buffering
     if love.graphics and love.graphics.isActive() then
       love.graphics.origin()
@@ -164,7 +164,10 @@ function love.load()
   fill(255)
 end
 
-function love.update(dt)
+-- Per-frame framework bookkeeping (mouse position, deltaTime, key, video
+-- looping). update() is not part of the L5 lifecycle - only setup() and
+-- draw() are - so this is purely internal plumbing, not a user callback.
+function L5_internal.updateFrameState(dt)
   mouseX, mouseY = love.mouse.getPosition()
   movedX=mouseX-pmouseX
   movedY=mouseY-pmouseY
@@ -182,9 +185,6 @@ function love.update(dt)
       end
     end
   end
-
-  -- Optional update (not typically Processing-like but available)
-  if update ~= nil then update() end
 end
 
 function love.draw()
@@ -849,7 +849,7 @@ function L5_internal.defaults()
   TRIANGLE_STRIP = "strip"
 
   -- global user vars - can be read by user but shouldn't be altered by user
-  key = "" --default, overriden with key presses detected in love.update(dt)
+  key = "" --default, overriden with key presses detected in L5_internal.updateFrameState(dt)
   width = 800 --default, overridden with size() or fullscreen()
   height = 600 --ditto
   frameCount = 0
