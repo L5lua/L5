@@ -128,7 +128,6 @@ The other files and folders are either assets or other kinds of support files; i
 
 ## AI Usage Policy
 
-This project does *not* accept fully AI-generated contributions. AI tools may be used assistively only. As a contributor, you should be able to understand and take responsibility for changes you make to the codebase.
+As permacomputing principles underlie the goals of this coding library, please don't include Large Language Models (LLMs) in code contributions.
 
-We maintain the same stance on AI usage as p5.js. Please read the [AI Usage Policy](https://github.com/processing/p5.js/blob/main/AI_USAGE_POLICY.md) before proceeding.
-
+We maintain the same stance on AI usage as p5.js. AI tools may be used assistively only. Please read the [AI Usage policy](https://github.com/processing/p5.js/blob/main/AI_USAGE_POLICY.md#what-ai-tools-can-do) before proceeding.
