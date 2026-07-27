@@ -3463,6 +3463,11 @@ function loadVideo(_filename)
 end
 
 function image(_img,_x,_y,_w,_h)
+  --check if offscreen buffer, if so, allow passing in the buffer directly
+  if type(_img) == "table" and _img._canvas then
+    _img = _img._canvas
+  end
+
   local originalWidth = _img:getWidth()
   local originalHeight = _img:getHeight()
   local xscale, yscale, ox, oy
