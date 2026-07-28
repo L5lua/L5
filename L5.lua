@@ -2763,8 +2763,12 @@ function int(_a)
         return nil
     end
     
-    -- strip decimal via floor
-    return math.floor(num)
+    -- strip decimal via floor (or ceil if a neg number)
+    if num >= 0 then
+      return math.floor(num)
+    else
+      return math.ceil(num) + 0 --adding 0 normalizes -0.0 to 0.0 (a floating-point quirk of ceil() returning negative zero between 0 and -1)
+    end
 end
 
 function ceil(_a)
