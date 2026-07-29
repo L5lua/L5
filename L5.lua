@@ -2732,7 +2732,7 @@ end
 function round(n, decimals)
   decimals = decimals or 0
   local mult = 10 ^ decimals
-  return math.floor(n * mult + 0.5 * (n >= 0 and 1 or -1)) / mult
+  return math.floor(n * mult + 0.5) / mult
 end
 
 function int(_a)
