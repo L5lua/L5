@@ -1479,7 +1479,6 @@ function square(_a,_b,_c, _d)
 end
 
 function ellipse(_a,_b,_c,_d)
---love.graphics.ellipse( mode, x, y, radiusx, radiusy, segments )
   if not _d then
     _d = _c
   end
@@ -1496,10 +1495,10 @@ function ellipse(_a,_b,_c,_d)
     love.graphics.ellipse("line",_a+_c/2,_b+_d/2,_c/2,_d/2)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNERS then 
-    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2) 
+    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_d-_b)/2,(_c-_a)/2,(_d-_b)/2) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color)) 
-    love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_a)/2,(_c-_a)/2,(_d-_b)/2)
+    love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_d-_b)/2,(_c-_a)/2,(_d-_b)/2)
     love.graphics.setColor(r, g, b, a)
   else --default CENTER x,y,w/2,h/2
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_d/2) 
