@@ -761,11 +761,8 @@ function save(filename)
 end
 
 function describe(sceneDescription)
- if not L5_env.described then
-    L5_env.originalPrint("CANVAS_DESCRIPTION: " .. sceneDescription)
-    io.flush() -- Ensure immediate output for screen readers
-    L5_env.described = true
-    end
+  L5_env.originalPrint("CANVAS_DESCRIPTION: " .. sceneDescription)
+  io.flush() -- Ensure immediate output for screen readers
 end
 
 --declares global variables that are user-accessible
@@ -896,7 +893,6 @@ function L5_internal.define_env_globals()
   L5_env.backBuffer = nil
   L5_env.frontBuffer = nil
   L5_env.clearscreen = false
-  L5_env.described = false
   -- global video tracking for looping
   L5_env.videos = {}
   -- global font state
