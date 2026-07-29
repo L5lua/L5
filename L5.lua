@@ -2272,7 +2272,11 @@ function strokeWeight(_w)
 end
 
 function strokeJoin(_style)
-  love.graphics.setLineJoin(_style)
+  if _style == MITER or _style == BEVEL or _style == NONE then
+    love.graphics.setLineJoin(_style)
+  else
+    error("strokeJoin() must be either MITER, BEVEL or NONE")
+  end
 end
 
 function noSmooth()
