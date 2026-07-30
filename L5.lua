@@ -2852,7 +2852,7 @@ function asin(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.asin(_angle)
   else
-    return math.asin(radians(_angle))
+    return degrees(math.asin(_angle))
   end
 end
 
@@ -2868,7 +2868,7 @@ function acos(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.acos(_angle)
   else
-    return math.acos(radians(_angle))
+    return degrees(math.acos(_angle))
   end
 end
 
@@ -2884,17 +2884,17 @@ function atan(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.atan(_angle)
   else
-    return math.atan(radians(_angle))
+    return degrees(math.atan(_angle))
   end
 end
 
 function atan2(y, x)
   local angle = math.atan2(y, x)  -- This returns radians
   
-  if L5_env.degree_mode == DEGREES then
-    return math.deg(angle)  -- convert to degrees 
+  if L5_env.degree_mode == RADIANS then
+    return angle
   else
-    return angle  -- or keep in default radians 
+    return math.deg(angle)
   end
 end
 
