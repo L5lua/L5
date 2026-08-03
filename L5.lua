@@ -2992,7 +2992,7 @@ function char(n)
     local int_val = math.floor(n)
     -- Convert to character using string.char
     -- handle out of range values gracefully
-    if int_val >= 0 and int_val <= 1114111 then  -- Valid Unicode range
+    if int_val >= 0 and int_val <= 127 then -- only ASCII range is safely displayable
       local success, result = pcall(string.char, int_val)
       if success then
         return result
