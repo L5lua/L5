@@ -898,7 +898,7 @@ function L5_internal.define_env_globals()
   -- global font state
   L5_env.fontPaths = {}
   L5_env.currentFontPath = nil
-  L5_env.currentFontSize = 12
+  L5_env.currentFontSize = love.graphics.getFont():getHeight()
   L5_env.textAlignX = LEFT
   L5_env.textAlignY = BASELINE
   L5_env.textWrap = WORD
@@ -3189,11 +3189,9 @@ function textSize(size)
   love.graphics.setFont(L5_env.currentFont)
 end
 
-function textWidth(text)
-  if L5_env.currentFont then
-    return L5_env.currentFont:getWidth(text)
-  end
-  return 0
+function textWidth(_text)
+  local font = L5_env.currentFont or love.graphics.getFont()
+  return font:getWidth(_text)
 end
 
 function textHeight()
