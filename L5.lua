@@ -3052,8 +3052,14 @@ function hex(n, digits)
   -- Default to 8 digits if not specified (matches p5.js)
   digits = digits or 8
   
+  -- check if valid
+  local num = tonumber(n)
+  if not num then
+    error("hex() requires a number or numeric string")
+  end
+
   -- convert to int
-  local int_val = math.floor(tonumber(n) or 0)
+  local int_val = math.floor(num)
   
   -- convert to hex string uppercase
   local hex_str = string.format("%X", int_val)
