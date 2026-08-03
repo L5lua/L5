@@ -3178,6 +3178,9 @@ function textFont(font, size)
 end
 
 function textSize(size)
+  if not size then
+    return L5_env.currentFontSize
+  end
   L5_env.currentFontSize = size
   if L5_env.currentFontPath then
     -- We have a path, recreate with new size
@@ -3195,10 +3198,8 @@ function textWidth(_text)
 end
 
 function textHeight()
-  if L5_env.currentFont then
-    return L5_env.currentFont:getHeight()
-  end
-  return 0
+  local font = L5_env.currentFont or love.graphics.getFont()
+  return font:getHeight()
 end
 
 --------------------- SYSTEM -----------------------
