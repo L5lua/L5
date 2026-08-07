@@ -50,6 +50,7 @@
 * [X] flickering happens in specific circumstances that need to be debugged such as transparency-related 
 * [X] fix toColor() for individual args and table 
 * [ ] noSmooth() does not appear to work well? test more and improve
+* [ ] consider standardizing color 0-255 everywhere so that testing "<=1.0 = normalized" doesn't return incorrect results when color returns less than 1 for 0-255 range. Check fill(), red(), green(), blue(), alpha(), brightness(), lightness(), hue(), lerpColor()
 
 ## Shapes
 
@@ -70,12 +71,12 @@
   * [ ] add OPAQUE filter to blur
 * [ ] received report of shader failure for BLUR, ERODE, DILATE
 
-
 ## Typography
 
 * [X] font size (via L5_env.currentFontSize) does not seem to carry over from setup() to draw()
 * [X] specifying optional width to text() function doesn't work correctly if textAlign() is set to CENTER or RIGHT currently. text doesn't draw to screen correctly.
 * [ ] add utf-8 support to handle multi-byte UTF-8 characters (Chinese, emoji, etc.) correctly in CHAR wrap mode in text()
+* [ ] bug inside L5_internal.defaults() where in "typography" section the `CENTER = "center"` constant overwrites the previous `CENTER = "CENTER"` in the "shapes" section.
 
 ## Pixels
 

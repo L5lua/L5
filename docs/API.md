@@ -187,6 +187,7 @@
 
 ### Rendering
 
+* [ ] blendMode()
 * [X] createGraphics -- creates an offscreen buffer to draw to, with beginDraw() and endDraw() methods
 
 ### Transform
@@ -207,6 +208,7 @@
 ### Math
 * [X] random() --takes 1 or 2 arguments. if a table name is given, returns a random value from the table
 * [X] randomSeed()
+* [ ] noiseSeed()
 * [X] randomGaussian()
 * [X] noise() --1, 2 or 3 dimensional Simplex noise generation
 * [X] lerp()  
@@ -229,6 +231,11 @@
 * [X] min()  --return min of 2 values
 
 ## DATA
+
+* [ ] nf() --utility function for formatting numbers into strings
+* [ ] nfc() --utility function for formatting numbers into strings and placing appropriate commas to mark units of 1000 (should vary for non-US locales)
+* [ ] nfp() --utility function for formatting numbers into strings, adds pos/neg sign
+* [ ] nfs() --utility function for formatting numbers into strings, adds blank space for pos values
 
 ### Conversion
 
@@ -256,8 +263,10 @@
 * [X] loadFont() --create new font
 * [X] text() --display text, at x,y, optional max width for wrapping
 * [X] textFont() --change to loaded font
-* [X] textWidth() --returns width of text
-* [X] textHeight() -- returns height of text
+* [X] textWidth() --returns width of text input
+* [X] textHeight() -- returns height of text (includes line-gap)
+* [X] textAscent() -- returns ascent, which is the distance between the baseline and the highest point on the glyph
+* [X] textDescent() -- returns descent, which is the distance between the baseline and the lowest point on the glyph
 * [ ] textMode() --not currently planning on implementing this 
 * [X] textAlign() --first parameter sets horizontal alignment LEFT (default), CENTER, or RIGHT. Optional second parameter sets TOP, CENTER or BOTTOM vertical alignment.
 * [X] textWrap()

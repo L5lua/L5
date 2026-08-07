@@ -3202,6 +3202,16 @@ function textHeight()
   return font:getHeight()
 end
 
+function textAscent()
+  local font = L5_env.currentFont or love.graphics.getFont()
+  return font:getAscent()
+end
+
+function textDescent()
+  local font = L5_env.currentFont or love.graphics.getFont()
+  return font:getDescent()
+end
+
 --------------------- SYSTEM -----------------------
 function exit()
   os.exit()
