@@ -3214,7 +3214,7 @@ end
 
 --------------------- SYSTEM -----------------------
 function exit()
-  os.exit()
+  love.event.quit()
 end
 
 function windowTitle(_title)
