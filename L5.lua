@@ -3634,6 +3634,7 @@ function cursor(_cursor_icon, hotX, hotY)
     end
   end
   
+  --3 options for cursors: built-in LOVE system cursor, pre-loaded image, or a file path to load as image
   if isSystemCursor then
     -- Use system cursor
     local _cursor = love.mouse.getSystemCursor(_cursor_icon)
@@ -3644,9 +3645,14 @@ function cursor(_cursor_icon, hotX, hotY)
     love.mouse.setCursor(_cursor)
   elseif type(_cursor_icon) == "string" then
     -- Treat as file path to custom cursor image
-    local cursorImage = love.image.newImageData(_cursor_icon)
+    local success, cursorImage = pcall(love.image.newImageData, _cursor_icon)
+    if not success then
+      error("cursor() could not load image at path: ".._cursor_icon)
+    end
     local _cursor = love.mouse.newCursor(cursorImage, hotX, hotY)
     love.mouse.setCursor(_cursor)
+  else
+    error("cursor() requires a system cursor name, file path, or ImageData")
   end
 end
 
