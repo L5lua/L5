@@ -1427,6 +1427,9 @@ end
 -------------------- 2D Primitives -------------------
 
 function rect(_a,_b,_c,_d,_e)
+  if not _d then
+    _d = _c
+  end
   if L5_env.rect_mode==CORNERS then --x1,y1,x2,y2
     love.graphics.rectangle(L5_env.fill_mode,_a,_b,_c-_a,_d-_b,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
@@ -1434,6 +1437,7 @@ function rect(_a,_b,_c,_d,_e)
     love.graphics.rectangle("line",_a,_b,_c-_a,_d-_b,_e,_e)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.rect_mode==CENTER then --x-w/2,y-h/2,w,h
+
     love.graphics.rectangle(L5_env.fill_mode, _a-_c/2,_b-_d/2,_c,_d,_e,_e) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color)) 
