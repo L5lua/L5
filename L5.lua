@@ -1,5 +1,5 @@
--- L5 0.1.8 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.1.8'
+-- L5 0.2.0 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.2.0'
 
 -- Internal table for L5 helper functions
 local L5_internal = {} 
@@ -409,6 +409,15 @@ function L5_internal.drawPrintBuffer()
     love.graphics.pop()
 end
 
+--- API Start
+---
+--- ANNOTATION ALIASES
+---@alias Image userdata|table An image object returned by loadImage(), or an offscreen buffer from createGraphics. Internally a LÖVE Image (userdata)
+---@alias Font userdata A font object returned by loadFont()
+---@alias Video table A video object returned by loadVideo(), wrapping a LÖVE Video with play(), pause(), stop(), loop(), noLoop(), time(), and volume() methods
+
+---Enables the on-screen print console and sets its font size.
+---@param textSize? number Font size in points (default: 16)
 function printToScreen(textSize)
   L5_env.showPrintBuffer = true
 
@@ -419,6 +428,9 @@ function printToScreen(textSize)
 
 end
 
+---Sets the window size.
+---@param _w number Window width, in pixels
+---@param _h number Window height, in pixels
 function size(_w, _h)
   -- do nothing if the window size hasn't changed
   if _w == width and _h == height then return end
@@ -446,6 +458,8 @@ function size(_w, _h)
   width, height = love.graphics.getDimensions()
 end
 
+---Switches to fullscreen, optionally on a specific display.
+---@param display? integer Display index to use, 1-based (default: 1)
 function fullscreen(display)
   display = display or 1
   
@@ -714,6 +728,9 @@ local function toColor(_a, _b, _c, _d)
   return {r/L5_env.color_max[1], g/L5_env.color_max[2], b/L5_env.color_max[3], a/L5_env.color_max[4]}
 end
 
+---Saves a screenshot of the display window as a PNG file.
+---Tries to save to the same folder as your project first; if that fails (e.g. in a packaged app), it falls back to LÖVE's save directory instead. Check console output to see exactly where the file is written.
+---@param filename? string Optional filename; .png is appended automatically if omitted. Default: screenshot_<timestamp>.png
 function save(filename)
     love.graphics.captureScreenshot(function(imageData)
         -- Generate filename
@@ -760,6 +777,8 @@ function save(filename)
     end)
 end
 
+---Prints an accessibility description to the command line. 
+---@param sceneDescription string Text describing the current scene
 function describe(sceneDescription)
   L5_env.originalPrint("CANVAS_DESCRIPTION: " .. sceneDescription)
   io.flush() -- Ensure immediate output for screen readers
@@ -979,6 +998,8 @@ end
 
 ----------------------- INPUT -----------------------
 
+---Loads a text file and returns a table
+---@param _file string The path to the file. Paths to local files should be relative.
 function loadStrings(_file)
   local lines = {} 
   for line in love.filesystem.lines(_file) do 
@@ -987,6 +1008,13 @@ function loadStrings(_file)
   return lines
 end
 
+---Reads the contents of a file and creates a table object with its values. 
+---The file's path should be specified relative to the sketch's folder. 
+---The file format can be a comma-separated (in CSV format), a tab-separated value (in TSV format), or a lua table (as a lua file). 
+---Table only looks for a header row if the 'header' option is included.
+---@param _file string The path to the file. Paths to local files should be relative.
+---@param _header? string Optional string 'header' indicates a header row is included
+---@return table data For CSV/TSV: array of rows (or records, if "header" used), plus a `.columns` field listing column names/indices. For .lua files: whatever table the file itself returns.
 function loadTable(_file, _header)
   local extension = _file:match("%.([^%.]+)$")
   
@@ -1059,6 +1087,11 @@ function loadTable(_file, _header)
   end
 end
 
+---Saves an array table to a file, one entry per line.
+---Writes to the current directory. Fails if the location is not writable — check the return value or console output.
+---@param data table An array (ordered table) of values to save, one per line
+---@param filename string The filename to save to
+---@return boolean success `true` if the file was written; `false` if it failed
 function saveStrings(data, filename)
   local lines = {}
   for i, value in ipairs(data) do
@@ -1078,6 +1111,11 @@ function saveStrings(data, filename)
   end
 end
 
+---Writes the contents of a table to a file, either comma-separated-values ('csv'), tab-separated values ('tsv'), or a Lua table ('lua', default). If format is omitted, it's inferred.
+---@param data table A table to save (array or table with named keys)
+---@param filename string The filename to save to
+---@param format? "lua"|"csv"|"tsv" Optional explicit selection of data format; otherwise format is determined by filename extension 
+---@return boolean success `true` if the file was written; `false` if it failed or format is not supported
 function saveTable(data, filename, format)
   -- Auto-detect format from filename if not specified
   if not format then
@@ -1220,6 +1258,7 @@ end
 
 ---------------------- KEYBOARD ---------------------
 
+--internal tracking of keys
 function L5_internal.updateLastKeyPressed()
   local commonKeys = {
     -- Letters
@@ -1260,12 +1299,16 @@ function L5_internal.updateLastKeyPressed()
   return key
 end
 
+---Returns true if the given key is currently pressed. Useful for checking multiple keys at once, e.g. left arrow and up arrow together for diagonal movement.
+---@param k string The key to check, e.g. "left", "up", "space", "w"
+---@return boolean isDown
 function keyIsDown(k)
   return L5_env.pressedKeys[k] == true
 end
 
 ---------------------- TRANSFORM ---------------------
 
+--internal helper function for copying style for use with push()/pop() 
 function L5_internal.copyStyle(t)
   local out = {}
   for k, v in pairs(t) do
@@ -1274,6 +1317,9 @@ function L5_internal.copyStyle(t)
   return out
 end
 
+---Begins a drawing group that contains its own style and transformations.
+---By default, styles such as fill() and transformations such as rotate() are applied to all drawing that follows. The push() and pop() functions can limit the effect of styles and transformations to a specific group of shapes, images, and text.
+---@see pop
 function push()
   local STYLE_KEYS = {
     "fill_mode",
@@ -1300,6 +1346,9 @@ function push()
   table.insert(L5_env.styleStack, snapshot)
 end
 
+---Ends a drawing group that contains its own style and transformations.
+---By default, styles such as fill() and transformations such as rotate() are applied to all drawing that follows. The push() and pop() functions can limit the effect of styles and transformations to a specific group of shapes, images, and text.
+---@see push
 function pop()
   love.graphics.pop('all')
   local snapshot = table.remove(L5_env.styleStack)
@@ -1309,10 +1358,20 @@ function pop()
     end
   end
 end
+
+---Translates the coordinate system.
+---By default, the origin (0, 0) is at the sketch's top-left corner in 2D. The translate() function shifts the origin to a different position. Everything drawn after translate() is called will appear to be shifted.
+---By default, transformations accumulate. Note: Transformations are reset at the beginning of the draw loop.
+---@param _x number Amount to translate along the positive x-axis.
+---@param _y number Amount to translate along the positive y-axis.
 function translate(_x,_y)
   love.graphics.translate(_x,_y )
 end
 
+---Rotates the coordinate system.
+---By default, the positive x-axis points to the right and the positive y-axis points downward. The rotate() function changes this orientation by rotating the coordinate system about the origin. Everything drawn after rotate() is called will appear to be rotated.
+---Note: Transformations are reset at the beginning of the draw loop. Calling rotate(1) inside the draw() function won't cause shapes to spin
+---@param _angle number Amount to rotate along the positive x-axis, specified in radians (default) or degrees if set by angleMode()
 function rotate(_angle)
   if L5_env.degree_mode == RADIANS then 
     love.graphics.rotate(_angle)
@@ -1321,6 +1380,11 @@ function rotate(_angle)
   end
 end
 
+---Scales the coordinate system.
+---By default, shapes are drawn at their original scale. The scale() function can shrink or stretch the coordinate system so that shapes appear at different sizes. 
+---By default, transformations accumulate. Calling scale(2) twice has the same effect as calling scale(4) once. The push() and pop() functions can be used to isolate transformations within distinct drawing groups.
+---@param _sx number Amount to scale along the positive x-axis.
+---@param _sy? number Amount to scale along the positive y-axis. If omitted will default to the set scale along the x-axis.
 function scale(_sx,_sy)
   if _sy ~= nil then --2 args, 2 dif scales
     love.graphics.scale(_sx,_sy)
@@ -1329,6 +1393,11 @@ function scale(_sx,_sy)
   end
 end
 
+---Applies a transformation matrix (of 6 values) to the coordinate system.
+---applyMatrix() allows for many transformations to be applied at once. 
+---By default, transformations accumulate. The push() and pop() functions can be used to isolate transformations within distinct drawing groups. Note: Transformations are reset at the beginning of the draw loop.
+---@overload fun(a: number, b: number, c: number, d: number, e: number, f: number)
+---@overload fun(matrix: table) A table of 6 numbers: {a, b, c, d, e, f}
 function applyMatrix(...)
   local args = {...}
   local a, b, c, d, e, f
@@ -1388,36 +1457,51 @@ function applyMatrix(...)
   love.graphics.applyTransform(transform)
 end
 
+---Clears all transformations applied to the coordinate system.
 function resetMatrix()
   love.graphics.origin()
 end
 
 -------------------- TIME and DATE -------------------
 
+---Returns the number of milliseconds since a sketch started running.
+---@return number millis
 function millis()
   return 1000*love.timer.getTime()
 end
 
+---Returns the current day as a number from 1–31.
+---@return number day
 function day()
   return tonumber(os.date("%d"))
 end
 
+---Returns the current month as a number from 1–12.
+---@return number month
 function month()
   return tonumber(os.date("%m"))
 end
 
+---Returns the current year as a number such as 1999.
+---@return number year
 function year()
   return tonumber(os.date("%Y"))
 end
 
+---Returns the current hour as a number 0-23.
+---@return number hour
 function hour()
   return tonumber(os.date("%H"))
 end
 
+---Returns the current minute as a number 0-59.
+---@return number minute
 function minute()
   return tonumber(os.date("%M"))
 end
 
+---Returns the current second as a number 0-59.
+---@return number second
 function second()
   return tonumber(os.date("%S"))
 end
@@ -1426,6 +1510,17 @@ end
 
 -------------------- 2D Primitives -------------------
 
+---Draws a rectangle. The meaning of the four position/size parameters depends on the current rectMode() setting.
+---Default (CORNER): _a,_b is the top-left corner; _c,_d is width and height.
+---CORNERS: _a,_b and _c,_d are two opposite corners.
+---CENTER: _a,_b is the center; _c,_d is width and height.
+---RADIUS: _a,_b is the center; _c,_d are the horizontal and vertical radius.
+---@param _a number X-coordinate 
+---@param _b number Y-coordinate 
+---@param _c number The width, second corner's x, or horizontal radius, depending on rectMode
+---@param _d number The height, second corner's y, or vertical radius, depending on rectMode()
+---@param _e? number Optional corner radius for rounded corners
+---@see rectMode
 function rect(_a,_b,_c,_d,_e)
   if not _d then
     _d = _c
@@ -1458,6 +1553,15 @@ function rect(_a,_b,_c,_d,_e)
   end
 end
 
+---Draws a square. Parameter meaning depends on the current rectMode(). (CORNERS mode is not supported for squares, displays error if active.)
+---Default (CORNER): _a,_b is top-left corner; _c is width and height
+---CENTER: _a,_b is the center; _c is width and height.
+---RADIUS: _a,_b is the center; _c is the radius (half the length).
+---@param _a number X-coordinate 
+---@param _b number Y-coordinate 
+---@param _c number Width and height or radius, depending on rectMode
+---@param _d? number Optional corner radius for rounded corners (not height)
+---@see rectMode
 function square(_a,_b,_c, _d)
   --note: _d is not height! it is radius of rounded corners!
   --CORNERS mode doesn't exist for squares
@@ -1479,9 +1583,21 @@ function square(_a,_b,_c, _d)
     love.graphics.setColor(unpack(L5_env.stroke_color)) 
     love.graphics.rectangle("line",_a,_b,_c,_c,_d,_d)
     love.graphics.setColor(r, g, b, a)
+  elseif L5_env.rect_mode == CORNERS then
+    error("square() does not support CORNERS mode; use rect() instead")
   end
 end
 
+---Draws an ellipse (oval). Parameter meaning depends on ellipseMode() (default: CENTER):
+---CENTER: _a,_b center; _c,_d width, height.
+---RADIUS: _a,_b center; _c,_d horizontal, vertical radius.
+---CORNER: _a,_b top-left corner; _c,_d width, height.
+---CORNERS: _a,_b and _c,_d are two opposite corners.
+---@param _a number
+---@param _b number
+---@param _c number
+---@param _d? number Height, radius, or second corner's y — depending on mode. Defaults to _c if omitted (draws a circle)
+---@see ellipseMode
 function ellipse(_a,_b,_c,_d)
   if not _d then
     _d = _c
@@ -1513,12 +1629,20 @@ function ellipse(_a,_b,_c,_d)
   end
 end
 
+---Draws a circle. Parameter meaning depends on ellipseMode() (default: CENTER; CORNERS mode is not supported — errors if active):
+---CENTER: _a,_b center; _c diameter.
+---RADIUS: _a,_b center; _c radius.
+---CORNER: _a,_b top-left corner; _c diameter.
+---@param _a number
+---@param _b number
+---@param _c number
+---@see ellipseMode
 function circle(_a,_b,_c)
   if L5_env.ellipse_mode==RADIUS then 
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c,_c) 
     local r, g, b, a = love.graphics.getColor()
     love.graphics.setColor(unpack(L5_env.stroke_color)) 
-    love.graphics.ellipse("line",_a,_b,_c,_d)
+    love.graphics.ellipse("line",_a,_b,_c,_c)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNER then 
     love.graphics.ellipse(L5_env.fill_mode,_a+_c/2,_b+_c/2,_c/2,_c/2) 
@@ -1527,11 +1651,7 @@ function circle(_a,_b,_c)
     love.graphics.ellipse("line",_a+_c/2,_b+_c/2,_c/2,_c/2)
     love.graphics.setColor(r, g, b, a)
   elseif L5_env.ellipse_mode==CORNERS then 
-    love.graphics.ellipse(L5_env.fill_mode,_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2) 
-    local r, g, b, a = love.graphics.getColor()
-    love.graphics.setColor(unpack(L5_env.stroke_color)) 
-    love.graphics.ellipse("line",_a+(_c-_a)/2,_b+(_c-_a)/2,(_c-_a)/2,(_c-_b)/2)
-    love.graphics.setColor(r, g, b, a)
+    error("circle() does not support CORNERS mode; use ellipse() instead")
   elseif L5_env.ellipse_mode==CENTER then --default CENTER x,y,w/2,h/2
     love.graphics.ellipse(L5_env.fill_mode,_a,_b,_c/2,_c/2) 
     local r, g, b, a = love.graphics.getColor()
@@ -1541,9 +1661,9 @@ function circle(_a,_b,_c)
   end
 end
 
-
-
-function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! a quad implies an applied texture
+---Draws a quadrilateral (4-sided polygon) from four corner points, in order.
+---@type fun(_x1: number, _y1: number, _x2: number, _y2: number, _x3: number, _y3: number, _x4: number, _y4: number)
+function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygon! 
   --for other # of sides, use processing api call createShape
   love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) 
     local r, g, b, a = love.graphics.getColor()
@@ -1552,6 +1672,8 @@ function quad(_x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4) --this is a 4-sided love2d polygo
     love.graphics.setColor(r, g, b, a)
 end
 
+---Draws a triangle (3-sided polygon) from three corner points, in order.
+---@type fun(_x1: number, _y1: number, _x2: number, _y2: number, _x3: number, _y3: number)
 function triangle(_x1,_y1,_x2,_y2,_x3,_y3) --this is a 3-sided love2d polygon
   love.graphics.polygon(L5_env.fill_mode,_x1,_y1,_x2,_y2,_x3,_y3) 
     local r, g, b, a = love.graphics.getColor()
@@ -1616,8 +1738,16 @@ local function draw_elliptical_arc(cx, cy, rx, ry, start_angle, arc_span, arctyp
   end
 end
 
-
---p5 calls arctype parameter "mode"
+---Draws an arc, a section of an ellipse defined by the x, y, w, and h parameters, and optional mode.
+---@param _x number X-coordinate of the arc's ellipse, affected by ellipseMode()
+---@param _y number Y-coordinate of the arc's ellipse, affected by ellipseMode()
+---@param _w number Width of the arc's ellipse, affected by ellipseMode()
+---@param _h number Height of the arc's ellipse, affected by ellipseMode()
+---@param _start number Angle to start the arc, in degrees or radians depending on angleMode()
+---@param _stop number Angle to stop the arc, always drawn clockwise from start to stop.
+---@param _arctype? OPEN|CLOSED|PIE Fill style: OPEN (semi-circle), CHORD (closed semi-circle), or PIE (closed pie segment).
+---@see ellipseMode
+---@see angleMode
 function arc(_x, _y, _w, _h, _start, _stop, _arctype)
   local arctype = _arctype or PIE
 
@@ -1717,6 +1847,12 @@ function arc(_x, _y, _w, _h, _start, _stop, _arctype)
   end
 end
 
+---Draws a single point in space. Default width is one pixel.
+---To color a point, use the stroke() function. To change its width, use strokeWeight()
+---@param _x number X-coordinate of the point
+---@param _y number Y-coordinate of the point
+---@see stroke
+---@see strokeWeight
 function point(_x,_y)
   --Points unaffected by love.graphics.scale - size is always in pixels
   --a line is drawn in the stroke color
@@ -1726,6 +1862,14 @@ function point(_x,_y)
   love.graphics.setColor(r, g, b, a)
 end
 
+---Draws a straight line between two points. Default width is one pixel.
+---To color a line, use the stroke() function. To change its width, use strokeWeight()
+---@param _x1 number X-coordinate of the line starting point
+---@param _y1 number Y-coordinate of the line starting point
+---@param _x2 number X-coordinate of the line ending point
+---@param _y2 number Y-coordinate of the line ending point
+---@see stroke
+---@see strokeWeight
 function line(_x1,_y1,_x2,_y2)
   --a line is drawn in the stroke color
     local r, g, b, a = love.graphics.getColor()
@@ -1734,6 +1878,14 @@ function line(_x1,_y1,_x2,_y2)
     love.graphics.setColor(r, g, b, a)
 end
 
+---Sets the current background color (values are 0-255) or image
+---@overload fun(img: Image) An image previously loaded with loadImage()
+---@overload fun(gray: number)
+---@overload fun(gray: number, alpha: number)
+---@overload fun(r: number, g: number, b: number)
+---@overload fun(r: number, g: number, b: number, a: number)
+---@overload fun(colorName: string)
+---@overload fun(hex: string)
 function background(_r,_g,_b,_a)
   if type(_r) == "userdata" and _r:type() == "Image" then
     image(_r,0,0,width,height)
@@ -1746,6 +1898,12 @@ function background(_r,_g,_b,_a)
   end
 end
 
+---Changes the way color values are interpreted. Specify RGB, HSB, or HSL mode and (optionally) parameter maximum.
+---By default, the Number parameters for fill(), stroke(), background(), and color() are defined by values between 0 and 255 using the RGB color model.
+---@overload fun(_mode: string) Specify RGB, HSB, or HSL mode.
+---@overload fun(_mode: string, _max: number) Sets the max value for all channels/attributes
+---@overload fun(_mode: string, _max1: number, _max2: number, _max3: number) Sets max values for each channel/attribute (excludes alpha, defaults to 255 or 100)
+---@overload fun(_mode: string, _max1: number, _max2: number, _max3: number, _maxA: number) Sets max values for each channel/attribute, including alpha
 function colorMode(_mode, _max1, _max2, _max3, _maxA)
   --handles 4 colorMode variations 
   -- Set the color mode
@@ -1781,6 +1939,16 @@ function colorMode(_mode, _max1, _max2, _max3, _maxA)
   end
 end
 
+---Sets the current fill color (values are 0-255).
+---The version of fill() with three parameters interprets them as RGB, HSB, or HSL colors, depending on the current colorMode(). The default color space is RGB, with each value in the range from 0 to 255.
+---@overload fun(gray: number)
+---@overload fun(gray: number, alpha: number)
+---@overload fun(r: number, g: number, b: number)
+---@overload fun(r: number, g: number, b: number, a: number)
+---@overload fun(colorName: string)
+---@overload fun(hex: string)
+---@overload fun(colors: table) A table of {r, g, b} or {r, g, b, a} values, 0-255
+---@see colorMode
 function fill(...)
   L5_env.fill_mode = "fill"
   local args = {...}
@@ -1803,6 +1971,17 @@ end
 
 --------------- CREATING and READING ----------------
 
+---Creates a color object.
+---By default, the parameters are interpreted as RGB values. The way these parameters are interpreted may be changed with the colorMode() function.
+---@overload fun(gray: number)
+---@overload fun(gray: number, alpha: number)
+---@overload fun(r: number, g: number, b: number)
+---@overload fun(r: number, g: number, b: number, a: number)
+---@overload fun(colorName: string)
+---@overload fun(hex: string)
+---@overload fun(colors: table) A table of {r, g, b} or {r, g, b, a} values, 0-255
+---@return table color Returns normalized RGBA values (0-1 range), e.g. {r, g, b, a}
+---@see colorMode
 function color(...)
     local args = {...}
     
@@ -1832,6 +2011,10 @@ function color(...)
     end
 end
 
+---Extracts the red value from a color.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number red Red channel value, scaled to the current colorMode() range, default 0-255
+---@see colorMode
 function red(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1851,6 +2034,10 @@ function red(_color)
   end
 end
 
+---Extracts the green value from a color.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number green Green channel value, scaled to the current colorMode() range, default 0-255
+---@see colorMode
 function green(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1870,6 +2057,10 @@ function green(_color)
   end
 end
 
+---Extracts the blue value from a color.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number blue Blue channel value, scaled to the current colorMode() range, default 0-255
+---@see colorMode
 function blue(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1889,6 +2080,10 @@ function blue(_color)
   end
 end
 
+---Extracts the alpha channel value from a color.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number alpha Alpha channel value, scaled to the current colorMode() range (default 0-255 in RGB mode)
+---@see colorMode
 function alpha(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1908,6 +2103,10 @@ function alpha(_color)
   end
 end
 
+---Gets the brightness value of a color (HSB "V"/value component) 
+---By default, brightness() returns a color's HSB brightness in the range 0 to 100. If the colorMode() is set to HSB, it returns the brightness value in the given range.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number brightness Brightness value: scaled to the current colorMode() range in HSB mode, otherwise 0-100
 function brightness(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1944,6 +2143,10 @@ function brightness(_color)
   end
 end
 
+---Gets the lightness value of a color.
+---lightness() extracts the HSL lightness value from a color object, an array of color components, or a CSS color string.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number lightness Lightness value: scaled to the current colorMode() range in HSL mode, otherwise 0-100
 function lightness(_color)
   if type(_color) == "string" then
     -- Convert CSS color string to color object first
@@ -1988,6 +2191,12 @@ function lightness(_color)
   end
 end
 
+---Gets the hue value of a color.
+---hue() extracts the hue value from a color object, an array of color components, or a CSS color string.
+---Hue describes a color's position on the color wheel. By default, hue() returns a color's HSL hue in the range 0 to 360. If the colorMode() is set to HSB or HSL, it returns the hue value in the given mode.
+---@param _color table|string A color table (e.g. from color()) or a CSS color string
+---@return number hue Hue value: scaled to the current colorMode() range in HSB/HSL mode, defaults to 0-360
+---@see colorMode
 function hue(_color)
   if type(_color) == "string" then
     _color = toColor(_color)
@@ -2045,6 +2254,13 @@ function hue(_color)
   end
 end
 
+---Blends two colors to find a third color between them.
+---Color interpolation depends on current colorMode()
+---@param _c1 table|string First color (a color table or CSS color string)
+---@param _c2 table|string Second color (a color table or CSS color string)
+---@param _amt number Amount to interpolate between the two colors. 0 is equal to the first color, 0.5 is halfway and 1 is the second color. Numbers out of range are constrained to 0 or 1.
+---@return table color The interpolated color, e.g. {r, g, b, a}
+---@see colorMode
 function lerpColor(_c1, _c2, _amt)
   -- Clamp amt to [0, 1]
   _amt = math.max(0, math.min(1, _amt))
@@ -2242,6 +2458,9 @@ htmlColors = {
     ["yellowgreen"] = {154, 205, 50}
 }
 
+---Modifies the location from which rectangles are drawn by changing the way in which parameters given to rect() are interpreted.
+---By default, the first two parameters of a rectangle are the x- and y-coordinates of its top left corner, the same as calling rectMode(CORNER)
+---@param _mode string Either CORNER (default), CORNERS, CENTER, or RADIUS
 function rectMode(_mode)
   if _mode == CORNER or _mode == CORNERS or _mode == CENTER or _mode == RADIUS then
     L5_env.rect_mode = _mode
@@ -2250,6 +2469,9 @@ function rectMode(_mode)
   end
 end
 
+---Modifies the location from which ellipses, circles, and arcs are drawn.
+---By default, the first two parameters of a circle are the x- and y-coordinates of its center, the same as calling ellipseMode(CENTER)
+---@param _mode string Either CENTER (default), CORNER, CORNERS or RADIUS
 function ellipseMode(_mode)
   if _mode == CENTER or _mode == CORNER or _mode == CORNERS or _mode == RADIUS then
     L5_env.ellipse_mode = _mode
@@ -2258,6 +2480,9 @@ function ellipseMode(_mode)
   end
 end
 
+---Modifies the location from which images are drawn when image() is called.
+---By default, the first two parameters of image() are the x- and y-coordinates of the image's upper-left corner. This is the same as calling imageMode(CORNER).
+---@param _mode string Either CORNER (default), CENTER or CORNERS
 function imageMode(_mode)
   if _mode == CORNER or _mode == CENTER or _mode == CORNERS then
     L5_env.image_mode = _mode
@@ -2266,15 +2491,22 @@ function imageMode(_mode)
   end
 end
 
+---Disables the fill color for shapes
+---Calling noFill() is the same as making the fill completely transparent, as in fill(0, 0). If both noStroke() and noFill() are called, nothing will be drawn to the screen.
 function noFill()
   L5_env.fill_mode="line" 
 end
 
+---Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of pixels.
+---Using point() with strokeWeight(1) or smaller may draw nothing to the screen, depending on the graphics settings of the computer. Workarounds include drawing the point using either circle() or square().
+---@param _w number Stroke width in pixels
 function strokeWeight(_w)
   love.graphics.setLineWidth(_w)
   love.graphics.setPointSize(_w) --also sets sizing on points
 end
 
+---Sets the style of the joints that connect line segments.
+---@param _style string Either MITER (default), BEVEL, or NONE
 function strokeJoin(_style)
   if _style == MITER or _style == BEVEL or _style == NONE then
     love.graphics.setLineJoin(_style)
@@ -2283,26 +2515,70 @@ function strokeJoin(_style)
   end
 end
 
+---Draws features with jagged (aliased) edges.
+---smooth() is active by default. The functions don't affect shapes or fonts.
+---@see smooth
 function noSmooth()
   love.graphics.setDefaultFilter("nearest", "nearest", 1)
   love.graphics.setLineStyle('rough')
-
 end
 
+---Draws features with smooth (anti-aliased) edges.
+---smooth() is active by default. The functions don't affect shapes or fonts.
+---@see noSmooth
 function smooth()
   love.graphics.setDefaultFilter("linear", "linear", 1)
   love.graphics.setLineStyle('smooth')
 end
 
-function stroke(_r,_g,_b,_a)
-  L5_env.stroke_color = toColor(_r,_g,_b,_a) 
+---Sets the color used to draw points, lines, and the outlines of shapes.
+---The version of stroke() with three parameters interprets them as RGB, HSB, or HSL colors, depending on the current colorMode(). The default color space is RGB, with each value in the range from 0 to 255.
+---@overload fun(gray: number)
+---@overload fun(gray: number, alpha: number)
+---@overload fun(r: number, g: number, b: number)
+---@overload fun(r: number, g: number, b: number, a: number)
+---@overload fun(colorName: string)
+---@overload fun(hex: string)
+---@overload fun(colors: table) A table of {r, g, b} or {r, g, b, a} values, 0-255
+function stroke(...)
+  local args = {...}
+  
+  -- If single argument is a table
+  if #args == 1 and type(args[1]) == "table" then
+    local t = args[1]
+    -- Check if it's normalized (all values <= 1.0) or raw array
+    if t[1] <= 1.0 and t[2] <= 1.0 and t[3] <= 1.0 and (not t[4] or t[4] <= 1.0) then
+      -- Already normalized, use directly
+      L5_env.stroke_color = t
+    else
+      -- Raw array, needs conversion
+      L5_env.stroke_color = toColor(unpack(t))
+    end
+  else
+    L5_env.stroke_color = toColor(...)
+  end
 end
 
+---Disables drawing points, lines, and the outlines of shapes.
+---Calling noStroke() is the same as making the stroke completely transparent, as in stroke(0, 0). If both noStroke() and noFill() are called, nothing will be drawn to the screen.
 function noStroke()
   L5_env.stroke_color={0,0,0,0} 
 end
 
 ------------------ RENDERING ------------------------
+
+---Creates an offscreen canvas with specified dimensions that can be rendered to the window later.
+---Begin drawing to this graphics buffer with :beginDraw()
+---End drawing to this graphics buffer with :endDraw()
+---Draw to screen with image(). 
+---Example: offscreenCanvas = createGraphics(width,height)
+---offscreenCanvas:beginDraw()
+---circle(100,100,30)
+---offscreenCanvas:endDraw()
+---image(offscreenCanvas:getCanvas(),0,0)
+---@param _width number Offscreen canvas width, in pixels
+---@param _height number Offscreen canvas height, in pixels
+---@return table graphics An offscreen graphics buffer with beginDraw(), endDraw() and getCanvas() methods
 function createGraphics(_width, _height)
     local pg = {}
     
@@ -2343,15 +2619,26 @@ end
 
 -------------------- VERTEX -------------------------
 
+---Sets a texture to be applied to vertex points. 
+---@param _img Image Texture to be applied
 function texture(_img)
+  -- Allow passing a createGraphics() buffer directly, without needing :getCanvas()
+  if type(_img) == "table" and _img._canvas then
+    _img = _img._canvas
+  end
+
   -- to be applied to vertices
   L5_env.currentTexture = _img
   L5_env.useTexture = true
 end
 
+---Changes the coordinate system used for textures when they’re applied to custom shapes. 
+---The default mode is IMAGE, which refers to the actual coordinates of the image in pixels. NORMAL refers to a normalized space of values ranging from 0 to 1.
+---@param _mode string IMAGE (default) or NORMAL 
+---@see vertex
 function textureMode(_mode)
     -- Set how texture coordinates are interpreted
-    -- NORMAL - coordinates are 0 to 1 (default)
+    -- NORMAL - coordinates are 0 to 1
     -- IMAGE - coordinates are in pixel dimensions
     if _mode == NORMAL or _mode == IMAGE then
         L5_env.textureMode = _mode
@@ -2360,6 +2647,10 @@ function textureMode(_mode)
     end
 end
 
+---Defines if textures repeat or draw once within a texture map. 
+---The two parameters are CLAMP (the default behavior) and REPEAT.  
+---@param _mode string CLAMP (default) or REPEAT 
+---@see texture
 function textureWrap(_mode)
     -- Set texture wrapping mode
     -- Valid modes: CLAMP or REPEAT
@@ -2370,6 +2661,10 @@ function textureWrap(_mode)
     end
 end
 
+---beginShape() begins adding vertices to a custom shape. 
+---Default shape is an irregular polygon. The optional mode parameter can be POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP
+---@param _kind? string Optional shape mode: POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP
+---@see endShape
 function beginShape(...)
 
   local n = select('#' , ...)
@@ -2393,6 +2688,12 @@ function beginShape(...)
   L5_env.kind = _kind
 end
 
+---Adds a vertex to a custom shape.
+---@param _x number x-coordinate to add to current custom shape
+---@param _y number y-coordinate to add to current custom shape
+---@param _u? number u coordinate for an applied texture (default IMAGE, set with textureMode)
+---@param _v? number v coordinate for an applied texture  (default IMAGE mode, set with textureMode)
+---@see textureMode
 function vertex(_x, _y, _u, _v)
     -- add vertex (x, y) to the custom shape vertices table
     if _u ~= nil and _v ~= nil then
@@ -2410,6 +2711,9 @@ function vertex(_x, _y, _u, _v)
     end
 end
 
+---endShape() ends adding vertices to a custom shape and draws it to the screen. 
+---@param _close? string Optionally add CLOSE to connect final vertex back to the first for polygons.
+---@see beginShape
 function endShape(_close)
   -- no vertices, early exit
   if #L5_env.vertices == 0 then return end
@@ -2572,6 +2876,11 @@ function endShape(_close)
   end
 end
 
+---Draws a Bézier curve, defined by two anchor points and two control points
+---The first 2 parameters set an x1, y1 anchor point.
+---The next 4 parameters set two paired x2, y2, x3, y3 control points that 'pull' the curve toward them
+---The last 2 parameters x4, y4 set the last anchor point where the curve ends
+---@type fun(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number)
 function bezier(x1,y1,x2,y2,x3,y3,x4,y4)
   local curve = love.math.newBezierCurve({x1,y1,x2,y2,x3,y3,x4,y4})
   local points = curve:render()
@@ -2597,12 +2906,13 @@ function bezier(x1,y1,x2,y2,x3,y3,x4,y4)
   love.graphics.setColor(r, g, b, a)
 end
 
---catmull-rom spline - generated
--- curve(x1,y1,x2,y2,x3,y3,x4,y4)
--- x1,y1: first control point (not drawn)
--- x2,y2: first anchor point (curve starts here)
--- x3,y3: second anchor point (curve ends here)
--- x4,y4: last control point (not drawn)
+---Draws a curve using Catmull-Rom spline.
+---Spline curves can form shapes and curves that slope gently.
+---The first 2 parameters x1, y1 set the first control point (not drawn).
+---The next 4 parameters x2, y2, x3, y3 set the starting and ending point of the visible segment.
+---The last 2 parameters x4, y4 set the last control point (not drawn).
+---@type fun(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number)
+---@see bezier
 function curve(x1, y1, x2, y2, x3, y3, x4, y4)
     local points = {}
     local segments = 20 -- Number of line segments to approximate the curve
@@ -2636,39 +2946,89 @@ function curve(x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
 --------------------- MATH --------------------------
+
+---Calculates the fractional part of a number.
+---@param _n number 
+---@return number fraction Returns the number's decimal fractional part, matching the sign of the input.
 function fract(_n)
   return _n - int(_n)
 end
 
+---Calculates the natural logarithm (the base-e logarithm) of a number.
+---@param _n number Must be greater than 0 due to definition of natural log.
+---@return number log Returns the number's natural log.
 function log(_n)
-  return math.log(_n)
+  if _n > 0 then
+    return math.log(_n)
+  else
+    error("log() expects input greater than 0.")
+  end
 end
 
+---Calculates exponential expressions.
+---For example, `pow(2, 3)` evaluates the expression 2 x 2 x 2
+---@param n number Sets the base of the exponent.
+---@param e number Sets the power by which to raise the base.
+---@return number value 
 function pow(n, e)
   return n ^ e
 end
 
+---Calculates the value of Euler's number e (2.71828...) raised to the power of a number.
+---@param n number Exponent to raise.
+---@return number value
 function exp(n)
   return math.exp(n)
 end
 
+---Maps a number from input range to a value between 0 and 1.
+---Numbers outside of the original range are not constrained between 0 and 1. Out-of-range values are often intentional and useful.
+---@param val number Incoming value to be normalized.
+---@param start number Lower bound of the value's current range.
+---@param stop number Upper bound of the value's current range.
+---@return number normalized The normalized value output.
 function norm(val, start, stop)
   -- normalize the value to 0-1 range
   return (val - start) / (stop - start)
 end
 
+---Calculates a number between two numbers at a specific increment.
+---If the value of amt is less than 0 or more than 1, lerp() will return a number outside of the original interval.
+---@param start number First value.
+---@param stop number Second value.
+---@param amt number Amount to interpolate between the two numbers. 0.1 is near 1st number. 0.5 is halfway between.
+---@return number lerped The lerped value.
 function lerp(start, stop, amt)
   return start + (stop - start) * amt
 end
 
+---Calculates the square of a number.
+---@param n number Number to square.
+---@return number Squared number.
 function sq(n)
   return n * n
 end
 
+---Calculates the square root of a number.
+---@param n number Number to square root.
+---@return number sqrt Square root of number.
 function sqrt(n)
-  return math.sqrt(n)
+  if n >= 0 then
+    return math.sqrt(n)
+  else
+    error("sqrt() requires non-negative number input.")
+  end
 end
 
+---Returns a random number or a random element from an array.
+---random() follows uniform distribution, which means that all outcomes are equally likely. 
+---By default random() produces different results each time.
+---@overload fun(): number Returns a random number 0 to 1
+---@overload fun(_a: number): number Returns a random number between 0 and that number
+---@overload fun(_a: number, _b: number): number With 2 parameters returns a random number in given range, exclusive of the upper limit
+---@overload fun(_a: table): any Selects a random selection from the passed table
+---@see noise
+---@see randomGaussian
 function random(_a,_b)
   if _b then
     return love.math.random()*(_b-_a)+_a
@@ -2688,16 +3048,34 @@ function random(_a,_b)
   end
 end
 
+---Sets the seed value for the random() and randomGaussian() functions.
+---Calling randomSeed() with a constant argument allows random() and randomGaussian() to produce the same results each time
+---@param seed number
+---@see randomGaussian
 function randomSeed(seed)
   love.math.setRandomSeed(seed)
 end
 
+---Returns random numbers that can be tuned to feel organic. Always returns numbers normalized 0 to 1.
+---Calls to noise() with similar inputs will produce similar outputs. 
+---Uses simplex noise for 1 and 2 arguments and Perlin noise algorithm for 3 arguments.
+---@overload fun(_x: number): number Computes noise values in one dimension, such as space `noise(x)` or time, `noise(t)`.
+---@overload fun(_x: number, _y: number): number Computes noise values in two dimensions, such as space `noise(x, y)` or space and time, `noise(x, t)`.
+---@overload fun(_x: number, _y: number, _z: number): number Computes noise values in three dimensions, such as space `noise(x, y, z)` or space and time, `noise(x, y, t)`.
+---@see random
 function noise(_x,_y,_z)
   return love.math.noise(_x,_y,_z)
 end
 
---self-contained, optional params
+---Returns a random number fitting a Gaussian, or normal, distribution.
+---@overload fun(): number Returns values with a mean of 0 and standard deviation of 1
+---@overload fun(mean: number): number Takes an argument as the mean. Returns values with a standard deviation of 1.
+---@overload fun(mean: number, sd: number): number Takes an argument as the mean. Returns values with second argument as the standard deviation.
+---@see random
+---@see randomSeed
 randomGaussian = (function()
+--self-contained, optional params
+--Box-Muller transform
   local hasSpare = false
   local spare = 0
   
@@ -2728,16 +3106,26 @@ randomGaussian = (function()
   end
 end)()
 
+---Calculates the absolute value of a number, its distance from zero on the number line.
+---@param _a number
+---@return number abs
 function abs(_a)
   return math.abs(_a)
 end
 
+---Calculates the integer closest to a number.
+---@param n number
+---@param decimals? number Optional parameter to set number of decimal places. Default is 0.
+---@return number rounded
 function round(n, decimals)
   decimals = decimals or 0
   local mult = 10 ^ decimals
   return math.floor(n * mult + 0.5) / mult
 end
 
+---Converts a boolean, string, decimal to an integer by stripping the decimal. Also converts a table of values to a table of integers.
+---@param _a number|string|boolean|table
+---@return number|table|nil result The truncated integer or table of truncated values, or nil if invalid.
 function int(_a)
     -- Handle table input
     if type(_a) == "table" then
@@ -2774,14 +3162,23 @@ function int(_a)
     end
 end
 
+---Calculates the closest integer value that is greater than or equal to a number.
+---@param _a number
+---@return number int
 function ceil(_a)
   return math.ceil(_a)
 end
 
+---Calculates the closest integer value that is less than or equal to a number.
+---@param _a number
+---@return number int
 function floor(_a)
   return math.floor(_a)
 end
 
+---Returns the largest value in a sequence of numbers.
+---@overload fun(...: number): number
+---@overload fun(numbers: table): number
 function max(...)
   local args = {...}
   -- If single table argument, unpack it
@@ -2792,6 +3189,9 @@ function max(...)
   end
 end
 
+---Returns the smallest value in a sequence of numbers.
+---@overload fun(...: number): number
+---@overload fun(numbers: table): number
 function min(...)
   local args = {...}
   -- If single table argument, unpack it
@@ -2802,10 +3202,24 @@ function min(...)
   end
 end
 
+---Constrains a number between a minimum and maximum value.
+---@param _val number Value to constrain.
+---@param _min number Minimum limit.
+---@param _max number Maximum limit.
+---@return number constrained Constrained number
 function constrain(_val,_min,_max)
   return math.max(_min, math.min(_val,_max));
 end
 
+
+---Re-maps a number from one range to another.
+---@param _val number Value to be remapped.
+---@param inputMin number Lower bound of the value's current range.
+---@param inputMax number Upper bound of the value's current range.
+---@param outputMin number Lower bound of the value's target range.
+---@param outputMax number Upper bound of the value's target range.
+---@param withinBounds? boolean By default, values outside the target range can be returned. Setting this optionally to true will constrain the value to the newly mapped range.
+---@return number mapped Output value.
 function map(_val, inputMin, inputMax, outputMin, outputMax, withinBounds)
     local mapped = outputMin + (outputMax - outputMin) * ((_val - inputMin) / (inputMax - inputMin))
 
@@ -2820,12 +3234,18 @@ function map(_val, inputMin, inputMax, outputMin, outputMax, withinBounds)
     return mapped
 end
 
+---Calculates the distance between two points.
+---@type fun(x1: number, y1: number, x2: number, y2: number): number
 function dist(x1,y1,x2,y2)
   return ((x2-x1)^2+(y2-y1)^2)^0.5
 end
 
 -------------------- TRIGONOMETRY --------------------
 
+---Changes the unit system used to measure angles.
+---Calling angleMode() with no arguments returns current angle mode, which is either RADIANS or DEGREES.
+---@param _mode? string Either RADIANS (default) or DEGREES
+---@return string? mode The current angle mode, only returned when called without arguments. 
 function angleMode(_mode)
   if not _mode then
     return L5_env.degree_mode
@@ -2836,14 +3256,26 @@ function angleMode(_mode)
   end
 end
 
+---Converts an angle measured in radians to its value in degrees.
+---Degrees and radians are both units for measuring angles. There are 360˚ in one full rotation. A full rotation is 2 × π (about 6.28) radians.
+---@param _angle number 
+---@return number degrees
 function degrees(_angle)
   return math.deg(_angle)
 end
 
+---Converts an angle measured in degrees to its value in radians.
+---Degrees and radians are both units for measuring angles. There are 360˚ in one full rotation. A full rotation is 2 × π (about 6.28) radians.
+---@param _angle number 
+---@return number radians
 function radians(_angle)
   return math.rad(_angle)
 end
 
+---Calculates the sine of an angle. 
+---The angle is interpreted in radians or degrees depending on the current angleMode() (default: RADIANS)
+---@param _angle number
+---@return number sine
 function sin(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.sin(_angle)
@@ -2852,6 +3284,10 @@ function sin(_angle)
   end
 end
 
+---Calculates the arcsine of a number, the inverse of sin().
+---By default, asin() returns values in the range -π ÷ 2 (about -1.57) to π ÷ 2 (about 1.57). If the angleMode() is DEGREES then values are returned in the range -90 to 90.
+---@param _angle number
+---@return number asin
 function asin(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.asin(_angle)
@@ -2860,6 +3296,10 @@ function asin(_angle)
   end
 end
 
+---Calculates the cosine of an angle. 
+---The angle is interpreted in radians or degrees depending on the current angleMode() (default: RADIANS)
+---@param _angle number
+---@return number cosine
 function cos(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.cos(_angle)
@@ -2868,6 +3308,10 @@ function cos(_angle)
   end
 end
 
+---Calculates the arccosine of a number, the inverse of cos().
+---By default, acos() returns values in the range 0 to π radians (about 3.14). If the angleMode() is DEGREES then values are returned in the range -90 to 90.
+---@param _angle number
+---@return number acos
 function acos(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.acos(_angle)
@@ -2876,6 +3320,10 @@ function acos(_angle)
   end
 end
 
+---Calculates the tangent of an angle. 
+---The angle is interpreted in radians or degrees depending on the current angleMode() (default: RADIANS)
+---@param _angle number
+---@return number tangent
 function tan(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.tan(_angle)
@@ -2884,6 +3332,10 @@ function tan(_angle)
   end
 end
 
+---Calculates the arctangent of a number, the inverse of tan().
+---By default, atan() returns values in the range -π ÷ 2 (about -1.57) to π ÷ 2 (about 1.57). If the angleMode() is DEGREES then values are returned in the range -90 to 90.
+---@param _angle number
+---@return number atan
 function atan(_angle)
   if L5_env.degree_mode == RADIANS then 
     return math.atan(_angle)
@@ -2892,6 +3344,12 @@ function atan(_angle)
   end
 end
 
+---Calculates the angle formed by a point, the origin, and the positive x-axis.
+---atan2() is most often used for orienting geometry to the mouse's position, as in atan2(mouseY, mouseX).
+---By default, atan2() returns values in the range -π (about -3.14) to π (about 3.14). If the angleMode() is DEGREES then values are returned in the range -180 to 180.
+---@param y number
+---@param x number
+---@return number angle Angle in RADIANS or DEGREES depending on angleMode()
 function atan2(y, x)
   local angle = math.atan2(y, x)  -- This returns radians
   
@@ -2904,6 +3362,12 @@ end
 
 ---------------------- DATA ------------------------
 
+---Converts a string, number or table to a boolean
+---If n is a string, only the exact value "true" returns true — every other string (including "false") returns false.
+---If n is a number, 0 returns false and every other value (positive or negative) returns true.
+---If n is a table, each element is converted and returned as a table 
+---@param n table|string|number|boolean
+---@return boolean|table result The converted boolean or a table of converted booleans 
 function boolean(n)
   if type(n) == "table" then
     local result = {}
@@ -2928,6 +3392,12 @@ function boolean(n)
   return false
 end
 
+---Converts a Boolean, String, or Number to its byte value.
+---byte() converts a value to an integer (whole number) between -128 and 127. Values greater than 127 wrap around while negative values are unchanged.
+---If n represents a number as a string (e.g. "ten"), it's converted directly. If it's a non-numeric string, the byte value of its first character is used instead.
+---If an array is passed, then an array of byte values will be returned.
+---@param n table|boolean|string|number
+---@return number|table byte_value
 function byte(n)
     if type(n) == "table" then
     local result = {}
@@ -2972,6 +3442,11 @@ function byte(n)
   return 0
 end
 
+---Converts a number, string, or boolean to a single-character string.
+---If n represents a number as a string (e.g. "65"), it's converted directly. If a non-numeric string, the first character is returned.
+---If a table is passed, a table of single character strings is returned
+---@param n table|string|number|boolean
+---@return string|table char
 function char(n)
   if type(n) == "table" then
     local result = {}
@@ -3014,6 +3489,12 @@ function char(n)
   return ""
 end
 
+---Converts a String (and Boolean) to a floating point (decimal) Number.
+---float() converts strings that resemble numbers, such as '12.34', into numbers.
+---A passed table will convert all values, returning a table of floats.
+---Invalid input will return nil.
+---@param str number|boolean|string|table 
+---@return number|table|nil float
 function float(str)
   if type(str) == "table" then
     local result = {}
@@ -3044,6 +3525,11 @@ function float(str)
   return nil
 end
 
+---Converts a number to a string with its hexadecimal value.
+---Or converts a table of strings with their hexadecimal values.
+---@param n number|table Number to convert.
+---@param digits? number Number of hexadecimal digits to display.
+---@return string|table hexadecimal Converted hexadecimal value.
 function hex(n, digits)
   if type(n) == "table" then
     local result = {}
@@ -3076,6 +3562,10 @@ function hex(n, digits)
   return hex_str
 end
 
+---Converts a boolean or number to string.
+---If passed a table, will return a table of strings. Strings will be returned unchanged.
+---@param n number|boolean|string|table
+---@return string|table strings
 function str(n)
   if type(n) == "table" then
     local result = {}
@@ -3101,6 +3591,11 @@ function str(n)
   return tostring(n)
 end
 
+---Converts a single-character string, or first character in longer string to a Number.
+---If passed a table, returns a table of uncharred numbers.
+---Numbers are passed through.
+---@param n string|table|number
+---@return number|table|nil uncharred
 function unchar(n)
   if type(n) == "table" then
     local result = {}
@@ -3128,6 +3623,10 @@ function unchar(n)
   return nil
 end
 
+---Converts a String with a hexadecimal value to a Number. Invalid hex strings return nil.
+---If passed a table, returns a table of numbers. unhexed numbers are passed through.
+---@param n string|table|number
+---@return number|table|nil unhexed
 function unhex(n)
   if type(n) == "table" then
     local result = {}
@@ -3156,6 +3655,10 @@ end
 
 ------------------- TYPOGRAPHY ---------------------
 
+---Loads a font and creates a font object. 
+---Fonts can be Truetype (.ttf), OpenType fonts (.otf), or Bitmap Fonts.
+---@param fontPath string
+---@return Font font
 function loadFont(fontPath)
   local font = love.graphics.newFont(fontPath)
   -- Store the path so we can recreate the font at different sizes
@@ -3163,6 +3666,11 @@ function loadFont(fontPath)
   return font
 end
 
+---Sets the font used by the text() function.
+---@param font Font A font loaded previously with loadFont().
+---@param size? number Optional. Sets font size in pixels. Same effect as calling textSize().
+---@see loadFont
+---@see textSize
 function textFont(font, size)
   -- Update size if provided
   if size then
@@ -3181,6 +3689,9 @@ function textFont(font, size)
   love.graphics.setFont(L5_env.currentFont)
 end
 
+---Sets the font size when text() is called, or gets the font size if no arguments.
+---@param size? number Size in pixels.
+---@return number? size
 function textSize(size)
   if not size then
     return L5_env.currentFontSize
@@ -3196,31 +3707,47 @@ function textSize(size)
   love.graphics.setFont(L5_env.currentFont)
 end
 
+---Calculates the maximum width of a string of text drawn when text() is called.
+---@param _text string
+---@return number size
 function textWidth(_text)
   local font = L5_env.currentFont or love.graphics.getFont()
   return font:getWidth(_text)
 end
 
+---Calculates the maximum height of a string of text drawn when text() is called.
+---Note: textHeight() includes the spacing between lines (called "leading") which may differ from a letter's height. Using textAscent() + textDescent() may more closely calculate letter height without spacing.
+---@return number size
 function textHeight()
   local font = L5_env.currentFont or love.graphics.getFont()
   return font:getHeight()
 end
 
+---Returns the ascent, the distance from the baseline to the highest point of the current font when drawn with text().
+---@return number size
 function textAscent()
   local font = L5_env.currentFont or love.graphics.getFont()
   return font:getAscent()
 end
 
+---Returns the descent, the distance from the baseline to the lowest point of the current font when drawn with text().
+---@return number size
 function textDescent()
   local font = L5_env.currentFont or love.graphics.getFont()
-  return font:getDescent()
+  return math.abs(font:getDescent())
 end
 
 --------------------- SYSTEM -----------------------
+
+---Quits/stops/exits the program and closes the program window.
 function exit()
   love.event.quit()
 end
 
+---Adds a text label to the window's title bar.
+---Calling windowTitle without an argument returns the current window title, or "Untitled" if it hasn't been set.
+---@param _title? string
+---@return string? title
 function windowTitle(_title)
   if _title ~= nil then
     love.window.setTitle(_title)
@@ -3229,6 +3756,10 @@ function windowTitle(_title)
   end
 end
 
+---Resizes the window to a given width and height.
+---Clears the drawing surface and calls windowResized() if defined
+---@param _w number
+---@param _h number
 function resizeWindow(_w, _h)
   if _w == nil or _h == nil then --check for 2 args
     error("resizeWindow() requires two arguments: width and height")
@@ -3249,14 +3780,20 @@ function resizeWindow(_w, _h)
   love.resize(_w, _h)
 end
 
+---Clears the screen to transparent black.
 function clear()
   love.graphics.clear()
 end
 
+---Returns the display's current pixel density.
+---@return number pixelDensity
 function displayDensity()
   return love.graphics.getDPIScale()
 end
 
+---Sets or gets the number of frames drawn per second.
+---@param _inp? number Optional: sets the frameRate in frames per second
+---@return number rate Returned if no arguments given.
 function frameRate(_inp)
   if _inp then --change frameRate
     L5_env.framerate = _inp 
@@ -3265,14 +3802,26 @@ function frameRate(_inp)
   end
 end
 
+---Stops the code in draw() from running repeatedly.
+---The draw loop can be restarted by calling loop(). draw() can be run once by calling redraw().
+---isLooping() can be useful to check whether a sketch is looping
+---@see loop
+---@see redraw
+---@see isLooping
 function noLoop()
   L5_env.drawing = false 
 end
 
+---Resumes the draw loop after noLoop() has been called.
+---@see noLoop
 function loop()
   L5_env.drawing = true 
 end
 
+---Useful to check whether a sketch is looping, such as in `isLooping() == true`.
+---@return boolean looping
+---@see noLoop
+---@see loop
 function isLooping()
   if L5_env.drawing then 
     return true
@@ -3281,6 +3830,9 @@ function isLooping()
   end
 end
 
+---Runs the code in draw() once.
+---@see noLoop
+---@see loop
 function redraw()
   draw()
   noLoop()
@@ -3288,6 +3840,15 @@ end
 
 --------------------- TYPOGRAPHY ---------------------
 
+---Draws text to the canvas.
+---Color is set by fill().
+---By default, the x-coordinate sets the edge of text, and the y-coordinate sets its baseline. Can be changed with textAlign().
+---@param _msg string The text to be drawn.
+---@param _x number X-coordinate of the text. 
+---@param _y number Y-coordinate of the text.
+---@param _w? number Sets the width of the invisible rectangle containing the text, wrapping to a new line if text is longer.
+---@see textAlign
+---@see textWrap
 function text(_msg,_x,_y,_w)
   if _msg == nil then
     return  -- Don't draw anything if message is nil
@@ -3359,6 +3920,13 @@ function text(_msg,_x,_y,_w)
   end
 end
 
+---Sets the way text is aligned when text() is called.
+---Changes the way text() interprets x and y arguments in the text() function.
+---Default for text() without textAlign() is LEFT, BASELINE. 
+---Omitting y_alignment resets vertical alignment to BASELINE
+---@param x_alignment string LEFT, CENTER, or RIGHT alignment for x-coordinate of text().
+---@param y_alignment? string TOP, BOTTOM, CENTER, or BASELINE alignment for y-coordinate of text().
+---@see text
 function textAlign(x_alignment,y_alignment)
   if x_alignment == LEFT or x_alignment == RIGHT or x_alignment == CENTER then
     L5_env.textAlignX=x_alignment
@@ -3370,6 +3938,10 @@ function textAlign(x_alignment,y_alignment)
   end
 end
 
+---Sets the style for wrapping text when text() is called. Default is WORD.
+---With no argument, returns current style
+---@param _style? string WORD or CHAR
+---@return string? currentwrap
 function textWrap(_style)
   -- If no argument, return current style
   if _style == nil then
@@ -3387,6 +3959,10 @@ end
 ----------------------- IMAGE ------------------------
 ---------------- LOADING & DISPLAYING ----------------
 
+---Loads an image from a specified file path. 
+---Possible image formats accepted are: .jpg, .jpeg, .png, .bpm, .tga, .hdr, .pic, .exr. Unsupported filetypes include .webp and .gif.
+---@param _filename string Path to image file.
+---@return Image
 function loadImage(_filename)
   local success, result = pcall(love.graphics.newImage, _filename)
   
@@ -3397,6 +3973,13 @@ function loadImage(_filename)
   end
 end
 
+---Loads and returns a video file for simple audio/video playback.
+---Videos get drawn to the screen with image().
+---L5 can only play ogv (Ogg Theora) video files. Use an external program such as Handbrake or ffmpeg (command line) to convert mp4, avi, mkv, and mov codecs first.
+---Video methods :play(), pause(), stop(), loop(), noLoop(), time(), volume()
+---Note: Videos with audio may experience sync issues when looping
+---@param _filename string
+---@return Video video
 function loadVideo(_filename)
   local success, result = pcall(love.graphics.newVideo, _filename)
   
@@ -3484,6 +4067,15 @@ function loadVideo(_filename)
   return videoWrapper
 end
 
+---Draws an image to the canvas
+---x, y coordinate are set with imageMode. Default: CORNER.
+---Drawn at their full size unless a width and height are specified.
+---@param _img Image
+---@param _x number x-coordinate to draw image, can be altered with imageMode()
+---@param _y number y-coordinate to draw image, can be altered with imageMode()
+---@param _w? number width of image (optional), or second corner's x-coordinate in CORNERS mode (required)
+---@param _h? number height of image (optional), or second corner's y-coordinate in CORNERS mode (required)
+---@see imageMode
 function image(_img,_x,_y,_w,_h)
   --check if offscreen buffer, if so, allow passing in the buffer directly
   if type(_img) == "table" and _img._canvas then
@@ -3517,6 +4109,11 @@ function image(_img,_x,_y,_w,_h)
   love.graphics.draw(_img,_x,_y,0,xscale,yscale,ox,oy)
 end
 
+---Masks part of the image with another.
+---Uses another image's alpha channel as the alpha channel for this image. 
+---Masks are cumulative and can't be removed once applied. If the mask has a different pixel density from this image, the mask will be scaled.
+---@param img Image
+---@param maskImage Image
 function mask(img, maskImage)
   -- save current graphics state
   local prevCanvas = love.graphics.getCanvas()
@@ -3579,6 +4176,15 @@ function mask(img, maskImage)
   love.graphics.setBlendMode(prevBlendMode)
 end
 
+---Tints images using a color.
+---@overload fun(gray: number)
+---@overload fun(hex: string)
+---@overload fun(colorName: string)
+---@overload fun(gray: number, alpha: number)
+---@overload fun(r: number, g: number, b: number) RGB mode (default) or HSB.
+---@overload fun(r: number, g: number, b: number, a: number)
+---@overload fun(colors: table) A table of {r, g, b} or {r, g, b, a} values
+---@see colorMode
 function tint(...)
   local args = {...}
   if #args == 1 and type(args[1]) == "table" then
@@ -3588,6 +4194,8 @@ function tint(...)
   end
 end
 
+---Removes the current tint set by tint().
+---@see tint
 function noTint()
     L5_env.currentTint = {1, 1, 1, 1} 
 end
@@ -3617,6 +4225,13 @@ function love.graphics.draw(drawable, x, y, r, sx, sy, ox, oy, kx, ky)
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
 
+---Changes the cursor's appearance.
+---Can be specified with path to image file (e.g. 'assets/cursor.png') or of type: ARROW, IBEAM, WAIT, CROSSHAIR, WAITARROW, SIZENWSE, SIZENESW, SIZEWE, SIZENS, SIZEALL, NO, HAND
+---Custom cursor images should generally be at most 32 by 32 pixels large.
+---The parameters x and y are optional, used for custom image cursors. Sets the location pointed to within the image. (Default: 0,0 -> top left)
+---@param _cursor_icon string|userdata
+---@param hotX? number
+---@param hotY? number
 function cursor(_cursor_icon, hotX, hotY)
   love.mouse.setVisible(true)
   local _cursor_icon = _cursor_icon or "arrow"
@@ -3660,12 +4275,25 @@ function cursor(_cursor_icon, hotX, hotY)
   end
 end
 
+---Hides the cursor from view.
 function noCursor()
   love.mouse.setVisible(false)
 end
 
 ---------------------- Pixels ----------------------
 
+---Copies pixels from a source image to a region of the canvas.
+---copy() will scale pixels from the source region if it isn't the same size as the destination region.
+---@param source? Image The image to copy from. Defaults to the current window if omitted.
+---@param sx number Source region's top-left x-coordinate.
+---@param sy number Source region's top-left y-coordinate.
+---@param sw number Source region's width.
+---@param sh number Source region's height.
+---@param dx number Destination region's top-left x-coordinate.
+---@param dy number Destination region's top-left y-coordinate.
+---@param dw number Destination region's width.
+---@param dh number Destination region's height.
+---@see blend
 function copy(source, sx, sy, sw, sh, dx, dy, dw, dh)
     -- If source is nil, try to use the current canvas
     if source == nil then
@@ -3677,17 +4305,26 @@ function copy(source, sx, sy, sw, sh, dx, dy, dw, dh)
         end
     end
     
-    local quad = love.graphics.newQuad(sx, sy, sw, sh, 
-                                       source:getDimensions())
+    local quad = love.graphics.newQuad(sx, sy, sw, sh, source:getDimensions())
     
     local scaleX = dw / sw
     local scaleY = dh / sh
     love.graphics.draw(source, quad, dx, dy, 0, scaleX, scaleY)
 end
 
+---Copies a region of pixels from one image to another.
+---@param source? Image The image to blend. Defaults to the current window if omitted.
+---@param sx number Source region's top-left x-coordinate.
+---@param sy number Source region's top-left y-coordinate.
+---@param sw number Source region's width.
+---@param sh number Source region's height.
+---@param dx number Destination region's top-left x-coordinate.
+---@param dy number Destination region's top-left y-coordinate.
+---@param dw number Destination region's width.
+---@param dh number Destination region's height.
+---@param blendMode string BLEND, NORMAL, ADD, MULTIPLY, SCREEN, LIGHTEST, DARKEST, or REPLACE
+---@see copy
 function blend(source, sx, sy, sw, sh, dx, dy, dw, dh, blendMode)
-  -- allows blend, normal, add, multiply, screen, lightest, darkest, replace
-  -- would need to be implemented with shaders: DIFFERENCE, EXCLUSION, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN
     if source == nil then
         source = love.graphics.getCanvas()
         
@@ -3732,6 +4369,9 @@ function blend(source, sx, sy, sw, sh, dx, dy, dw, dh, blendMode)
     love.graphics.setBlendMode(previousMode, previousAlphaMode)
 end
 
+---Applies an image filter to the canvas.
+---@param _name string Filter options are: INVERT, GRAY, THRESHOLD, POSTERIZE, BLUR, ERODE, DILATE.
+---@param _param? number Secondary parameter for THRESHOLD (default: 0.5), POSTERIZE (default: 4), BLUR (default: 4). Not used for INVERT, GRAY, ERODE, or DILATE.
 function filter(_name, _param)
   if _name == GRAY then
     L5_env.filterOn = true 
@@ -3766,15 +4406,9 @@ function filter(_name, _param)
         print("Blur filter not available on this system")
     end
   elseif _name == ERODE then
-    if _param then
-      L5_filter.erode:send("strength", _param)
-    end
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.erode
   elseif _name == DILATE then
-    if _param then
-      L5_filter.dilate:send("strength", _param)
-    end
     L5_env.filterOn = true 
     L5_env.filter = L5_filter.dilate
   else
@@ -3782,7 +4416,8 @@ function filter(_name, _param)
   end
 end
 
--- Load pixels from the back buffer into the pixels array
+---Loads the current value of each pixel on the canvas into the pixels array.
+---@see updatePixels
 function loadPixels()
     if not L5_env.backBuffer then
         error("L5_env.backBuffer not initialized. Make sure L5 is loaded properly.")
@@ -3818,7 +4453,9 @@ function loadPixels()
     L5_env.pixelsLoaded = true  -- Changed from pixelsLoaded to L5_env.pixelsLoaded
 end
 
--- Update the back buffer with modified pixel data
+---Updates the canvas with the RGBA values in the pixels array.
+---updatePixels() only needs to be called after changing values in the pixels array directly, following a call to loadPixels().
+---@see loadPixels
 function updatePixels()
     if not L5_env.pixelsLoaded then
         return
@@ -3851,21 +4488,12 @@ function updatePixels()
     L5_env.pixelsLoaded = false
 end
 
--- Helper function to get pixel index
-local function getPixelIndex(x, y)
-    local w = L5_env.imageData:getWidth()
-    return (x + y * w) * 4
-end
-
--- Helper to set a pixel color (optional convenience function)
-function setPixel(x, y, r, g, b, a)
-    local idx = getPixelIndex(x, y)
-    pixels[idx] = r
-    pixels[idx + 1] = g
-    pixels[idx + 2] = b
-    pixels[idx + 3] = a or 255
-end
-
+---Gets a pixel or a region of pixels from the canvas.
+---get() is easy to use but it's not as fast as pixels. Use pixels to read many pixel values.
+---With no parameters, get returns the entire window.
+---@overload fun():Image Returns the entire window.
+---@overload fun(x: number, y: number):table Returns the {R, G, B, A} values of the pixel at the given point as a table.
+---@overload fun(x: number, y: number, w: number, h: number):Image Returns a subsection of the canvas as an image. The first two parameters are the coordinates for the upper-left corner of the subsection. The last two parameters are the width and height of the subsection.
 function get(x, y, w, h)
     if not x then
         -- No parameters: return entire window as image
@@ -3885,7 +4513,7 @@ function get(x, y, w, h)
         if wasActive then
             love.graphics.setCanvas(L5_env.backBuffer)
         end
-        return r * 255, g * 255, b * 255, a * 255
+        return {r * 255, g * 255, b * 255, a * 255}
     else
         -- Four parameters: return sub-region as image
         local wasActive = love.graphics.getCanvas() == L5_env.backBuffer
@@ -3903,6 +4531,12 @@ function get(x, y, w, h)
     end
 end
 
+---Sets the color of a pixel or draws an image to the canvas.
+---set() is easy to use but it's not as fast as pixels if drawing many pixels individually. Use pixels table array to batch set many pixel values instead of once per at a time.
+---Changes drawn with set() are immediate. 
+---@param x number X-coordinate 
+---@param y number Y-coordinate
+---@param c number|table|Image Interprets the last parameter as a grayscale value, a {R, G, B, A} pixel array, or an image object. 
 function set(x, y, c)
     if type(c) == "userdata" and c.type and c:type() == "Image" then
         -- c is an image, draw it at x,y

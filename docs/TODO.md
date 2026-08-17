@@ -32,6 +32,7 @@
 * [X] add createGraphics() drawing to offscreen buffer
 * [ ] Enhancement: figure out some way to allow passing in image vars instead of only image filepath for custom cursors 
 * [X] not registering backspace/delete key pressed
+* [ ] mask() doesn't currently unwrap createGraphics() buffers the way image()/texture() do. Passing a createGraphics() to mask will fail at img:getWidth(). Recheck after LOVE 12.0 due to change in Texture:replacePixels. Test and add unwrapping.
 
 ## Color
 
@@ -83,6 +84,7 @@
 * [ ] add pixelDensity()
 * [X] add pixel array and functions for working with pixels
 * [X] fix blend modes, currently not differentiated much, likely requires implementing shaders
+* [ ] adding additional blendModes (if desired - not currently a priority) would need to be implemented with shaders: DIFFERENCE, EXCLUSION, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN
 
 ## Events
 
@@ -93,8 +95,8 @@
 * [ ] add new L5 mode to Processing IDE
 * [ ] custom launcher for L5 programs?
   * [ ] [VSCode launcher fork that packages L5?](https://marketplace.visualstudio.com/items?itemName=Menerv.love2d-launcher)
-* [ ] VSCode extension for L5
-  * [ ] VSCode setup instructions/starter
+* [X] VSCode extension for L5
+  * [X] VSCode setup instructions/starter
 * [ ] Exporter
   * [ ] Wrapper to simplify export to Mac Application, PC executable or Linux appImage (compare to Processing's Export Application, basic GUI) - examples: [love-export](https://github.com/dmoa/love-export) (CLI, older), [love-build](https://github.com/ellraiser/love-build) (GUI built in Love, current)
 
@@ -102,7 +104,7 @@
 
 * [X] Build website and reference
   * [X] landing page
-  * [x] download
+  * [X] download
   * [X] reference index and pages
   * [X] tutorials
   * [X] examples pages
