@@ -1,5 +1,5 @@
--- L5 0.2.0 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.2.0'
+-- L5 0.2.1 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.2.1'
 
 -- Internal table for L5 helper functions
 local L5_internal = {} 
@@ -3059,12 +3059,14 @@ end
 ---Returns random numbers that can be tuned to feel organic. Always returns numbers normalized 0 to 1.
 ---Calls to noise() with similar inputs will produce similar outputs. 
 ---Uses simplex noise for 1 and 2 arguments and Perlin noise algorithm for 3 arguments.
+---@param ... number
+---@return number
 ---@overload fun(_x: number): number Computes noise values in one dimension, such as space `noise(x)` or time, `noise(t)`.
 ---@overload fun(_x: number, _y: number): number Computes noise values in two dimensions, such as space `noise(x, y)` or space and time, `noise(x, t)`.
 ---@overload fun(_x: number, _y: number, _z: number): number Computes noise values in three dimensions, such as space `noise(x, y, z)` or space and time, `noise(x, y, t)`.
 ---@see random
-function noise(_x,_y,_z)
-  return love.math.noise(_x,_y,_z)
+function noise(...)
+  return love.math.noise(...)
 end
 
 ---Returns a random number fitting a Gaussian, or normal, distribution.
