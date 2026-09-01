@@ -13,6 +13,7 @@
 
 * [ ] add noWindow() for headless mode 
 * [X] should fullscreen() toggle between fullscreen and previous screen size? or take an argument to reset? or... (investigate p5/processing ways to do this)
+  * [ ] see slime's note on [canonical way to come out of fullscreen](https://github.com/love2d/love/issues/2348#issuecomment-5209544143)
 * [X] resizeCanvas() - debug. doesn't seem to correctly work.
 * [ ] error detection with useful error messages
 * [ ] cursor() has only been tested on Linux. Test that the same cursor constants are present on Mac and Windows.
