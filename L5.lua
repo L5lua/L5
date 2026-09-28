@@ -1,5 +1,5 @@
--- L5 0.2.1 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.2.1'
+-- L5 0.2.2 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.2.2'
 
 -- Internal table for L5 helper functions
 local L5_internal = {} 
@@ -437,7 +437,10 @@ function size(_w, _h)
   -- must clear canvas before setMode
   love.graphics.setCanvas()
 
-  love.window.setMode(_w, _h)
+  -- Get DPI scale 
+  local dpiScale = love.window.getDPIScale()
+  -- Set window size, using scale
+  love.window.setMode(_w / dpiScale, _h / dpiScale)
 
   -- Recreate buffers for new size
   if L5_env.backBuffer then L5_env.backBuffer:release() end 
