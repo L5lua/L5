@@ -9,7 +9,7 @@ Missing from the list? To add yourself or someone else, open a pull request or c
 | [Lee Tusman](https://leetusman.com)                            | 💻 code ✅ tutorial 🖋 content 📆	projectManagement |
 | [Sam Heckle](https://samheckle.com)                            | 💻 code 🔧 tool 👀 review ✅ tutorial 📢 talk 📹 video |
 | [Jessica Garson Beauchemin](https://github.com/JessicaGarson)  | 📖 doc                                                 |
-| [and](https://github.com/Capital-EX)                           | 💻 code 👀 review 📝 blog                              |
+| [and](https://www.sheeeeeeeep.art/)                           | 💻 code 👀 review 📝 blog                              |
 | [Nitish-bot](https://github.com/Nitish-bot)                    | 📖 doc                                                 |
 | [Quan Hoang](https://github.com/hmyam6090-lab)                 | 📖 doc 💡 example                                      |
 | [George Ibrahim](https://github.com/georgeibrahim1)            | 💻 code                                                |
