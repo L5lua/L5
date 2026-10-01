@@ -437,10 +437,15 @@ function size(_w, _h)
   -- must clear canvas before setMode
   love.graphics.setCanvas()
 
-  -- Get DPI scale 
-  local dpiScale = love.window.getDPIScale()
-  -- Set window size, using scale
-  love.window.setMode(_w / dpiScale, _h / dpiScale)
+  love.window.setMode(_w, _h)
+
+  -- Detect scaling and compensate for fractional scaling such as in Wayland
+  local widthWindow, heightWindow, flags = love.window.getMode()
+  local widthScale = widthWindow / _w
+  local heightScale = heightWindow / _h
+  if widthScale ~= 1 or heightScale ~= 1 then
+    love.window.setMode(_w / widthScale, _h / heightScale)
+  end
 
   -- Recreate buffers for new size
   if L5_env.backBuffer then L5_env.backBuffer:release() end 
