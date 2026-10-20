@@ -4,7 +4,7 @@ VERSION = '0.2.3'
 -- Internal table for L5 helper functions
 local L5_internal = {} 
 -- Internal table for holding state
-local L5_env = { bgColor = {0.5, 0.5, 1} }
+local L5_env = {}
 -- Internal table for holding filter shaders
 local L5_filter = {}
 -- Internal table for html color names
@@ -897,6 +897,7 @@ function L5_internal.define_env_globals()
   L5_env.image_mode = CORNER --also: CENTER, CORNERS
   -- global color state 
   L5_env.fill_mode="fill"   --also: "line"
+  L5_env.bgColor = {0.5, 0.5, 0.5, 1}
   L5_env.stroke_color = {0,0,0}
   L5_env.currentTint = {1, 1, 1, 1} -- Default: no tint white
   L5_env.color_max = {255,255,255,255}
