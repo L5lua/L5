@@ -10,6 +10,7 @@ Missing from the list? To add yourself or someone else, open a pull request or c
 | [Sam Heckle](https://samheckle.com)                                    | 💻 code 🔧 tool 👀 review ✅ tutorial 📢 talk 📹 video |
 | [Jessica Garson Beauchemin](https://github.com/JessicaGarson)          | 📖 doc                                                 |
 | [and](https://www.sheeeeeeeep.art/)                                    | 💻 code 👀 review 📝 blog                              |
+| [Nilay Kumar](https://nilaykumar.github.io/)                           | 💻 code 🐛 bug                                         |
 | [Nitish-bot](https://github.com/Nitish-bot)                            | 📖 doc                                                 |
 | [Quan Hoang](https://github.com/hmyam6090-lab)                         | 📖 doc 💡 example                                      |
 | [George Ibrahim](https://github.com/georgeibrahim1)                    | 💻 code                                                |

@@ -1,5 +1,5 @@
--- L5 0.2.3 (c) Lee Tusman and Contributors GNU LGPL2.1
-VERSION = '0.2.3'
+-- L5 0.2.4 (c) Lee Tusman and Contributors GNU LGPL2.1
+VERSION = '0.2.4'
 
 -- Internal table for L5 helper functions
 local L5_internal = {} 
