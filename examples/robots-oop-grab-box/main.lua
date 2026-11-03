@@ -1,3 +1,6 @@
+-- Examples share the same L5.lua file, so tell LÖVE where require() can find it
+package.path = package.path .. ";" .. love.filesystem.getSource() .. "/../../?.lua"
+
 require("L5")
 
 -- The robot class definition below could all be moved to separate file Robot.lua 

@@ -5,6 +5,9 @@
 
   Adapted from Processing examples. Adapted to L5 2025. Licensed under CC BY-NC-SA 4.0.
 ]] --
+-- Examples share the same L5.lua file, so tell LÖVE where require() can find it
+package.path = package.path .. ";" .. love.filesystem.getSource() .. "/../../?.lua"
+
 require("L5")
 
 function setup()
