@@ -9,7 +9,9 @@ function setup()
   describe("A sketch that saves a list of the original Migos rappers as lines in a text file.")
 
   local myData = {"Quavo", "Offset", "Takeoff"}
-  if saveStrings(myData, "assets/migos.txt") then
+  -- Save file into the LÖVE save directory for this sketch
+  -- see https://love2d.org/wiki/love.filesystem.getSaveDirectory
+  if saveStrings(myData, "migos.txt") then
     print("File saved successfully!")
   end
 
