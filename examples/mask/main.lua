@@ -1,4 +1,7 @@
-require 'L5'
+-- Examples share the same L5.lua file, so tell LÖVE where require() can find it
+package.path = package.path .. ";" .. love.filesystem.getSource() .. "/../../?.lua"
+
+require('L5')
 
 local photo
 local maskImage
@@ -9,6 +12,9 @@ function setup()
 
   -- Load the images
   photo = loadImage('assets/rockies.jpg')
+  -- TODO: FIX ME. assets/mask2.png is missing
+  print("\n== THIS EXAMPLE IS BROKEN ===")
+  print("== TODO: Fix missing assets/mask2.png file ===\n") 
   maskImage = loadImage('assets/mask2.png')
   
   -- Apply the mask

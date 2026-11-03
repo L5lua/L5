@@ -1,4 +1,7 @@
-require ("L5")
+-- Examples share the same L5.lua file, so tell LÖVE where require() can find it
+package.path = package.path .. ";" .. love.filesystem.getSource() .. "/../../?.lua"
+
+require("L5")
 
 local img;
 
@@ -8,6 +11,11 @@ function setup()
   img = loadImage('/assets/rockies.jpg');
   -- Display the image.
   image(img, 0, 0, 100, 100)
+
+  -- TODO: Revise this when pixelDensity() is implemented
+  -- See https://github.com/L5lua/L5/blob/main/docs/TODO.md#pixels
+  print("\n=== THIS EXAMPLE IS BROKEN ===")
+  print("=== TODO: Check this once pixelDensity() is implemented ===\n")
 
   -- Get the pixel density.
   local d = pixelDensity()
