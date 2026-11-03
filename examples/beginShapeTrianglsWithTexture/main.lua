@@ -8,7 +8,7 @@ function setup()
   windowTitle("texture() example")
   textureMode(NORMAL)
 
-  cat = loadImage("examples/assets/cat.png")
+  cat = loadImage("assets/cat.png")
 
   beginShape(TRIANGLES)
   texture(cat)
