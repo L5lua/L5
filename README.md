@@ -11,7 +11,7 @@ L5 is designed to work cross-platform, including on desktop, phone, and tablet. 
 
 ![L5 hello drawing program running](assets/L5-hi.gif)
 
-The main.lua file for typical L5 sketch might look like this:
+The main.lua file for a typical L5 sketch might look like this:
 
 ```lua
 require("L5")
