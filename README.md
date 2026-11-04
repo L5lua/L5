@@ -4,12 +4,14 @@
 
 L5 is a fun, fast, cross-platform, and lightweight implementation of the Processing API in Lua. It is a free and open source coding library to make interactive artwork on the computer, aimed at artists, designers, and anyone that wants a flexible way to prototype art, games, toys, and other software experiments in code.
 
-L5 is designed to work cross-platform, including on desktop, phone, and tablet. Beyond running fast on modern machines, L5 is optimized for older and lower-powered devices, minimizing resource usage to keep creative coding accessible to everyone. This helps with our goal of building resilient, long-lasting software projects. L5 is built in Lua, a robust but lightweight, long-running, lightning-fast, extensible language. 
+L5 is designed to work cross-platform, including on desktop, phone, and tablet. Beyond running fast on modern machines, L5 is optimized for older and lower-powered devices, minimizing resource usage to keep creative coding accessible to everyone. This helps with our goal of building resilient, long-lasting software projects. L5 is built in Lua, a robust but lightweight, long-running, lightning-fast, extensible language.
 
 
-## Example sketch
+## Example Sketches
 
 ![L5 hello drawing program running](assets/L5-hi.gif)
+
+The main.lua file for a typical L5 sketch might look like this:
 
 ```lua
 require("L5")
@@ -31,6 +33,10 @@ function mousePressed()
   fill(random(255),random(255),random(255))
 end
 ```
+
+For more examples and notes on how to run them, check out the [examples/](examples/) directory and [examples/README.md](examples/README.md).
+
+
 
 ## Overview
 
