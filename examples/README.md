@@ -48,4 +48,4 @@ If you want to make your own sketch based on one of the examples, and if you wan
 
 2. Read the LÖVE [Game Distribution](https://love2d.org/wiki/Game_Distribution) wiki page to understand how sharing LÖVE games works (making `.love` files with `zip`, etc)
 
-3. [Optional] you can remove the `package.path = ...` code that the examples include above `require("L5")`. The examples need that because they don't have their own copy `L5.lua`. If you include `L5.lua` in your sketch's folder, changing the path isn't necessary.
+3. [Optional] you can remove the `package.path = ...` code that the examples include above `require("L5")`. The examples need that because they don't have their own copy of `L5.lua`. If you include `L5.lua` in your sketch's folder, changing the path isn't necessary.
