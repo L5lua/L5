@@ -15,6 +15,7 @@ function love.run()
   L5_internal.defaults()
 
   L5_internal.define_env_globals()
+
   if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
   if love.timer then love.timer.step() end
   local dt = 0
@@ -145,11 +146,11 @@ function love.load()
   displayWidth, displayHeight = love.window.getDesktopDimensions()
 
   -- create default-size buffers. will be recreated again if size() or fullscreen(true) called
-  local w, h = love.graphics.getDimensions()
+  width, height = love.graphics.getDimensions()
 
   -- Create double buffers
-  L5_env.backBuffer = love.graphics.newCanvas(w, h) 
-  L5_env.frontBuffer = love.graphics.newCanvas(w, h) 
+  L5_env.backBuffer = love.graphics.newCanvas(width, height) 
+  L5_env.frontBuffer = love.graphics.newCanvas(width, height) 
 
   -- Clear both buffers initially
   love.graphics.setCanvas(L5_env.backBuffer) 
